@@ -15,21 +15,24 @@ const validContactFormData = [
   body('message').notEmpty().withMessage('Message is required')
 ];
 
-const modelDataValid = [
+const addModelDataValid = [
   body('model_name').isString().notEmpty().withMessage('Name must be a non-empty string'),
   body('agency').optional({ nullable: true }).isString().withMessage('Agency must be a string').notEmpty().withMessage('Agency cannot be an empty string'),
   body('agency_url').optional({ nullable: true }).isString().withMessage('Agency URL must be a string').notEmpty().withMessage('Agency URL cannot be an empty string')
 ];
 
-module.exports = {
-  modelDataValid
-};
+const addPhotographerDataValid = [
+  body('photographer_name').isString().notEmpty().withMessage('Photographer name must be a non-empty string'),
+  body('websiteURL').optional({ nullable: true }).isString().withMessage('Website URL must be a string').notEmpty().withMessage('Website URL cannot be an empty string'),
+  body('instagramURL').optional({ nullable: true }).isString().withMessage('Instagram URL must be a string').notEmpty().withMessage('Instagram URL cannot be an empty string'),
+  body('facebookURL').optional({ nullable: true }).isString().withMessage('Facebook URL must be a string').notEmpty().withMessage('Facebook URL cannot be an empty string'),
+  body('twitterURL').optional({ nullable: true }).isString().withMessage('Twitter URL must be a string').notEmpty().withMessage('Twitter URL cannot be an empty string'),
+  body('pinterestURL').optional({ nullable: true }).isString().withMessage('Pinterest URL must be a string').notEmpty().withMessage('Pinterest URL cannot be an empty string')
+];
 
 
 // need: validTokenPresent validation schema
 
-
-// need: modelDataValid validation schema
 
 // need: photographerDataValid validation schema
 
@@ -41,5 +44,6 @@ module.exports = {
   paramsIsNumber,
   emailAndPasswordAreValid, 
   validContactFormData,
-  modelDataValid
+  addModelDataValid,
+  addPhotographerDataValid
 }

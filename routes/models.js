@@ -1,7 +1,7 @@
 const modelsController = require('../controllers/models-controller.js');
 const modelsRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
-const { paramsIsNumber, modelDataValid } = require('../utils/validationSchemas.js');
+const { paramsIsNumber, addModelDataValid } = require('../utils/validationSchemas.js');
 
 // need:
 // 1) paramsIsNumber validation schema
@@ -30,7 +30,7 @@ modelsRouter.route('/model/:id')
 
 // add model route  
 modelsRouter.route('/add')
-  .post(modelDataValid, (req, res, next) => {
+  .post(addModelDataValid, (req, res, next) => {
     const errors = validationResult(req);
       const errorMsgs = errors.array().map(error => error.msg);
 
