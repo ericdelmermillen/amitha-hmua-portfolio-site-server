@@ -2,6 +2,16 @@ const modelsController = require('../controllers/models-controller.js');
 const modelsRouter = require('express').Router();
 
 
+// *** import express validator to validate requests
+// import { query, body, validationResult, matchedData } from 'express-validator';
+
+// import validationSchemas necessary for each route
+
+// need:
+// 1) paramsIsNumber validation schema
+// 2) modelDataValid validation schema: name, agency, agencyUrl: only name required, all must be string or not present/undefined/null (?)
+
+
 // get models route
 // for getting all models to show in the add model select for adding a shoot
 modelsRouter.route('/all')

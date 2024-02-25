@@ -1,6 +1,19 @@
 const shootsRouter = require('express').Router();
 const shootsController = require('../controllers/shoots-controller.js');
 
+
+// *** import express validator to validate requests
+// import { query, body, validationResult, matchedData } from 'express-validator';
+
+// import validationSchemas necessary for each route
+
+// need:
+// 1) paramsIsNumber validation schema
+// 2) shootDataValid validation schema: shoot_title, shoot_blurb, photographer_ids, model_ids, photo_urls
+// 3) shootsOrderDataValid validation schema
+
+
+
 // GET shoots 
 shootsRouter.route('/all')
   .get(shootsController.getShootSummaries);

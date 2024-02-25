@@ -1,8 +1,5 @@
 require('dotenv').config();
 
-// *** import express validator to validate requests
-// import { query, body, validationResult, matchedData } from 'express-validator';
-
 const express = require('express');
 const app = express();
 

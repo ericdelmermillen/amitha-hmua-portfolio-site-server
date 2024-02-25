@@ -9,6 +9,7 @@ const { getToken } = require('../utils/utils.js');
 
 // createUser function
 const createUser = async (req, res) => {
+  // validate req.body contains email + password, that both are strings and both contain length
   const { email, password } = req.body;
 
   // move this to utils? 
@@ -50,7 +51,7 @@ const createUser = async (req, res) => {
 
 // userLogin function
 const userLogin = async (req, res) => {
-  // email and password checking moved to utils?
+  // validate req.body contains email + password, that both are strings and both contain length
   const { email, password } = req.body;
 
   if(!email || !password) {
@@ -104,6 +105,7 @@ const userLogin = async (req, res) => {
 // userLogout function
 // client can get the user_id from the jwt
 const logLogout = (req, res) => {
+  // validate params: must be a number/can be coerced into a number
   const { user_id } = req.body;
 
   res.status(200).json({ message: 'Successfully Logged Out' });

@@ -24,7 +24,6 @@ const getAllPhotographers = async (req, res) => {
     }
   }
 
-
   try {
     const photographersData = await knex('photographers');
 
