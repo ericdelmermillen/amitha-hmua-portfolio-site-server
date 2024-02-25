@@ -1,17 +1,20 @@
 const contactController = require('../controllers/contact-controller.js');
 const contactRouter = require('express').Router();
+const { validationResult } = require('express-validator');
+const { validContactFormData } = require('../utils/validationSchemas.js');
 
-// *** import express validator to validate requests
-// import { query, body, validationResult, matchedData } from 'express-validator';
-
-// import validationSchemas necessary for each route
-
-// need:
-// 1) email, password, message present and valid schema: validContactFormData 
 
 // contact route
 contactRouter.route('/')
-  .post(contactController.handleContactForm);
+  .post(validContactFormData, (req, res, next) => {
+    const errors = validationResult(req);
+      const errorMsgs = errors.array().map(error => error.msg);
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+      
+    next()
+  }, contactController.handleContactForm);
 
 
 module.exports = contactRouter;

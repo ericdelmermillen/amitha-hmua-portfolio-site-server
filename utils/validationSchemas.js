@@ -4,21 +4,20 @@ const paramsIsNumber = [
   param('id').isInt().withMessage('ID must be a number')
 ];
 
-// const emailAndPasswordAreValid = () => [
-//   body('email').isEmail().withMessage('Invalid email format'),
-//   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
-// ];
-
 const emailAndPasswordAreValid = [
   body('email').isEmail().withMessage('Invalid email format'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
 ];
 
+const validContactFormData = [
+  body('email').isEmail().withMessage('Invalid email format'),
+  body('subject').notEmpty().withMessage('Subject is required'),
+  body('message').notEmpty().withMessage('Message is required')
+];
 
 
 // need: validTokenPresent validation schema
 
-// need: validContactFormData validation schema
 
 // need: modelDataValid validation schema
 
@@ -30,5 +29,6 @@ const emailAndPasswordAreValid = [
 
 module.exports = {
   paramsIsNumber,
-  emailAndPasswordAreValid
+  emailAndPasswordAreValid, 
+  validContactFormData
 }

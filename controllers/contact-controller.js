@@ -4,14 +4,7 @@ const nodemailer = require('nodemailer');
 // contact route
 // not forwarding email: needs to set up for the correct email anyway: make new email
 const handleContactForm = (req, res) => {
-  // move email, subject, message validation to validation schemas
   const { email, subject, message } = req.body;
-
-  if(!email || !subject || !message || !message.length) {
-    return res.status(400).json({
-      message: "Missing email, subject, or message"
-    });
-  }
 
   let config = {
     service: 'gmail',
