@@ -93,13 +93,13 @@ const getModelByID = async (req, res) => {
 // models/add route
 const addModel = async (req, res) => {
   try {
-    const token = req.headers.authorization; 
+  //   const token = req.headers.authorization; 
     
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  //   if(!token) {
+  //     return res.status(401).json({ message: 'Token Missing' });
+  //   }
 
-    verifyToken(token);
+  //   verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -113,11 +113,7 @@ const addModel = async (req, res) => {
 
   try {
     const { model_name, agency, agencyURL } = req.body;
-
-    if(!model_name || model_name.length) {
-      return res.status(400).json({ message: 'Model name can not be left blank' });
-    }
-
+    
     const newModel = {
       model_name: model_name,
       agency: agency || null,

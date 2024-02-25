@@ -15,6 +15,16 @@ const validContactFormData = [
   body('message').notEmpty().withMessage('Message is required')
 ];
 
+const modelDataValid = [
+  body('model_name').isString().notEmpty().withMessage('Name must be a non-empty string'),
+  body('agency').optional({ nullable: true }).isString().withMessage('Agency must be a string').notEmpty().withMessage('Agency cannot be an empty string'),
+  body('agency_url').optional({ nullable: true }).isString().withMessage('Agency URL must be a string').notEmpty().withMessage('Agency URL cannot be an empty string')
+];
+
+module.exports = {
+  modelDataValid
+};
+
 
 // need: validTokenPresent validation schema
 
@@ -30,5 +40,6 @@ const validContactFormData = [
 module.exports = {
   paramsIsNumber,
   emailAndPasswordAreValid, 
-  validContactFormData
+  validContactFormData,
+  modelDataValid
 }
