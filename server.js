@@ -62,8 +62,6 @@ app.listen(PORT, () => {
 
 // move token verification function to utils for code reusability
 
-// standardize date formattting: send all res object with SQL formatted dates
-
 // move validation of requests into /utils/validationSchemas
 
 // user validation via express-validator middleware
