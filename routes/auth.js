@@ -24,7 +24,7 @@ authRouter.route('/login')
 
   const errorMsgs = errors.array().map(error => error.msg);
   
-  if(!errors.isEmpty()) {
+  if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errorMsgs });
   }
   next();

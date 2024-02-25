@@ -105,8 +105,13 @@ const userLogin = async (req, res) => {
 // userLogout function
 // client can get the user_id from the jwt
 const logLogout = (req, res) => {
-  // validate params: must be a number/can be coerced into a number
   const { user_id } = req.body;
+
+  if(!user_id) {
+    res.status(400).send({message: "Invalid or missing User ID"})
+  } else if(isNaN(+user_id)) {
+    res.status(400).send({message: "User ID must be a number"})
+  }
 
   res.status(200).json({ message: 'Successfully Logged Out' });
 };
