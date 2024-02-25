@@ -1,6 +1,7 @@
-const shootsRouter = require('express').Router();
 const shootsController = require('../controllers/shoots-controller.js');
-
+const shootsRouter = require('express').Router();
+const { query, body, validationResult, matchedData } = require('express-validator');
+const { paramsIsNumber } = require('../utils/validationSchemas.js');
 
 // *** import express validator to validate requests
 // import { query, body, validationResult, matchedData } from 'express-validator';
@@ -21,7 +22,16 @@ shootsRouter.route('/all')
 
 // GET shoot by id
 shootsRouter.route('/shoot/:id')
-  .get(shootsController.getShootByID);
+  .get(paramsIsNumber, (req, res, next) => {
+    const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, shootsController.getShootByID);
   
 
 // POST /shoots/add
@@ -37,7 +47,16 @@ shootsRouter.route('/edit/:id')
 
 // delete shoot
 shootsRouter.route('/delete/:id')
-  .delete(shootsController.deleteShootByID);
+  .delete(paramsIsNumber, (req, res, next) => {
+    const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, shootsController.deleteShootByID);
   
 // edit shoots order
 shootsRouter.route('/updateorder')
