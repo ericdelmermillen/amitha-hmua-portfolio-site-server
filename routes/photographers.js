@@ -48,9 +48,18 @@ photographersRouter.route('/add')
   }, photographersController.addPhotographer);
 
 
-// edit model by id route  
+// edit photographer by id route  
 photographersRouter.route('/edit/:id')
-  .put(photographersController.editPhotographerById);
+  .put(paramsIsNumber, (req, res, next) => {
+    const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, photographersController.editPhotographerById);
 
 // delete photographer route
 // will need to make deleting a photographer delete all shoots/photos that reference them

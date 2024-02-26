@@ -174,7 +174,7 @@ const editPhotographerById = async (req, res) => {
   //   verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -194,7 +194,7 @@ const editPhotographerById = async (req, res) => {
       pinterestURL
     } = req.body;
 
-    if (!photographer_name) {
+    if (!photographer_name || !photographer_name.length) {
       return res.status(400).json({ message: 'Photographer name cannot be left blank' });
     }
 
