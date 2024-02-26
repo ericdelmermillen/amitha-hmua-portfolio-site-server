@@ -151,13 +151,13 @@ const addModel = async (req, res) => {
 // edit model by id
 const editModelById = async (req, res) => {
   try {
-    const token = req.headers.authorization; 
+    // const token = req.headers.authorization; 
     
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+    // if(!token) {
+    //   return res.status(401).json({ message: 'Token Missing' });
+    // }
 
-    verifyToken(token);
+    // verifyToken(token);
 
   } catch(error) {
     if (error.message === 'Token expired') {
@@ -174,7 +174,7 @@ const editModelById = async (req, res) => {
   const { id } = req.params;
   const { model_name, agency, agencyURL } = req.body;
     
-  if(!model_name) {
+  if(!model_name || !model_name.length) {
     return res.status(400).json({ message: 'Model name can not be left blank' });
   }
 
@@ -189,7 +189,7 @@ const editModelById = async (req, res) => {
     .where({ id })
     .update({ model_name, agency, agencyURL });
 
-  return res.status(200).json({ message: `Model withID ${id} updated successfully`});
+  return res.status(200).json({ message: `Model with ID ${id} updated successfully`});
 
   } catch(error) {
     console.error('Error updating model:', error);

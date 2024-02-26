@@ -44,7 +44,16 @@ modelsRouter.route('/add')
   
 // edit model by id route  
 modelsRouter.route('/edit/:id')
-  .put(modelsController.editModelById);
+  .put(paramsIsNumber, (req, res, next) => {
+    const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, modelsController.editModelById);
 
   
 // delete model route
