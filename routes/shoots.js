@@ -1,12 +1,7 @@
 const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
-const { paramsIsNumber } = require('../utils/validationSchemas.js');
-
-// *** import express validator to validate requests
-// import { query, body, validationResult, matchedData } from 'express-validator';
-
-// import validationSchemas necessary for each route
+const { paramsIsNumber, shootDataValid } = require('../utils/validationSchemas.js');
 
 // need:
 // 1) paramsIsNumber validation schema
@@ -42,7 +37,16 @@ shootsRouter.route('/add')
 
 // edit shoot by id
 shootsRouter.route('/edit/:id')
-  .put(shootsController.editShootByID);
+  .put(paramsIsNumber, shootDataValid, (req, res, next) => {
+    const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, shootsController.editShootByID);
 
 
 // delete shoot

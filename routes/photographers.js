@@ -1,7 +1,7 @@
 const photographersController = require('../controllers/photographers-controller.js');
 const photographersRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
-const { paramsIsNumber, addPhotographerDataValid } = require('../utils/validationSchemas.js');
+const { paramsIsNumber, photographerDataValid } = require('../utils/validationSchemas.js');
 
 // *** import express validator to validate requests
 // import { query, body, validationResult, matchedData } from 'express-validator';
@@ -20,7 +20,6 @@ photographersRouter.route('/all')
 
 
 // get photographer by id
-// for getting photographer by id to edit photographer modal
 photographersRouter.route('/photographer/:id')
   .get(paramsIsNumber,  (req, res, next) => {
     const errors = validationResult(req);
@@ -36,7 +35,7 @@ photographersRouter.route('/photographer/:id')
 
 // add photographer route
 photographersRouter.route('/add')
-  .post(addPhotographerDataValid, (req, res, next) => {
+  .post(photographerDataValid, (req, res, next) => {
     const errors = validationResult(req);
       const errorMsgs = errors.array().map(error => error.msg);
 
@@ -50,7 +49,7 @@ photographersRouter.route('/add')
 
 // edit photographer by id route  
 photographersRouter.route('/edit/:id')
-  .put(paramsIsNumber, (req, res, next) => {
+  .put(paramsIsNumber, photographerDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
