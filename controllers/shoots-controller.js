@@ -55,6 +55,7 @@ const getShootSummaries = async (req, res) => {
 }
 
 // get shoot by id with all photos (max 10)
+// do I need the photo ID as well?
 const getShootByID = async (req, res) => {
   try {
     const id = req.params.id;
@@ -74,7 +75,8 @@ const getShootByID = async (req, res) => {
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
         'shoots.shoot_title',
         'shoots.shoot_blurb',
-        knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.id ASC SEPARATOR ",") AS photo_urls')
+        knex.raw('GROUP_CONCAT(photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
+        knex.raw('GROUP_CONCAT(photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls')
       )
       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
       .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
@@ -84,32 +86,22 @@ const getShootByID = async (req, res) => {
       .where('shoots.id', id)
       .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb');
 
-      const shootData = {};
-      shootData.shoot_id = shoot[0].shoot_id;
-      shootData.shoot_date = new Date(
-        shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
-      shootData.photographers = [];
-      shootData.models = [];
-      shootData.shoot_title = shoot[0].shoot_title;
-      shootData.shoot_blurb = shoot[0].shoot_blurb;
-      shootData.photo_urls = shoot[0].photo_urls.split(',');
+    const shootData = {};
+    shootData.shoot_id = shoot[0].shoot_id;
+    shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
+    shootData.photographers = shoot[0].photographers.split(',');
+    shootData.models = shoot[0].models.split(',');
+    shootData.shoot_title = shoot[0].shoot_title;
+    shootData.shoot_blurb = shoot[0].shoot_blurb;
 
-    // Add values to each photographer object
-    const photographers = shoot[0].photographers.split(',');
-    
-    for(const photographerName of photographers) {
-      const photographer = await knex('photographers').where('photographer_name', photographerName).first();
-      shootData.photographers.push(photographer);
-    }
+    // Create an array of photo objects with photo_url and display_order properties
+    const displayOrders = shoot[0].display_orders.split(',');
+    const photoUrls = shoot[0].photo_urls.split(',');
+    shootData.photo_urls = displayOrders.map((order, index) => ({
+      photo_url: photoUrls[index],
+      display_order: parseInt(order)
+    }));
 
-    // Add values to each model object
-    const models = shoot[0].models.split(',');
-
-    for(const modelName of models) {
-      const model = await knex('models').where('model_name', modelName).first();
-      shootData.models.push(model);
-    }
-    
     res.json(shootData);
   } catch (error) {
     console.error(error);
@@ -336,6 +328,14 @@ const deleteShootByID = async (req, res) => {
 };
 
 
+
+// editPhotoOrderByShootID
+
+const editPhotoOrderByShootID = async (req, res) => {
+  return res.send({msg: "from shoot by id update photo order"});
+}
+
+
 // route for updating shoots order: will need to either update the display order of all the shoots or overwrite/update all the shoots
 const updateShootOrder = async (req, res) => {
   const token = req.headers.authorization; 
@@ -380,5 +380,6 @@ module.exports = {
   addShoot,
   deleteShootByID,
   editShootByID,
+  editPhotoOrderByShootID,
   updateShootOrder
 };

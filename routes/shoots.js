@@ -49,6 +49,14 @@ shootsRouter.route('/edit/:id')
   }, shootsController.editShootByID);
 
 
+
+// // edit editPhotoOrderByShootID
+shootsRouter.put('/updateshootphotoorder/:id', (req, res) => {
+  res.send({msg: "from editPhotoOrderByShootID"})
+}, shootsController.editPhotoOrderByShootID)
+
+
+
 // delete shoot
 shootsRouter.route('/delete/:id')
   .delete(paramsIsNumber, (req, res, next) => {
