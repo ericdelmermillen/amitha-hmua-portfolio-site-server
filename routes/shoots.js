@@ -57,9 +57,9 @@ shootsRouter.route('/edit/:id')
 
 
 
-// // edit editPhotoOrderByShootID
-shootsRouter.put('/updateshootphotoorder/:id', (req, res) => {
-  res.send({msg: "from editPhotoOrderByShootID"})
+// // updateshootphotoorder by id
+shootsRouter.patch('/updateshootphotoorder/:id', (req, res) => {
+  // res.send({msg: "from editPhotoOrderByShootID"})
 }, shootsController.editPhotoOrderByShootID)
 
 

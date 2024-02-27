@@ -123,7 +123,6 @@ const getShootByID = async (req, res) => {
 
 
 // add shoot 
-// change so that the display order is set relative to the newly inserted shoots id: 1) insert shoot, 2) get max id of shoots table, 3) set display_order to be id
 const addShoot = async (req, res) => {
   try {
     // const token = req.headers.authorization; 
@@ -237,7 +236,8 @@ const editShootByID = async (req, res) => {
   // }
   
   const shootID = req.params.id;
-  const { shoot_date, shoot_title, shoot_blurb, photographers, models, photo_urls } = req.body;
+  const { shoot_date, shoot_title, shoot_blurb, photographer_ids, model_ids, photo_urls } = req.body;
+  console.log(photo_urls)
 
   try {
     await knex.transaction(async (trx) => {
@@ -253,7 +253,7 @@ const editShootByID = async (req, res) => {
 
       // Insert new photographer entries
       await trx('shoot_photographers').insert(
-        photographers.map((photographer_id) => ({
+        photographer_ids.map((photographer_id) => ({
           shoot_id: shootID,
           photographer_id,
         }))
@@ -264,7 +264,7 @@ const editShootByID = async (req, res) => {
 
       // Insert new model entries
       await trx('shoot_models').insert(
-        models.map((model_id) => ({
+        model_ids.map((model_id) => ({
           shoot_id: shootID,
           model_id,
         }))
@@ -342,9 +342,23 @@ const deleteShootByID = async (req, res) => {
 
 
 // editPhotoOrderByShootID
-
 const editPhotoOrderByShootID = async (req, res) => {
-  return res.send({msg: "from shoot by id update photo order"});
+  console.log("first")
+  const token = req.headers.authorization; 
+  if(!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+// Verify the token
+  try {
+    jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    if(err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired' });
+    }
+  }
+  
+  return res.send({msg: "from shoot by ID update photo order"});
 }
 
 

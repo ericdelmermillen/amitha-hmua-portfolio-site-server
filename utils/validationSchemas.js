@@ -74,14 +74,17 @@ function isValidURL(url) {
 
 
 
+// need: editPhotoOrderByShootID validation schema
+
+
+// need: shootsOrderDataValid validation schema
+
 
 // need: validTokenPresent validation schema
 
 
 
-// need: shootDataValid validation schema
 
-// need: shootsOrderDataValid validation schema
 
 module.exports = {
   paramsIsNumber,
