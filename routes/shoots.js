@@ -4,8 +4,6 @@ const { query, body, validationResult, matchedData } = require('express-validato
 const { paramsIsNumber, shootDataValid } = require('../utils/validationSchemas.js');
 
 // need:
-// 1) paramsIsNumber validation schema
-// 2) shootDataValid validation schema: shoot_title, shoot_blurb, photographer_ids, model_ids, photo_urls
 // 3) shootsOrderDataValid validation schema
 
 
@@ -32,7 +30,16 @@ shootsRouter.route('/shoot/:id')
 // POST /shoots/add
 // client needs to be able to compress then send uploaded photo(s) to AWS abd receive the urls back to be able to add them to the db
 shootsRouter.route('/add')
-  .post(shootsController.addShoot);
+  .post(shootDataValid, (req, res, next) => {
+    const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, shootsController.addShoot);
 
 
 // edit shoot by id

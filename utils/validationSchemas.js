@@ -32,46 +32,24 @@ const photographerDataValid = [
 
 
 const shootDataValid = [
-  body('shoot_date').isString().withMessage('Shoot date must be a string')
+  body('shoot_date')
+    .isString().withMessage('Shoot date must be a string')
     .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Shoot date must be in YYYY-MM-DD format'),
-  body('shoot_title').isString().isLength({ min: 3, max: 255 }).withMessage('Shoot title must be at least 3 characters long'),
-  body('shoot_blurb').isString().isLength({ min: 10, max: 255 }).withMessage('Shoot blurb must be at least 10 characters long'),
-  body('photographers').isArray({ min: 1 }).withMessage('At least one photographer is required')
-    .custom((value, { req }) => {
-      if (!Array.isArray(value) || value.length < 1) {
-        return Promise.reject('At least one photographer is required');
-      }
-      for (const photographer of value) {
-        if (typeof photographer !== 'number') {
-          return Promise.reject('Each photographer must be a number');
-        }
-      }
-      return true;
-    }),
-  body('models').isArray({ min: 1 }).withMessage('At least one model is required')
-    .custom((value, { req }) => {
-      if (!Array.isArray(value) || value.length < 1) {
-        return Promise.reject('At least one model is required');
-      }
-      for (const model of value) {
-        if (typeof model !== 'number') {
-          return Promise.reject('Each model must be a number');
-        }
-      }
-      return true;
-    }),
-  body('photo_urls').isArray({ min: 1 }).withMessage('At least one photo URL is required')
-    .custom((value, { req }) => {
-      if (!Array.isArray(value) || value.length < 1) {
-        return Promise.reject('At least one photo URL is required');
-      }
-      for (const url of value) {
-        if (typeof url !== 'string' || !isValidURL(url)) {
-          return Promise.reject('Each photo URL must be a valid URL');
-        }
-      }
-      return true;
-    })
+  body('shoot_title')
+    .isString().withMessage('Shoot title must be a string')
+    .isLength({ min: 3, max: 255 }).withMessage('Shoot title must be between 3 and 255 characters long'),
+  body('shoot_blurb')
+    .isString().withMessage('Shoot blurb must be a string')
+    .isLength({ min: 10, max: 255 }).withMessage('Shoot blurb must be between 10 and 255 characters long'),
+  body('photographer_ids')
+    .isArray({ min: 1 }).withMessage('At least one photographer ID is required')
+    .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each photographer ID must be a number'),
+  body('model_ids')
+    .isArray({ min: 1 }).withMessage('At least one model ID is required')
+    .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each model ID must be a number'),
+  body('photo_urls')
+    .isArray({ min: 1 }).withMessage('At least one photo URL is required')
+    .custom(urls => urls.every(url => typeof url === 'string' && isValidURL(url))).withMessage('Each photo URL must be a valid URL')
 ];
 
 // Helper function to validate URL
@@ -82,10 +60,24 @@ function isValidURL(url) {
 }
 
 
+module.exports = {
+  shootDataValid
+};
+
+// Helper function to validate URL
+function isValidURL(url) {
+  // Regular expression to check URL format
+  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+  return urlRegex.test(url);
+}
+
+
+
+
+
 // need: validTokenPresent validation schema
 
 
-// need: photographerDataValid validation schema
 
 // need: shootDataValid validation schema
 

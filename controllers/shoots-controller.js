@@ -151,7 +151,7 @@ const addShoot = async (req, res) => {
     model_ids, 
     photo_urls
   } = req.body;
-
+  
   let { shoot_date } = req.body;
 
   if(!shoot_date || !shoot_title || !shoot_blurb || !photographer_ids || !model_ids || !photo_urls) {

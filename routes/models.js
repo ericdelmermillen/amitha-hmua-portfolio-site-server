@@ -3,10 +3,6 @@ const modelsRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
 const { paramsIsNumber, modelDataValid } = require('../utils/validationSchemas.js');
 
-// need:
-// 1) paramsIsNumber validation schema
-// 2) modelDataValid validation schema: name, agency, agencyUrl: only name required, all must be string or not present/undefined/null (?)
-
 
 // get models route
 modelsRouter.route('/all')
@@ -67,7 +63,7 @@ modelsRouter.route('/delete/:id')
       return res.status(400).json({ errors: errorMsgs });
     }
     next();
-  }, modelsController.getModelByID);
+  }, modelsController.deleteModelByID);
 
 
 module.exports = modelsRouter;
