@@ -57,10 +57,23 @@ shootsRouter.route('/edit/:id')
 
 
 
-// // updateshootphotoorder by id
-shootsRouter.patch('/updateshootphotoorder/:id', (req, res) => {
-  // res.send({msg: "from editPhotoOrderByShootID"})
-}, shootsController.editPhotoOrderByShootID)
+  // shootsRouter.patch('/updateshootphotoorder/:id', (req, res) => {
+    
+  // }, shootsController.editPhotoOrderByShootID)
+  
+  
+shootsRouter.route('/updateshootphotoorder/:id')
+  .patch(paramsIsNumber, async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, shootsController.editPhotoOrderByShootID);
+
 
 
 

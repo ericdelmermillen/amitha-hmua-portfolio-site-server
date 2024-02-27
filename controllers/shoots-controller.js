@@ -289,7 +289,28 @@ const editShootByID = async (req, res) => {
 };
 
 
+
+// editPhotoOrderByShootID
+// grab all photos with the params id: where the photo id matches, update the display_order value
+const editPhotoOrderByShootID = async (req, res) => {
+  const { id } = req.params;
+
+  console.log(id)
+
+  const { new_photo_order } = req.body;
+
+  console.log(new_photo_order)
+
+
+
+
+  console.log("first")
+}
+
+
+
 // delete shoots
+// put new shoots order in a named array in mson
 const deleteShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
@@ -340,44 +361,27 @@ const deleteShootByID = async (req, res) => {
 };
 
 
-
-// editPhotoOrderByShootID
-const editPhotoOrderByShootID = async (req, res) => {
-  console.log("first")
-  const token = req.headers.authorization; 
-  if(!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-// Verify the token
-  try {
-    jwt.verify(token, process.env.JWT_SECRET);
-  } catch (err) {
-    if(err.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Token expired' });
-    }
-  }
-  
-  return res.send({msg: "from shoot by ID update photo order"});
-}
-
-
 // route for updating shoots order: will need to either update the display order of all the shoots or overwrite/update all the shoots
 const updateShootOrder = async (req, res) => {
-  const token = req.headers.authorization; 
-  if(!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-// Verify the token
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
-  } catch (err) {
-    if(err.name === 'TokenExpiredError') {
+    // const token = req.headers.authorization; 
+    
+    // if(!token) {
+    //   return res.status(401).json({ message: 'Token Missing' });
+    // }
+
+    // verifyToken(token);
+
+  } catch(error) {
+    if (error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
+    } else if (error.message === 'Invalid token') {
+      return res.status(401).json({ message: 'Invalid token' });
+    } else {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
   }
-  
+
   const newShootsOrder = req.body;
 
   try {

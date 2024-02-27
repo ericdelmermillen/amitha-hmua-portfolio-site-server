@@ -57,24 +57,12 @@ function isValidURL(url) {
   // Regular expression to check URL format
   const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
   return urlRegex.test(url);
-}
-
-
-module.exports = {
-  shootDataValid
 };
 
-// Helper function to validate URL
-function isValidURL(url) {
-  // Regular expression to check URL format
-  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
-  return urlRegex.test(url);
-}
 
 
 
-
-// need: editPhotoOrderByShootID validation schema
+// need: photoOrderDataValid validation schema
 
 
 // need: shootsOrderDataValid validation schema
@@ -93,4 +81,4 @@ module.exports = {
   modelDataValid,
   photographerDataValid,
   shootDataValid
-}
+};
