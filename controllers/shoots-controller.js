@@ -56,6 +56,60 @@ const getShootSummaries = async (req, res) => {
 
 // get shoot by id with all photos (max 10)
 // do I need the photo ID as well?
+// const getShootByID = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+
+//     const shootExists = await knex('shoots').where({ id }).first();
+//     if (!shootExists) {
+//       return res.status(404).json({ error: 'Shoot not found' });
+//     }
+
+//     await knex.raw('SET SESSION group_concat_max_len = 2560');
+
+//     const shoot = await knex('shoots')
+//       .select(
+//         'shoots.id as shoot_id',
+//         'shoots.shoot_date',
+//         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
+//         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
+//         'shoots.shoot_title',
+//         'shoots.shoot_blurb',
+//         knex.raw('GROUP_CONCAT(photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
+//         knex.raw('GROUP_CONCAT(photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls')
+//       )
+//       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
+//       .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
+//       .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
+//       .leftJoin('models', 'shoot_models.model_id', 'models.id')
+//       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
+//       .where('shoots.id', id)
+//       .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb');
+
+//     const shootData = {};
+//     shootData.shoot_id = shoot[0].shoot_id;
+//     shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
+//     shootData.photographers = shoot[0].photographers.split(',');
+//     shootData.models = shoot[0].models.split(',');
+//     shootData.shoot_title = shoot[0].shoot_title;
+//     shootData.shoot_blurb = shoot[0].shoot_blurb;
+
+//     // Create an array of photo objects with photo_url and display_order properties
+//     const displayOrders = shoot[0].display_orders.split(',');
+//     const photoUrls = shoot[0].photo_urls.split(',');
+//     shootData.photo_urls = displayOrders.map((order, index) => ({
+//       photo_url: photoUrls[index],
+//       display_order: parseInt(order)
+//     }));
+
+//     res.json(shootData);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+
 const getShootByID = async (req, res) => {
   try {
     const id = req.params.id;
@@ -76,7 +130,8 @@ const getShootByID = async (req, res) => {
         'shoots.shoot_title',
         'shoots.shoot_blurb',
         knex.raw('GROUP_CONCAT(photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
-        knex.raw('GROUP_CONCAT(photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls')
+        knex.raw('GROUP_CONCAT(photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
+        knex.raw('GROUP_CONCAT(photos.id ORDER BY photos.display_order ASC) AS photo_ids') // Include photo ids
       )
       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
       .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
@@ -94,12 +149,14 @@ const getShootByID = async (req, res) => {
     shootData.shoot_title = shoot[0].shoot_title;
     shootData.shoot_blurb = shoot[0].shoot_blurb;
 
-    // Create an array of photo objects with photo_url and display_order properties
+    // Create an array of photo objects with photo_url, display_order, and id properties
     const displayOrders = shoot[0].display_orders.split(',');
     const photoUrls = shoot[0].photo_urls.split(',');
-    shootData.photo_urls = displayOrders.map((order, index) => ({
+    const photoIds = shoot[0].photo_ids.split(','); // Extract photo ids
+    shootData.photo_objects = displayOrders.map((order, index) => ({
       photo_url: photoUrls[index],
-      display_order: parseInt(order)
+      display_order: parseInt(order),
+      id: parseInt(photoIds[index]) // Include photo id
     }));
 
     res.json(shootData);
@@ -108,6 +165,9 @@ const getShootByID = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
 
 
 // add shoot 
