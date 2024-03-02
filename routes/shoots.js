@@ -1,7 +1,7 @@
 const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
-const { paramsIsNumber, shootDataValid } = require('../utils/validationSchemas.js');
+const { paramsIsNumber, shootDataValid, shootsOrderDataValid } = require('../utils/validationSchemas.js');
 
 // need:
 // 3) shootsOrderDataValid validation schema
@@ -84,9 +84,19 @@ shootsRouter.route('/delete/:id')
     next();
   }, shootsController.deleteShootByID);
   
+
 // edit shoots order
 shootsRouter.route('/updateorder')
-  .patch(shootsController.updateShootOrder);
+  .patch(shootsOrderDataValid, (req, res, next) => {
+const errors = validationResult(req);
+
+    const errorMsgs = errors.array().map(error => error.msg);
+
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    next();
+  }, shootsController.updateShootOrder);
 
 
 module.exports = shootsRouter;

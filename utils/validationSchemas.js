@@ -60,6 +60,15 @@ function isValidURL(url) {
 };
 
 
+const shootsOrderDataValid = [
+  body('new_shoot_order')
+    .isArray({ min: 1 }).withMessage('At least one shoot order update is required')
+    .custom(updates => updates.every(update => 
+      'shoot_id' in update && typeof update.shoot_id === 'number' && 
+      'display_order' in update && typeof update.display_order === 'number'
+    )).withMessage('Each update must have shoot_id and display_order as numbers')
+];
+
 
 
 // need: photoOrderDataValid validation schema
@@ -80,5 +89,6 @@ module.exports = {
   validContactFormData,
   modelDataValid,
   photographerDataValid,
-  shootDataValid
+  shootDataValid,
+  shootsOrderDataValid
 };
