@@ -299,12 +299,6 @@ const editPhotoOrderByShootID = async (req, res) => {
 
   const { new_photo_order } = req.body;
 
-  console.log(new_photo_order)
-
-
-
-
-  console.log("first")
 }
 
 
@@ -382,7 +376,7 @@ const updateShootOrder = async (req, res) => {
     }
   }
 
-  const newShootsOrder = req.body;
+  const newShootsOrder = req.body.new_shoot_order;
 
   try {
     await Promise.all(

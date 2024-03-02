@@ -1,3 +1,7 @@
+CREATE DATABASE shoots_db;
+
+USE shoots_db;
+
 CREATE TABLE users (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(255),
@@ -115,10 +119,9 @@ CREATE TABLE photos (
   FOREIGN KEY (shoot_id) REFERENCES shoots(id) ON DELETE CASCADE
 );
 
-
 DELIMITER //
 
-CREATE TRIGGER set_display_order_default
+CREATE TRIGGER set_display_order_default_photos
 BEFORE INSERT ON photos
 FOR EACH ROW
 BEGIN
@@ -129,6 +132,7 @@ END;
 //
 
 DELIMITER ;
+
 
 
 

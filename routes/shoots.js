@@ -55,12 +55,6 @@ shootsRouter.route('/edit/:id')
     next();
   }, shootsController.editShootByID);
 
-
-
-  // shootsRouter.patch('/updateshootphotoorder/:id', (req, res) => {
-    
-  // }, shootsController.editPhotoOrderByShootID)
-  
   
 shootsRouter.route('/updateshootphotoorder/:id')
   .patch(paramsIsNumber, async (req, res, next) => {
