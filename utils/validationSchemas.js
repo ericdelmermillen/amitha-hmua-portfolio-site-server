@@ -70,6 +70,15 @@ const shootsOrderDataValid = [
 ];
 
 
+// 
+const photoOrderDataValid = [
+  body('new_photo_order')
+    .isArray({ min: 1 }).withMessage('At least one photo order update is required')
+    .custom(updates => updates.every(update => 
+      'photo_id' in update && typeof update.photo_id === 'number' && 
+      'display_order' in update && typeof update.display_order === 'number'
+    )).withMessage('Each update must have photo_id and display_order as numbers')
+];
 
 
 // need: shootsOrderDataValid validation schema
@@ -88,5 +97,6 @@ module.exports = {
   modelDataValid,
   photographerDataValid,
   shootDataValid,
-  shootsOrderDataValid
+  shootsOrderDataValid,
+  photoOrderDataValid
 };

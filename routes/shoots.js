@@ -1,7 +1,7 @@
 const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
-const { paramsIsNumber, shootDataValid, shootsOrderDataValid } = require('../utils/validationSchemas.js');
+const { paramsIsNumber, shootDataValid, shootsOrderDataValid, photoOrderDataValid } = require('../utils/validationSchemas.js');
 
 // need:
 // 3) shootsOrderDataValid validation schema
@@ -58,7 +58,7 @@ shootsRouter.route('/edit/:id')
   
 // update the display order of the photos in a given shoot
 shootsRouter.route('/updateshootphotoorder/:id')
-  .patch(paramsIsNumber, async (req, res, next) => {
+  .patch(paramsIsNumber, photoOrderDataValid, async (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
