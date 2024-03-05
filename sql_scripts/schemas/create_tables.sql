@@ -135,7 +135,6 @@ DELIMITER ;
 
 
 
-
 INSERT INTO photos 
 	(shoot_id, photo_url)
 VALUES 

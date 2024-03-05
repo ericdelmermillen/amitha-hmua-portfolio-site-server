@@ -71,8 +71,6 @@ const shootsOrderDataValid = [
 
 
 
-// need: photoOrderDataValid validation schema
-
 
 // need: shootsOrderDataValid validation schema
 

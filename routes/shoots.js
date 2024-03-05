@@ -56,6 +56,7 @@ shootsRouter.route('/edit/:id')
   }, shootsController.editShootByID);
 
   
+// update the display order of the photos in a given shoot
 shootsRouter.route('/updateshootphotoorder/:id')
   .patch(paramsIsNumber, async (req, res, next) => {
     const errors = validationResult(req);
@@ -67,8 +68,6 @@ shootsRouter.route('/updateshootphotoorder/:id')
     }
     next();
   }, shootsController.editPhotoOrderByShootID);
-
-
 
 
 // delete shoot

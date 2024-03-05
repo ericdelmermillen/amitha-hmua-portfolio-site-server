@@ -222,6 +222,7 @@ const addShoot = async (req, res) => {
 
 // edit shoot by id
 const editShootByID = async (req, res) => {
+  // const token = req.headers.authorization; 
   // if(!token) {
   //   return res.status(401).json({ message: 'Unauthorized' });
   // }
@@ -237,7 +238,6 @@ const editShootByID = async (req, res) => {
   
   const shootID = req.params.id;
   const { shoot_date, shoot_title, shoot_blurb, photographer_ids, model_ids, photo_urls } = req.body;
-  console.log(photo_urls)
 
   try {
     await knex.transaction(async (trx) => {
@@ -289,22 +289,52 @@ const editShootByID = async (req, res) => {
 };
 
 
-
 // editPhotoOrderByShootID
-// grab all photos with the params id: where the photo id matches, update the display_order value
 const editPhotoOrderByShootID = async (req, res) => {
+  const token = req.headers.authorization; 
+//   if(!token) {
+//   return res.status(401).json({ message: 'Unauthorized' });
+// }
+
+// Verify the token
+// try {
+//   jwt.verify(token, process.env.JWT_SECRET);
+// } catch (err) {
+//   if(err.name === 'TokenExpiredError') {
+//     return res.status(401).json({ message: 'Token expired' });
+//   }
+// }
+  
   const { id } = req.params;
 
-  console.log(id)
+  const newPhotoOrder = req.body.new_photo_order;
 
-  const { new_photo_order } = req.body;
+  try {
+    // Start a transaction to ensure data integrity
+    await knex.transaction(async (trx) => {
+      // Iterate through each photo in the new order
 
+      for(const photo of newPhotoOrder) {
+        const { photo_id, display_order } = photo;
+        
+        // Update the display order of the photo in the database
+        await trx('photos')
+          .where({ id: photo_id, shoot_id: id })
+          .update({ display_order: display_order });
+      }
+    });
+
+    // Sending a success response
+    res.status(200).json({ message: `Photo order for shoot ${id} updated successfully` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
 
 
 // delete shoots
-// put new shoots order in a named array in mson
 const deleteShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
@@ -322,7 +352,7 @@ const deleteShootByID = async (req, res) => {
   // }
 
   try {
-    const id = req.params.id;
+    const { id } = req.params;
     
     const shootExists = await knex('shoots').where({ id }).first();
     
