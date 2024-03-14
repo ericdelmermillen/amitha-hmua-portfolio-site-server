@@ -177,10 +177,6 @@ const editModelById = async (req, res) => {
     
   const { id } = req.params;
   const { model_name, agency, agencyURL } = req.body;
-    
-  if(!model_name || !model_name.length) {
-    return res.status(400).json({ message: 'Model name can not be left blank' });
-  }
 
   // Check if the model with the specified ID exists
   const existingModel = await knex('models').where({ id }).first();
@@ -193,7 +189,10 @@ const editModelById = async (req, res) => {
     .where({ id })
     .update({ model_name, agency, agencyURL });
 
-  return res.status(200).json({ message: `Model with ID ${id} updated successfully`});
+    // Fetch the updated model from the database
+    const updatedModel = await knex('models').where({ id }).first();
+
+  return res.status(200).json({ message: `Model with ID ${id} updated successfully`, updatedModel});
 
   } catch(error) {
     console.error('Error updating model:', error);
@@ -203,7 +202,6 @@ const editModelById = async (req, res) => {
 
 
 // delete model by id
-// on successful delete return the model's name and id
 const deleteModelByID = async (req, res) => {
   // try {
   //   const token = req.headers.authorization; 
