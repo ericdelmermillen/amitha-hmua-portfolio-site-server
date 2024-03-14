@@ -3,10 +3,6 @@ const shootsRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
 const { paramsIsNumber, shootDataValid, shootsOrderDataValid, photoOrderDataValid } = require('../utils/validationSchemas.js');
 
-// need:
-// 3) shootsOrderDataValid validation schema
-
-
 
 // GET shoots 
 shootsRouter.route('/all')

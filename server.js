@@ -44,21 +44,15 @@ app.use('/api/models', modelsRouter);
 app.use('/api/photographers', photographersRouter);
 
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} 🚀`);
 });
 
 
 // set up jwt refreshing for all protected routes
-// ***************** //
-
-// research how to handle errors in accessing the database with my ORM (KNEX?)
 
 // research interacting with mysql database from express server without an ORM/KNEX.js
 
 // move token verification function to utils for code reusability
-
-// move validation of requests into /utils/validationSchemas
 
 // user validation via express-validator middleware

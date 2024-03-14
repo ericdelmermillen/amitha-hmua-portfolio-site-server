@@ -81,14 +81,7 @@ const photoOrderDataValid = [
 ];
 
 
-// need: shootsOrderDataValid validation schema
-
-
 // need: validTokenPresent validation schema
-
-
-
-
 
 module.exports = {
   paramsIsNumber,

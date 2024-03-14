@@ -104,7 +104,7 @@ const userLogin = async (req, res) => {
 
 // userLogout function
 // client can get the user_id from the jwt
-const logLogout = (req, res) => {
+const logLogout = async (req, res) => {
   const { user_id } = req.body;
 
   if(!user_id) {
@@ -113,7 +113,20 @@ const logLogout = (req, res) => {
     res.status(400).send({message: "User ID must be a number"})
   }
 
-  res.status(200).json({ message: 'Successfully Logged Out' });
+  try {
+    const matchedUser = await knex('users').where('id', user_id).first();
+
+    if(!matchedUser) {
+      res.status(404).json({ message: `User with id of ${user_id} not found`});
+    } else {
+      res.status(200).json({ message: 'Successfully Logged Out' });
+    }
+    
+
+  } catch(error) {
+    console.log(error)
+    return res.status(500).json({ error: "An error occurred while logging in" });
+  }
 };
 
 
