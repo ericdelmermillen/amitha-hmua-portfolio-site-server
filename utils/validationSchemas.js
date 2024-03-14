@@ -11,8 +11,13 @@ const emailAndPasswordAreValid = [
 
 const validContactFormData = [
   body('email').isEmail().withMessage('Invalid email format'),
-  body('subject').notEmpty().withMessage('Subject is required'),
-  body('message').notEmpty().withMessage('Message is required')
+  body('subject')
+    .notEmpty().withMessage('Subject is required')
+    .isLength({ min: 5, max: 100 }).withMessage('Subject must be between 5-100 characters long.'),
+  body('message')
+    .notEmpty()
+    .withMessage('Message is required')
+    .isLength({ min: 10, max: 500 }).withMessage('Message must be between 10-500 characters long.')
 ];
 
 const modelDataValid = [

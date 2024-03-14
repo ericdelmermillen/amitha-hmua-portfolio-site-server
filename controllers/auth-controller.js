@@ -5,14 +5,10 @@ const knex = require("knex")(require("../knexfile.js"));
 const app = require('../server.js');
 const { getToken } = require('../utils/utils.js');
 
-// move email and password present checking to utils
-
 // createUser function
 const createUser = async (req, res) => {
-  // validate req.body contains email + password, that both are strings and both contain length
   const { email, password } = req.body;
 
-  // move this to utils? 
   if(!email || !password) {
     return res.status(400).json({
       success: false,
@@ -51,7 +47,6 @@ const createUser = async (req, res) => {
 
 // userLogin function
 const userLogin = async (req, res) => {
-  // validate req.body contains email + password, that both are strings and both contain length
   const { email, password } = req.body;
 
   if(!email || !password) {
@@ -122,7 +117,6 @@ const logLogout = async (req, res) => {
       res.status(200).json({ message: 'Successfully Logged Out' });
     }
     
-
   } catch(error) {
     console.log(error)
     return res.status(500).json({ error: "An error occurred while logging in" });

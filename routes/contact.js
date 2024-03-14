@@ -13,7 +13,7 @@ contactRouter.route('/')
       return res.status(400).json({ errors: errorMsgs });
     }
       
-    next()
+    next();
   }, contactController.handleContactForm);
 
 

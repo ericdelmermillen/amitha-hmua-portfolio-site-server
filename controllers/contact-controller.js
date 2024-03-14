@@ -1,7 +1,6 @@
 const nodemailer = require('nodemailer');
 
-
-// contact route
+// contact form
 // not forwarding email: needs to set up for the correct email anyway: make new email
 const handleContactForm = (req, res) => {
   const { email, subject, message } = req.body;
@@ -25,9 +24,10 @@ const handleContactForm = (req, res) => {
   };
 
   transporter.sendMail(emailMessage, (error, info) => {
+
     if(error) {
       console.error('Error sending email:', error);
-      return res.status(500).json({ error: "Failed to send email" });
+      return res.status(500).json({ error: "Failed to send email." });
     } else {
       console.log('Email sent:', info.response);
       return res.status(201).json({
