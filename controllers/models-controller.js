@@ -189,8 +189,8 @@ const editModelById = async (req, res) => {
     .where({ id })
     .update({ model_name, agency, agencyURL });
 
-    // Fetch the updated model from the database
-    const updatedModel = await knex('models').where({ id }).first();
+  // Fetch the updated model from the database
+  const updatedModel = await knex('models').where({ id }).first();
 
   return res.status(200).json({ message: `Model with ID ${id} updated successfully`, updatedModel});
 
