@@ -18,13 +18,42 @@ const validContactFormData = [
     .notEmpty()
     .withMessage('Message is required')
     .isLength({ min: 10, max: 500 }).withMessage('Message must be between 10-500 characters long.')
-];
+  ];
+  
+//   const modelDataValid = [
+//     body('model_name')
+//       .isString().withMessage('Model Name must be a string')
+//       .notEmpty().withMessage('Model Name must be a non-empty string')
+//       .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.'),
+//     body('agency')
+//       .isString().withMessage('Agency Name must be a string')
+//       .notEmpty().withMessage('Agency Name must be a non-empty string')
+//       .optional({ nullable: true }).isString().withMessage('Agency must be a string').notEmpty().withMessage('Agency cannot be an empty string')
+//       .isLength({ min: 2, max: 50 }).withMessage('Agency Name must be between 2-50 characters long.'),
+//     body('agency_url')
+//       .optional({ nullable: true })
+//       .isString().withMessage('Agency URL must be a string')
+//       .notEmpty().withMessage('Agency URL cannot be an empty string')
+//       .isURL().withMessage('Agency URL must be a valid URL')
+// ];
+
 
 const modelDataValid = [
-  body('model_name').isString().notEmpty().withMessage('Name must be a non-empty string'),
-  body('agency').optional({ nullable: true }).isString().withMessage('Agency must be a string').notEmpty().withMessage('Agency cannot be an empty string'),
-  body('agency_url').optional({ nullable: true }).isString().withMessage('Agency URL must be a string').notEmpty().withMessage('Agency URL cannot be an empty string')
+  body('model_name')
+    .isString().withMessage('Model Name must be a string')
+    .notEmpty().withMessage('Model Name must be a non-empty string')
+    .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.'),
+  body('agency')
+    .optional({ nullable: true })
+    .isString().withMessage('Agency Name must be a string')
+    .notEmpty().withMessage('Agency Name must be a non-empty string')
+    .isLength({ min: 2, max: 50 }).withMessage('Agency Name must be between 2-50 characters long.'),
+  body('agencyURL')
+    .optional({ nullable: true })
+    .isURL().withMessage('Agency URL must be a valid URL')
 ];
+
+
 
 const photographerDataValid = [
   body('photographer_name').isString().notEmpty().withMessage('Photographer name must be a non-empty string'),

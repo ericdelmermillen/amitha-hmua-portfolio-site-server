@@ -32,7 +32,7 @@ const getAllModels = async (req, res) => {
     res.json({
       success: true,
       message: "Models fetched successfully",
-      models: models,
+      models: models
     });
 
   } catch(error) {
@@ -43,7 +43,6 @@ const getAllModels = async (req, res) => {
 
 
 // get model by id 
-// will need for edit model functionality
 const getModelByID = async (req, res) => {
   try {
     // const token = req.headers.authorization; 
@@ -55,7 +54,7 @@ const getModelByID = async (req, res) => {
     // verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -113,12 +112,17 @@ const addModel = async (req, res) => {
 
   try {
     const { model_name, agency, agencyURL } = req.body;
+
+    // console.log(model_name)
+    // console.log(agency)
+    // console.log(agencyURL)
     
     const newModel = {
       model_name: model_name,
       agency: agency || null,
       agencyUrl: agencyURL || null
     };
+
 
     const modelExists = await knex('models').where({ model_name }).first();
     
