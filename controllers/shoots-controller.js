@@ -35,6 +35,7 @@ const getShootSummaries = async (req, res) => {
 
     const shootsData = shoots.map(shoot => ({
       shoot_id: shoot.shoot_id,
+      display_order: shoot.display_order,
       shoot_date: new Date(
         shoot.shoot_date).toISOString('en-US', dateFormatOptions
       ).split('T')[0],
@@ -42,8 +43,7 @@ const getShootSummaries = async (req, res) => {
       models: shoot.models.split(','),
       shoot_title: shoot.shoot_title,
       shoot_blurb: shoot.shoot_blurb,
-      thumbnail_url: shoot.photo_url,
-      display_order: shoot.display_order
+      thumbnail_url: shoot.photo_url
     }));
 
   res.json(shootsData);
@@ -60,7 +60,7 @@ const getShootByID = async (req, res) => {
     const id = req.params.id;
 
     const shootExists = await knex('shoots').where({ id }).first();
-    if (!shootExists) {
+    if(!shootExists) {
       return res.status(404).json({ error: 'Shoot not found' });
     }
 
@@ -105,8 +105,8 @@ const getShootByID = async (req, res) => {
       if (!seenIds.has(id)) {
         photo_urls.push({
           id,
-          photo_url: photoUrls[index],
-          display_order: parseInt(order)
+          display_order: parseInt(order),
+          photo_url: photoUrls[index]
         });
         seenIds.add(id);
       }
@@ -121,7 +121,6 @@ const getShootByID = async (req, res) => {
 };
 
 
-
 // add shoot 
 const addShoot = async (req, res) => {
   try {
@@ -134,7 +133,7 @@ const addShoot = async (req, res) => {
     // verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -163,18 +162,16 @@ const addShoot = async (req, res) => {
   try {
     // Start transaction
     await knex.transaction(async (trx) => {
-      // const maxDisplayOrder = await trx('shoots').max('display_order').first();
-      // const displayOrder = maxDisplayOrder.display_order || 0; // Default to 0 if no existing shoots
-
-      const maxDisplayOrderResult = await trx('shoots').max('display_order as maxDisplayOrder').first();
-      let maxDisplayOrder = maxDisplayOrderResult.maxDisplayOrder || 0;
+       
+      // Increment the display order for existing shoots where it is not null, otherwise use shoot id
+      await trx('shoots').update('display_order', knex.raw('COALESCE(display_order + 2, id)'));
 
       // Insert shoot
       const [ shootId ] = await trx('shoots').insert({
         shoot_date,
         shoot_title,
         shoot_blurb,
-        display_order: maxDisplayOrder +1
+        display_order: 1
       });
 
       // Check if all photographers exist

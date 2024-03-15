@@ -80,21 +80,6 @@ CREATE TABLE shoots (
 );
 
 
-DELIMITER //
-
-CREATE TRIGGER set_display_order_default
-BEFORE INSERT ON shoots
-FOR EACH ROW
-BEGIN
-	DECLARE total_rows INT;
-    SELECT COUNT(*) INTO total_rows FROM shoots;
-    SET NEW.display_order = total_rows + 1;
-END;
-//
-
-DELIMITER ;
-
-
 INSERT INTO shoots 
     (shoot_date, shoot_title, shoot_blurb, display_order)
 VALUES

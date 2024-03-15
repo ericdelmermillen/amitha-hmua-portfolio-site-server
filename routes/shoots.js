@@ -1,6 +1,6 @@
 const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
-const { query, body, validationResult, matchedData } = require('express-validator');
+const { validationResult } = require('express-validator');
 const { paramsIsNumber, shootDataValid, shootsOrderDataValid, photoOrderDataValid } = require('../utils/validationSchemas.js');
 
 
