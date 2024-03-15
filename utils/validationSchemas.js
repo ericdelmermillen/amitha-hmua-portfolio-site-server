@@ -83,7 +83,7 @@ const shootDataValid = [
     .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Shoot date must be in YYYY-MM-DD format'),
   body('shoot_title')
     .isString().withMessage('Shoot title must be a string')
-    .isLength({ min: 3, max: 255 }).withMessage('Shoot title must be between 3 and 255 characters long'),
+    .isLength({ min: 3, max: 50 }).withMessage('Shoot title must be between 3 and 50 characters long'),
   body('shoot_blurb')
     .isString().withMessage('Shoot blurb must be a string')
     .isLength({ min: 10, max: 1000 }).withMessage('Shoot blurb must be between 10 and 255 characters long'),
