@@ -1,6 +1,6 @@
 const modelsController = require('../controllers/models-controller.js');
 const modelsRouter = require('express').Router();
-const { query, body, validationResult, matchedData } = require('express-validator');
+const { validationResult } = require('express-validator');
 const { paramsIsNumber, modelDataValid } = require('../utils/validationSchemas.js');
 
 

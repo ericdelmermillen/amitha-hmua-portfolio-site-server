@@ -1,6 +1,6 @@
 const photographersController = require('../controllers/photographers-controller.js');
 const photographersRouter = require('express').Router();
-const { query, body, validationResult, matchedData } = require('express-validator');
+const { validationResult } = require('express-validator');
 const { paramsIsNumber, photographerDataValid } = require('../utils/validationSchemas.js');
 
 
