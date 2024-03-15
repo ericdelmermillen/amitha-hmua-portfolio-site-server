@@ -164,7 +164,7 @@ const addShoot = async (req, res) => {
     await knex.transaction(async (trx) => {
        
       // Increment the display order for existing shoots where it is not null, otherwise use shoot id
-      await trx('shoots').update('display_order', knex.raw('COALESCE(display_order + 2, id)'));
+      await trx('shoots').update('display_order', knex.raw('COALESCE(display_order + 1, id)'));
 
       // Insert shoot
       const [ shootId ] = await trx('shoots').insert({
