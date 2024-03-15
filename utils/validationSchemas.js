@@ -56,12 +56,24 @@ const modelDataValid = [
 
 
 const photographerDataValid = [
-  body('photographer_name').isString().notEmpty().withMessage('Photographer name must be a non-empty string'),
-  body('websiteURL').optional({ nullable: true }).isString().withMessage('Website URL must be a string').notEmpty().withMessage('Website URL cannot be an empty string'),
-  body('instagramURL').optional({ nullable: true }).isString().withMessage('Instagram URL must be a string').notEmpty().withMessage('Instagram URL cannot be an empty string'),
-  body('facebookURL').optional({ nullable: true }).isString().withMessage('Facebook URL must be a string').notEmpty().withMessage('Facebook URL cannot be an empty string'),
-  body('twitterURL').optional({ nullable: true }).isString().withMessage('Twitter URL must be a string').notEmpty().withMessage('Twitter URL cannot be an empty string'),
-  body('pinterestURL').optional({ nullable: true }).isString().withMessage('Pinterest URL must be a string').notEmpty().withMessage('Pinterest URL cannot be an empty string')
+  body('photographer_name')
+    .isString().notEmpty().withMessage('Photographer name must be a non-empty string')
+    .isLength({ min: 2, max: 50 }).withMessage('Photographer Name must be between 2-50 characters long.'),
+  body('websiteURL')
+    .optional({ nullable: true })
+    .isURL().withMessage('Website URL must be a valid URL'),
+  body('instagramURL')
+    .optional({ nullable: true })
+    .isURL().withMessage('Instagram URL must be a valid URL'),
+  body('facebookURL')
+    .optional({ nullable: true })
+    .isURL().withMessage('Facebook URL must be a valid URL'),
+  body('twitterURL')
+    .optional({ nullable: true })
+    .isURL().withMessage('Twitter URL must be a valid URL'),
+  body('pinterestURL')
+    .optional({ nullable: true })
+    .isURL().withMessage('Pinterest URL must be a valid URL')
 ];
 
 

@@ -6,7 +6,7 @@ const { verifyToken } = require('../utils/utils.js');
 // get all photographers for create shoot modal photographer selector 
 const getAllPhotographers = async (req, res) => {
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
     // if(!token) {
     //   return res.status(401).json({ message: 'Token Missing' });
@@ -15,7 +15,7 @@ const getAllPhotographers = async (req, res) => {
     // verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -65,7 +65,6 @@ const getPhotographerByID = async (req, res) => {
   }
 
   try {
-  
     const id = req.params.id;
     
     const photographerExists = await knex('photographers').where({ id }).first();
@@ -80,7 +79,7 @@ const getPhotographerByID = async (req, res) => {
     res.json({
       success: true,
       message: `Photographer number ${id} fetched successfully`,
-      model: photographerExists,
+      photographer: photographerExists,
     });
     
   } catch(error) {
@@ -120,10 +119,6 @@ const addPhotographer = async (req, res) => {
       twitterURL, 
       pinterestURL
     } = req.body;
-
-    if(!photographer_name || !photographer_name.length) {
-      return res.status(400).json({ message: 'Photographer name can not be left blank' });
-    }
 
     const newPhotographer = {
       photographer_name: photographer_name,
@@ -194,13 +189,9 @@ const editPhotographerById = async (req, res) => {
       pinterestURL
     } = req.body;
 
-    if (!photographer_name || !photographer_name.length) {
-      return res.status(400).json({ message: 'Photographer name cannot be left blank' });
-    }
-
     // Check if the photographer with the specified ID exists
     const existingPhotographer = await knex('photographers').where({ id }).first();
-    if (!existingPhotographer) {
+    if(!existingPhotographer) {
       return res.status(404).json({ message: `Photographer with ID ${id} does not exist` });
     }
 
@@ -216,7 +207,9 @@ const editPhotographerById = async (req, res) => {
         pinterestURL
       });
 
-    return res.status(200).json({ message: `Photographer with ID ${id} updated successfully` });
+    const photographerExists = await knex('photographers').where({ id }).first();
+
+    return res.status(200).json({ message: `Photographer with ID ${id} updated successfully`, photographer: photographerExists });
   } catch (error) {
     console.error('Error updating photographer:', error);
     return res.status(500).json({ error: 'Internal server error' });

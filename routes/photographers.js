@@ -3,15 +3,6 @@ const photographersRouter = require('express').Router();
 const { query, body, validationResult, matchedData } = require('express-validator');
 const { paramsIsNumber, photographerDataValid } = require('../utils/validationSchemas.js');
 
-// *** import express validator to validate requests
-// import { query, body, validationResult, matchedData } from 'express-validator';
-
-// import validationSchemas necessary for each route
-
-// need:
-// 1) paramsIsNumber validation schema
-// 2) photographerDataValid validation schema: photographer_name, websiteURL, instagramURL, facebookURL, twitterURL, pinterestURL: only name required, all must be string or not present/undefined/null (?)
-
 
 // get photographers route
 // for getting all photographers to show in the add photographers select for adding a shoot
@@ -21,7 +12,7 @@ photographersRouter.route('/all')
 
 // get photographer by id
 photographersRouter.route('/photographer/:id')
-  .get(paramsIsNumber,  (req, res, next) => {
+  .get(paramsIsNumber, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
