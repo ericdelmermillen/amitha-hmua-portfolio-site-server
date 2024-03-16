@@ -83,7 +83,7 @@ shootsRouter.route('/delete/:id')
 // edit shoots order
 shootsRouter.route('/updateorder')
   .patch(shootsOrderDataValid, (req, res, next) => {
-const errors = validationResult(req);
+    const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
 

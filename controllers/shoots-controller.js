@@ -220,18 +220,12 @@ const addShoot = async (req, res) => {
 // edit shoot by id
 const editShootByID = async (req, res) => {
   // const token = req.headers.authorization; 
+    
   // if(!token) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
+  //   return res.status(401).json({ message: 'Token Missing' });
   // }
 
-// Verify the token
-  // try {
-  //   jwt.verify(token, process.env.JWT_SECRET);
-  // } catch (err) {
-  //   if(err.name === 'TokenExpiredError') {
-  //     return res.status(401).json({ message: 'Token expired' });
-  //   }
-  // }
+  // verifyToken(token);
   
   const shootID = req.params.id;
   const { shoot_date, shoot_title, shoot_blurb, photographer_ids, model_ids, photo_urls } = req.body;
@@ -288,19 +282,13 @@ const editShootByID = async (req, res) => {
 
 // editPhotoOrderByShootID
 const editPhotoOrderByShootID = async (req, res) => {
-  const token = req.headers.authorization; 
-//   if(!token) {
-//   return res.status(401).json({ message: 'Unauthorized' });
-// }
+  // const token = req.headers.authorization; 
+    
+  // if(!token) {
+  //   return res.status(401).json({ message: 'Token Missing' });
+  // }
 
-// Verify the token
-// try {
-//   jwt.verify(token, process.env.JWT_SECRET);
-// } catch (err) {
-//   if(err.name === 'TokenExpiredError') {
-//     return res.status(401).json({ message: 'Token expired' });
-//   }
-// }
+  // verifyToken(token);
   
   const { id } = req.params;
 
@@ -333,20 +321,13 @@ const editPhotoOrderByShootID = async (req, res) => {
 
 // delete shoots
 const deleteShootByID = async (req, res) => {
-  const token = req.headers.authorization; 
-
+  // const token = req.headers.authorization; 
+    
   // if(!token) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
+  //   return res.status(401).json({ message: 'Token Missing' });
   // }
 
-// Verify the token
-  // try {
-  //   jwt.verify(token, process.env.JWT_SECRET);
-  // } catch (err) {
-  //   if(err.name === 'TokenExpiredError') {
-  //     return res.status(401).json({ message: 'Token expired' });
-  //   }
-  // }
+  // verifyToken(token);
 
   try {
     const { id } = req.params;
