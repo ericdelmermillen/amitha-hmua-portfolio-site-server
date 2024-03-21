@@ -7,15 +7,15 @@ const { verifyToken } = require('../utils/utils.js');
 const getAllModels = async (req, res) => {
   try {
     const token = req.headers.authorization; 
-    
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
 
-    // verifyToken(token);
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
+    
+    verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -32,7 +32,7 @@ const getAllModels = async (req, res) => {
     res.json({
       success: true,
       message: "Models fetched successfully",
-      models: models,
+      models: models
     });
 
   } catch(error) {
@@ -43,7 +43,6 @@ const getAllModels = async (req, res) => {
 
 
 // get model by id 
-// will need for edit model functionality
 const getModelByID = async (req, res) => {
   try {
     const token = req.headers.authorization; 
@@ -55,7 +54,7 @@ const getModelByID = async (req, res) => {
     verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -93,13 +92,13 @@ const getModelByID = async (req, res) => {
 // models/add route
 const addModel = async (req, res) => {
   try {
-    const token = req.headers.authorization; 
+  //   const token = req.headers.authorization; 
     
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  //   if(!token) {
+  //     return res.status(401).json({ message: 'Token Missing' });
+  //   }
 
-    verifyToken(token);
+  //   verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -113,16 +112,13 @@ const addModel = async (req, res) => {
 
   try {
     const { model_name, agency, agencyURL } = req.body;
-
-    if(!model_name || model_name.length) {
-      return res.status(400).json({ message: 'Model name can not be left blank' });
-    }
-
+    
     const newModel = {
       model_name: model_name,
       agency: agency || null,
       agencyUrl: agencyURL || null
     };
+
 
     const modelExists = await knex('models').where({ model_name }).first();
     
@@ -155,13 +151,13 @@ const addModel = async (req, res) => {
 // edit model by id
 const editModelById = async (req, res) => {
   try {
-    const token = req.headers.authorization; 
+    // const token = req.headers.authorization; 
     
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+    // if(!token) {
+    //   return res.status(401).json({ message: 'Token Missing' });
+    // }
 
-    verifyToken(token);
+    // verifyToken(token);
 
   } catch(error) {
     if (error.message === 'Token expired') {
@@ -177,10 +173,6 @@ const editModelById = async (req, res) => {
     
   const { id } = req.params;
   const { model_name, agency, agencyURL } = req.body;
-    
-  if(!model_name) {
-    return res.status(400).json({ message: 'Model name can not be left blank' });
-  }
 
   // Check if the model with the specified ID exists
   const existingModel = await knex('models').where({ id }).first();
@@ -193,7 +185,10 @@ const editModelById = async (req, res) => {
     .where({ id })
     .update({ model_name, agency, agencyURL });
 
-  return res.status(200).json({ message: `Model withID ${id} updated successfully`});
+  // Fetch the updated model from the database
+  const updatedModel = await knex('models').where({ id }).first();
+
+  return res.status(200).json({ message: `Model with ID ${id} updated successfully`, updatedModel});
 
   } catch(error) {
     console.error('Error updating model:', error);
@@ -203,7 +198,6 @@ const editModelById = async (req, res) => {
 
 
 // delete model by id
-// on successful delete return the model's name and id
 const deleteModelByID = async (req, res) => {
   // try {
   //   const token = req.headers.authorization; 

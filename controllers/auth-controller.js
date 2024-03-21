@@ -5,13 +5,10 @@ const knex = require("knex")(require("../knexfile.js"));
 const app = require('../server.js');
 const { getToken } = require('../utils/utils.js');
 
-// move email and password present checking to utils
-
 // createUser function
 const createUser = async (req, res) => {
   const { email, password } = req.body;
 
-  // move this to utils? 
   if(!email || !password) {
     return res.status(400).json({
       success: false,
@@ -50,7 +47,6 @@ const createUser = async (req, res) => {
 
 // userLogin function
 const userLogin = async (req, res) => {
-  // email and password checking moved to utils?
   const { email, password } = req.body;
 
   if(!email || !password) {
@@ -103,10 +99,28 @@ const userLogin = async (req, res) => {
 
 // userLogout function
 // client can get the user_id from the jwt
-const logLogout = (req, res) => {
+const logLogout = async (req, res) => {
   const { user_id } = req.body;
 
-  res.status(200).json({ message: 'Successfully Logged Out' });
+  if(!user_id) {
+    res.status(400).send({message: "Invalid or missing User ID"})
+  } else if(isNaN(+user_id)) {
+    res.status(400).send({message: "User ID must be a number"})
+  }
+
+  try {
+    const matchedUser = await knex('users').where('id', user_id).first();
+
+    if(!matchedUser) {
+      res.status(404).json({ message: `User with id of ${user_id} not found`});
+    } else {
+      res.status(200).json({ message: 'Successfully Logged Out' });
+    }
+    
+  } catch(error) {
+    console.log(error)
+    return res.status(500).json({ error: "An error occurred while logging in" });
+  }
 };
 
 

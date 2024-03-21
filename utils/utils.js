@@ -9,11 +9,10 @@ const getToken = (user) => {
 const verifyToken = (token) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
+    
     return decoded;
     
   } catch(error) {
-    
     if(error.name === 'TokenExpiredError') {
       throw new Error('Token expired');
     } else {

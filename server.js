@@ -1,8 +1,5 @@
 require('dotenv').config();
 
-// *** import express validator to validate requests
-// import { query, body, validationResult, matchedData } from 'express-validator';
-
 const express = require('express');
 const app = express();
 
@@ -16,10 +13,20 @@ const cors = require('cors');
 const TESTING = process.env.TESTING || false;
 const corsOptions = TESTING ?  { }:  { origin: process.env.CLIENT_HOST};
 
+console.log("first")
+// Log the origin of a request
+app.use((req, res, next) => {
+  const origin = req.get('Origin'); // Get the value of the Origin header from the request
+  console.log('Request Origin:', origin); // Log the origin to the console
+  next(); // Move to the next middleware
+});
+
 // cors options use
 app.use(cors(
   corsOptions
 ));
+
+
 
 // need to set up .env for environment variables
 const PORT = process.env.PORT || 8080;
@@ -46,22 +53,13 @@ app.use('/api/models', modelsRouter);
 // photographers: get all photographers, edit a photographer, add a photographer, delete a photographer
 app.use('/api/photographers', photographersRouter);
 
-
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} 🚀`);
 });
 
 
 // set up jwt refreshing for all protected routes
-// ***************** //
-
-// research how to handle errors in accessing the database with my ORM (KNEX?)
 
 // research interacting with mysql database from express server without an ORM/KNEX.js
 
 // move token verification function to utils for code reusability
-
-// move validation of requests into /utils/validationSchemas
-
-// user validation via express-validator middleware

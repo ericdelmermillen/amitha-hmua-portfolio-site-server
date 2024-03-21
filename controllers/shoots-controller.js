@@ -35,6 +35,7 @@ const getShootSummaries = async (req, res) => {
 
     const shootsData = shoots.map(shoot => ({
       shoot_id: shoot.shoot_id,
+      display_order: shoot.display_order,
       shoot_date: new Date(
         shoot.shoot_date).toISOString('en-US', dateFormatOptions
       ).split('T')[0],
@@ -42,8 +43,7 @@ const getShootSummaries = async (req, res) => {
       models: shoot.models.split(','),
       shoot_title: shoot.shoot_title,
       shoot_blurb: shoot.shoot_blurb,
-      thumbnail_url: shoot.photo_url,
-      display_order: shoot.display_order
+      thumbnail_url: shoot.photo_url
     }));
 
   res.json(shootsData);
@@ -60,7 +60,7 @@ const getShootByID = async (req, res) => {
     const id = req.params.id;
 
     const shootExists = await knex('shoots').where({ id }).first();
-    if (!shootExists) {
+    if(!shootExists) {
       return res.status(404).json({ error: 'Shoot not found' });
     }
 
@@ -74,7 +74,9 @@ const getShootByID = async (req, res) => {
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
         'shoots.shoot_title',
         'shoots.shoot_blurb',
-        knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.id ASC SEPARATOR ",") AS photo_urls')
+        knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
+        knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
+        knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids') // Include photo ids
       )
       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
       .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
@@ -84,32 +86,33 @@ const getShootByID = async (req, res) => {
       .where('shoots.id', id)
       .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb');
 
-      const shootData = {};
-      shootData.shoot_id = shoot[0].shoot_id;
-      shootData.shoot_date = new Date(
-        shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
-      shootData.photographers = [];
-      shootData.models = [];
-      shootData.shoot_title = shoot[0].shoot_title;
-      shootData.shoot_blurb = shoot[0].shoot_blurb;
-      shootData.photo_urls = shoot[0].photo_urls.split(',');
+    const shootData = {};
+    shootData.shoot_id = shoot[0].shoot_id;
+    shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
+    shootData.photographers = shoot[0].photographers.split(',');
+    shootData.models = shoot[0].models.split(',');
+    shootData.shoot_title = shoot[0].shoot_title;
+    shootData.shoot_blurb = shoot[0].shoot_blurb;
 
-    // Add values to each photographer object
-    const photographers = shoot[0].photographers.split(',');
-    
-    for(const photographerName of photographers) {
-      const photographer = await knex('photographers').where('photographer_name', photographerName).first();
-      shootData.photographers.push(photographer);
-    }
+    // Create an array of distinct photo objects with id, photo_url, and display_order properties
+    const displayOrders = shoot[0].display_orders.split(',');
+    const photoUrls = shoot[0].photo_urls.split(',');
+    const photoIds = shoot[0].photo_ids.split(','); // Extract photo ids
+    const photo_urls = [];
+    const seenIds = new Set(); // Keep track of seen photo ids to ensure uniqueness
+    displayOrders.forEach((order, index) => {
+      const id = parseInt(photoIds[index]);
+      if (!seenIds.has(id)) {
+        photo_urls.push({
+          id,
+          display_order: parseInt(order),
+          photo_url: photoUrls[index]
+        });
+        seenIds.add(id);
+      }
+    });
+    shootData.photo_urls = photo_urls;
 
-    // Add values to each model object
-    const models = shoot[0].models.split(',');
-
-    for(const modelName of models) {
-      const model = await knex('models').where('model_name', modelName).first();
-      shootData.models.push(model);
-    }
-    
     res.json(shootData);
   } catch (error) {
     console.error(error);
@@ -119,7 +122,6 @@ const getShootByID = async (req, res) => {
 
 
 // add shoot 
-// change so that the display order is set relative to the newly inserted shoots id: 1) insert shoot, 2) get max id of shoots table, 3) set display_order to be id
 const addShoot = async (req, res) => {
   try {
     // const token = req.headers.authorization; 
@@ -131,7 +133,7 @@ const addShoot = async (req, res) => {
     // verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -147,7 +149,7 @@ const addShoot = async (req, res) => {
     model_ids, 
     photo_urls
   } = req.body;
-
+  
   let { shoot_date } = req.body;
 
   if(!shoot_date || !shoot_title || !shoot_blurb || !photographer_ids || !model_ids || !photo_urls) {
@@ -160,18 +162,16 @@ const addShoot = async (req, res) => {
   try {
     // Start transaction
     await knex.transaction(async (trx) => {
-      // const maxDisplayOrder = await trx('shoots').max('display_order').first();
-      // const displayOrder = maxDisplayOrder.display_order || 0; // Default to 0 if no existing shoots
-
-      const maxDisplayOrderResult = await trx('shoots').max('display_order as maxDisplayOrder').first();
-      let maxDisplayOrder = maxDisplayOrderResult.maxDisplayOrder || 0;
+       
+      // Increment the display order for existing shoots where it is not null, otherwise use shoot id
+      await trx('shoots').update('display_order', knex.raw('COALESCE(display_order + 1, id)'));
 
       // Insert shoot
       const [ shootId ] = await trx('shoots').insert({
         shoot_date,
         shoot_title,
         shoot_blurb,
-        display_order: maxDisplayOrder +1
+        display_order: 1
       });
 
       // Check if all photographers exist
@@ -219,21 +219,16 @@ const addShoot = async (req, res) => {
 
 // edit shoot by id
 const editShootByID = async (req, res) => {
+  // const token = req.headers.authorization; 
+    
   // if(!token) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
+  //   return res.status(401).json({ message: 'Token Missing' });
   // }
 
-// Verify the token
-  // try {
-  //   jwt.verify(token, process.env.JWT_SECRET);
-  // } catch (err) {
-  //   if(err.name === 'TokenExpiredError') {
-  //     return res.status(401).json({ message: 'Token expired' });
-  //   }
-  // }
+  // verifyToken(token);
   
   const shootID = req.params.id;
-  const { shoot_date, shoot_title, shoot_blurb, photographers, models, photo_urls } = req.body;
+  const { shoot_date, shoot_title, shoot_blurb, photographer_ids, model_ids, photo_urls } = req.body;
 
   try {
     await knex.transaction(async (trx) => {
@@ -249,7 +244,7 @@ const editShootByID = async (req, res) => {
 
       // Insert new photographer entries
       await trx('shoot_photographers').insert(
-        photographers.map((photographer_id) => ({
+        photographer_ids.map((photographer_id) => ({
           shoot_id: shootID,
           photographer_id,
         }))
@@ -260,7 +255,7 @@ const editShootByID = async (req, res) => {
 
       // Insert new model entries
       await trx('shoot_models').insert(
-        models.map((model_id) => ({
+        model_ids.map((model_id) => ({
           shoot_id: shootID,
           model_id,
         }))
@@ -285,25 +280,57 @@ const editShootByID = async (req, res) => {
 };
 
 
-// delete shoots
-const deleteShootByID = async (req, res) => {
-  const token = req.headers.authorization; 
-
+// editPhotoOrderByShootID
+const editPhotoOrderByShootID = async (req, res) => {
+  // const token = req.headers.authorization; 
+    
   // if(!token) {
-  //   return res.status(401).json({ message: 'Unauthorized' });
+  //   return res.status(401).json({ message: 'Token Missing' });
   // }
 
-// Verify the token
-  // try {
-  //   jwt.verify(token, process.env.JWT_SECRET);
-  // } catch (err) {
-  //   if(err.name === 'TokenExpiredError') {
-  //     return res.status(401).json({ message: 'Token expired' });
-  //   }
-  // }
+  // verifyToken(token);
+  
+  const { id } = req.params;
+
+  const newPhotoOrder = req.body.new_photo_order;
 
   try {
-    const id = req.params.id;
+    // Start a transaction to ensure data integrity
+    await knex.transaction(async (trx) => {
+      // Iterate through each photo in the new order
+
+      for(const photo of newPhotoOrder) {
+        const { photo_id, display_order } = photo;
+        
+        // Update the display order of the photo in the database
+        await trx('photos')
+          .where({ id: photo_id, shoot_id: id })
+          .update({ display_order: display_order });
+      }
+    });
+
+    // Sending a success response
+    res.status(200).json({ message: `Photo order for shoot ${id} updated successfully` });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
+
+
+// delete shoots
+const deleteShootByID = async (req, res) => {
+  // const token = req.headers.authorization; 
+    
+  // if(!token) {
+  //   return res.status(401).json({ message: 'Token Missing' });
+  // }
+
+  // verifyToken(token);
+
+  try {
+    const { id } = req.params;
     
     const shootExists = await knex('shoots').where({ id }).first();
     
@@ -338,21 +365,26 @@ const deleteShootByID = async (req, res) => {
 
 // route for updating shoots order: will need to either update the display order of all the shoots or overwrite/update all the shoots
 const updateShootOrder = async (req, res) => {
-  const token = req.headers.authorization; 
-  if(!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-// Verify the token
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
-  } catch (err) {
-    if(err.name === 'TokenExpiredError') {
+    // const token = req.headers.authorization; 
+    
+    // if(!token) {
+    //   return res.status(401).json({ message: 'Token Missing' });
+    // }
+
+    // verifyToken(token);
+
+  } catch(error) {
+    if (error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
+    } else if (error.message === 'Invalid token') {
+      return res.status(401).json({ message: 'Invalid token' });
+    } else {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
   }
-  
-  const newShootsOrder = req.body;
+
+  const newShootsOrder = req.body.new_shoot_order;
 
   try {
     await Promise.all(
@@ -380,5 +412,6 @@ module.exports = {
   addShoot,
   deleteShootByID,
   editShootByID,
+  editPhotoOrderByShootID,
   updateShootOrder
 };

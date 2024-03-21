@@ -1,3 +1,7 @@
+CREATE DATABASE shoots_db;
+
+USE shoots_db;
+
 CREATE TABLE users (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(255),
@@ -76,21 +80,6 @@ CREATE TABLE shoots (
 );
 
 
-DELIMITER //
-
-CREATE TRIGGER set_display_order_default
-BEFORE INSERT ON shoots
-FOR EACH ROW
-BEGIN
-	DECLARE total_rows INT;
-    SELECT COUNT(*) INTO total_rows FROM shoots;
-    SET NEW.display_order = total_rows + 1;
-END;
-//
-
-DELIMITER ;
-
-
 INSERT INTO shoots 
     (shoot_date, shoot_title, shoot_blurb, display_order)
 VALUES
@@ -111,8 +100,25 @@ CREATE TABLE photos (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   shoot_id INT NOT NULL,
   photo_url VARCHAR(255) NOT NULL,
+  display_order INT DEFAULT NULL,
   FOREIGN KEY (shoot_id) REFERENCES shoots(id) ON DELETE CASCADE
 );
+
+DELIMITER //
+
+CREATE TRIGGER set_display_order_default_photos
+BEFORE INSERT ON photos
+FOR EACH ROW
+BEGIN
+    DECLARE total_rows INT;
+    SELECT COUNT(*) INTO total_rows FROM photos WHERE shoot_id = NEW.shoot_id;
+    SET NEW.display_order = total_rows + 1;
+END;
+//
+
+DELIMITER ;
+
+
 
 INSERT INTO photos 
 	(shoot_id, photo_url)
