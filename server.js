@@ -60,6 +60,4 @@ app.listen(PORT, () => {
 
 // set up jwt refreshing for all protected routes
 
-// research interacting with mysql database from express server without an ORM/KNEX.js
-
 // move token verification function to utils for code reusability
