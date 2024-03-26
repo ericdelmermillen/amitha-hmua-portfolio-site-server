@@ -13,13 +13,12 @@ const cors = require('cors');
 const TESTING = process.env.TESTING || false;
 const corsOptions = TESTING ?  { }:  { origin: process.env.CLIENT_HOST};
 
-console.log("first")
-// Log the origin of a request
-app.use((req, res, next) => {
-  const origin = req.get('Origin'); // Get the value of the Origin header from the request
-  console.log('Request Origin:', origin); // Log the origin to the console
-  next(); // Move to the next middleware
-});
+// // Log the origin of a request
+// app.use((req, res, next) => {
+//   const origin = req.get('Origin'); // Get the value of the Origin header from the request
+//   console.log('Request Origin:', origin); // Log the origin to the console
+//   next(); // Move to the next middleware
+// });
 
 // cors options use
 app.use(cors(

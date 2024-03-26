@@ -14,8 +14,7 @@ INSERT INTO users (
 ) 
 VALUES (
 	'amithamillensuwants@gmail.com', 
-    '12345678', 
-    'admin');
+    '12345678';
 
 
 CREATE TABLE photographers (
@@ -70,7 +69,6 @@ INSERT INTO models (model_name, agency, agencyURL)
 ;
 
 
--- if possible simplify this for the display order
 CREATE TABLE shoots (
   id INT AUTO_INCREMENT PRIMARY KEY,
   shoot_date DATE,
@@ -117,7 +115,6 @@ END;
 //
 
 DELIMITER ;
-
 
 
 INSERT INTO photos 
@@ -184,7 +181,6 @@ VALUES
     (10, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1690740089146-MTO6LHGNR0D5UG86L2IY/Sage+10.1.jpg'),
     (10, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1690740240717-XRABRLKJYMI58K1L4EDC/Sage+5.jpg')
 ;
-
 
 
 CREATE TABLE shoot_photographers (
