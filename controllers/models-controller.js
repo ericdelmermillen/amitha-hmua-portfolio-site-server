@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken } = require('../utils/utils.js');
 
-
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
   try {
@@ -12,11 +11,7 @@ const getAllModels = async (req, res) => {
       return res.status(401).json({ message: 'Token Missing' });
     }
 
-    const tokenString = token.replace('Bearer ', '');
-    
-    // need to remove the "Bearer " part of the token string before passing it to verifyToken
-
-    verifyToken(tokenString);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -55,12 +50,13 @@ const getModelByID = async (req, res) => {
       return res.status(401).json({ message: 'Token Missing' });
     }
 
+    const tokenString = token.replace("Bearer ", "")
     verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
+    } else if(error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
     } else {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -102,12 +98,12 @@ const addModel = async (req, res) => {
   //     return res.status(401).json({ message: 'Token Missing' });
   //   }
 
-  //   verifyToken(token);
+  // verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
+    } else if(error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
     } else {
       return res.status(401).json({ message: 'Unauthorized' });
@@ -122,7 +118,6 @@ const addModel = async (req, res) => {
       agency: agency || null,
       agencyUrl: agencyURL || null
     };
-
 
     const modelExists = await knex('models').where({ model_name }).first();
     
@@ -210,7 +205,7 @@ const deleteModelByID = async (req, res) => {
   //     return res.status(401).json({ message: 'Token Missing' });
   //   }
 
-  //   verifyToken(token);
+    verifyToken(token);
 
   // } catch(error) {
   //   if (error.message === 'Token expired') {

@@ -12,9 +12,7 @@ const getAllPhotographers = async (req, res) => {
       return res.status(401).json({ message: 'Token Missing' });
     }
 
-    const tokenString = token.replace("Bearer ", "")
-
-    verifyToken(tokenString);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -103,7 +101,7 @@ const addPhotographer = async (req, res) => {
     // verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
     } else if (error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
@@ -168,7 +166,7 @@ const editPhotographerById = async (req, res) => {
   //     return res.status(401).json({ message: 'Token Missing' });
   //   }
 
-  //   verifyToken(token);
+  // verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {

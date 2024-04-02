@@ -5,10 +5,12 @@ const getToken = (user) => {
   return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '60m' });
 };
 
+
 // verify jwt
 const verifyToken = (token) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const tokenString = token.replace("Bearer ", "")
+    const decoded = jwt.verify(tokenString, process.env.JWT_SECRET);
     
     return decoded;
     
