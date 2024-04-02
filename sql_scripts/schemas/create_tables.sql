@@ -14,7 +14,7 @@ INSERT INTO users (
 ) 
 VALUES (
 	'amithamillensuwants@gmail.com', 
-    '12345678';
+    '12345678');
 
 
 CREATE TABLE photographers (
@@ -94,6 +94,7 @@ VALUES
     ;
     
 -- should delete photos linked to shoots table on deleting the linked shoots entry
+-- need to make photo urls unique
 CREATE TABLE photos (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   shoot_id INT NOT NULL,
@@ -144,7 +145,6 @@ VALUES
     (5, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1670864305269-KLRBFL0FWLANXZBIIPKW/MKY+-+JOA+02.jpg'),
     (5, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1670864334862-CX2BYDL4EUVZPPVC268F/MKY+-+JOA+01.jpg'),
 	(5, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1670864383579-LZ635E5R9RRU1W02IWXS/MKY+-+JOA+08.jpg'),
-    (5, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1670864383579-LZ635E5R9RRU1W02IWXS/MKY+-+JOA+08.jpg'),
     (5, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1670864400294-ZN7XUGA9PETEFMTRBO0E/MKY+-+JOA+06.jpg'),
     (5, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1670864437826-0FGRCE46WWKFAODWA4XK/MKY+-+JOA+07.jpg'),
     (5, 'https://images.squarespace-cdn.com/content/v1/5c2b8497620b859e3110e2e9/1670864487636-5I25O1ECM37IB4M1AIX3/MKY+-+JOA+03.jpg'),

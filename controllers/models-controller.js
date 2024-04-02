@@ -6,13 +6,13 @@ const { verifyToken } = require('../utils/utils.js');
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
   try {
-    const token = req.headers.authorization; 
+    // const token = req.headers.authorization; 
 
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+    // if(!token) {
+    //   return res.status(401).json({ message: 'Token Missing' });
+    // }
     
-    verifyToken(token);
+    // verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
