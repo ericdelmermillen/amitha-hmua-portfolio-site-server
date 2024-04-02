@@ -8,11 +8,13 @@ const getAllPhotographers = async (req, res) => {
   try {
     const token = req.headers.authorization; 
     
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    const tokenString = token.replace("Bearer ", "")
+
+    verifyToken(tokenString);
 
   } catch(error) {
     if(error.message === 'Token expired') {
