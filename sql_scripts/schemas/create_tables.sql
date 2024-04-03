@@ -77,6 +77,21 @@ CREATE TABLE shoots (
   display_order INT DEFAULT NULL
 );
 
+DELIMITER //
+CREATE TRIGGER set_display_order
+BEFORE INSERT ON shoots
+FOR EACH ROW
+BEGIN
+    DECLARE last_id INT;
+    SET last_id = (SELECT IFNULL(MAX(id), 0) FROM shoots);
+    SET NEW.display_order = last_id + 1;
+END;
+//
+DELIMITER ;
+
+
+--
+
 
 INSERT INTO shoots 
     (shoot_date, shoot_title, shoot_blurb, display_order)
@@ -94,7 +109,7 @@ VALUES
     ;
     
 -- should delete photos linked to shoots table on deleting the linked shoots entry
--- need to make photo urls unique
+-- need to make phto 
 CREATE TABLE photos (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   shoot_id INT NOT NULL,

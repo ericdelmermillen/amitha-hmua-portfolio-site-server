@@ -121,6 +121,7 @@ const getShootByID = async (req, res) => {
 
 
 // add shoot 
+// need to send more specific error if shoot data not valid (min lengths): in shoot route/validationSchema
 const addShoot = async (req, res) => {
   try {
     const token = req.headers.authorization; 
