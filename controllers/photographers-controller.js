@@ -6,13 +6,13 @@ const { verifyToken } = require('../utils/utils.js');
 // get all photographers for create shoot modal photographer selector 
 const getAllPhotographers = async (req, res) => {
   try {
-    const token = req.headers.authorization; 
+    // const token = req.headers.authorization; 
     
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+    // if(!token) {
+    //   return res.status(401).json({ message: 'Token Missing' });
+    // }
 
-    verifyToken(token);
+    // verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -112,21 +112,11 @@ const addPhotographer = async (req, res) => {
 
   try {
     const { 
-      photographer_name, 
-      websiteURL, 
-      instagramURL, 
-      facebookURL, 
-      twitterURL, 
-      pinterestURL
+      photographer_name
     } = req.body;
 
     const newPhotographer = {
-      photographer_name: photographer_name,
-      websiteURL: websiteURL || null,
-      instagramURL: instagramURL || null,
-      facebookURL: facebookURL || null,
-      twitterURL: twitterURL || null,
-      pinterestURL: pinterestURL || null,
+      photographer_name: photographer_name
     };
 
     const photographerExists = await knex('photographers').where({ photographer_name }).first();
@@ -180,14 +170,7 @@ const editPhotographerById = async (req, res) => {
 
   try {
     const { id } = req.params;
-    const {
-      photographer_name,
-      websiteURL,
-      instagramURL,
-      facebookURL,
-      twitterURL,
-      pinterestURL
-    } = req.body;
+    const { photographer_name } = req.body;
 
     // Check if the photographer with the specified ID exists
     const existingPhotographer = await knex('photographers').where({ id }).first();
@@ -199,12 +182,7 @@ const editPhotographerById = async (req, res) => {
     await knex('photographers')
       .where({ id })
       .update({
-        photographer_name,
-        websiteURL,
-        instagramURL,
-        facebookURL,
-        twitterURL,
-        pinterestURL
+        photographer_name
       });
 
     const photographerExists = await knex('photographers').where({ id }).first();
@@ -254,8 +232,7 @@ const deletePhotographerByID = async (req, res) => {
         }));
 
         const photographerShoots = photographerShootsData.map(shoot => ({
-          shoot_id: shoot.id,
-          shoot_title: shoot.shoot_title
+          shoot_id: shoot.id
         }));
 
         return res.status(409).json({

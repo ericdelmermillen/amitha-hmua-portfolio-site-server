@@ -112,9 +112,7 @@ const addModel = async (req, res) => {
   try {
     const { model_name } = req.body;
     
-    const newModel = {
-      model_name: model_name
-    };
+    const newModel = { model_name: model_name };
 
     const modelExists = await knex('models').where({ model_name }).first();
     
@@ -230,8 +228,6 @@ const deleteModelByID = async (req, res) => {
 
         const modelShoots = modelShootsData.map(shoot => ({
           shoot_id: shoot.id
-          // ,
-          // shoot_title: shoot.shoot_title
       }));
 
         return res.status(409).json({
