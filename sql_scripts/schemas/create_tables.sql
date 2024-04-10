@@ -19,61 +19,46 @@ VALUES (
 
 CREATE TABLE photographers (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  photographer_name VARCHAR(255) NOT NULL,
-  websiteURL VARCHAR(255),
-  instagramURL VARCHAR(255),
-  facebookURL VARCHAR(255),
-  twitterURL VARCHAR(255),
-  pinterestURL VARCHAR(255)
+  photographer_name VARCHAR(255) NOT NULL
 );
 
 INSERT INTO photographers (
-  photographer_name,
-  websiteURL,
-  instagramURL,
-  facebookURL,
-  twitterURL,
-  pinterestURL
+  photographer_name
 )
 VALUES 
-  ('Natasha Gerschon', 'https://www.natashagerschon.com/', 'https://www.instagram.com/natashagerschon/', NULL, 'https://twitter.com/natashagerschon/', 'https://www.pinterest.ca/natashagerschon/'),
-  ('Michael Kai Young', 'https://michaelkaiyoung.format.com/landing/', 'https://www.instagram.com/michaelkaiyoung/', 'https://www.facebook.com/michaelky/', 'https://twitter.com/michaelkaiyoung/', 'https://www.pinterest.ca/michaelkaiyoungphoto/'),
-  ('Colin Gaudette Sabad', NULL, 'https://www.instagram.com/colingaudet45/', 'https://www.facebook.com/ColinGaudetPhotography/', 'https://twitter.com/colingaudet1/', NULL),
-  ('Elijah Yutuc', 'https://www.elijahyutuc.com/', 'https://www.instagram.com/elijahyutuc/', NULL, 'https://twitter.com/eliyutucmyphoto/', NULL),
-  ('Mark Binks', 'https://www.markbinks.com/', 'https://www.instagram.com/binksheadshots/', 'https://www.facebook.com/MarkBinksPhotography/', 'https://twitter.com/markbinks/', 'https://www.pinterest.com/markbinks/'),
-  ('Alvaro Goveia', 'https://www.alvarogoveia.com/', 'https://www.instagram.com/alvarogoveia/', NULL, 'https://twitter.com/AlvaroGoveia/', NULL),
-  ('Generic Eric', 'https://www.genericeric.com/', 'https://www.instagram.com/genericeric/', NULL, 'https://twitter.com/genericeric/', NULL)
+  ('Natasha Gerschon'),
+  ('Michael Kai Young'),
+  ('Colin Gaudette Sabad'),
+  ('Elijah Yutuc'),
+  ('Mark Binks'),
+  ('Alvaro Goveia'),
+  ('Generic Eric')
 ;
-
-
 
 CREATE TABLE models (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  model_name VARCHAR(255) NOT NULL,
-  agency VARCHAR(255),
-  agencyURL VARCHAR(255)
+  model_name VARCHAR(255) NOT NULL
 );
 
-INSERT INTO models (model_name, agency, agencyURL)
+-- INSERT INTO models (model_name, agency, agencyURL)
+INSERT INTO models (model_name)
 	VALUES
-    ('Samira Salastname', 'Sutherland Models', 'https://www.sutherlandmodels.com/'),
-    ('Madison Samadison', 'Anita Norris Models', 'https://www.anitanorrismodels.com/'),
-    ('Sadie Sadieson', 'Icon Models', 'https://iconmodels.ca/'),
-    ('Gwen Gwendovish', 'Sutherland Models', 'https://www.sutherlandmodels.com/'),
-    ('Joan Smithers', 'Icon Models', 'https://iconmodels.ca/'),
-    ('Carey Burns', 'Icon Models', 'https://iconmodels.ca/'),
-    ('Anika Anikason', 'Spot 6 Management', 'http://www.spot6management.com/'),
-    ('Young Jiayan', 'Anita Norris Models', 'https://www.anitanorrismodels.com/'),
-    ('Jas Jasserson', 'Next Models Canada', 'https://www.nextmodels.ca/'),
-    ('Sage Saganaki', 'Sutherland Models', 'https://www.sutherlandmodels.com/')
+    ('Samira Salastname'),
+    ('Madison Samadison'),
+    ('Sadie Sadieson'),
+    ('Gwen Gwendovish'),
+    ('Joan Smithers'),
+    ('Carey Burns'),
+    ('Anika Anikason'),
+    ('Young Jiayan'),
+    ('Jas Jasserson'),
+    ('Sage Saganaki')
 ;
 
 
 CREATE TABLE shoots (
   id INT AUTO_INCREMENT PRIMARY KEY,
   shoot_date DATE,
-  shoot_title VARCHAR(255) NOT NULL,
-  shoot_blurb TEXT NOT NULL,
   display_order INT DEFAULT NULL
 );
 
@@ -94,22 +79,22 @@ DELIMITER ;
 
 
 INSERT INTO shoots 
-    (shoot_date, shoot_title, shoot_blurb, display_order)
+    (shoot_date, 
+    display_order)
 VALUES
-    ('2023-09-18', 'Urban Chic', 'Step into the vibrant streets of the city with \'Urban Chic,\' where sophistication meets urban edge. Natasha Gerschon captures the essence of contemporary fashion against the backdrop of bustling streets and modern architecture. Samira embodies the epitome of urban elegance, showcasing the latest trends with confidence and style. From sleek silhouettes to bold statement pieces, this collection celebrates the fusion of streetwear and high fashion. Each photograph tells a story of urban life, blending gritty realism with refined glamour. Join us on a journey through the concrete jungle, where every corner is a runway and every moment is an opportunity to shine.', NULL),
-    ('2020-07-25', 'Vintage Vibes', 'Step into a world of timeless elegance with \'Vintage Vibes,\' a captivating fashion shoot that pays homage to the glamour of bygone eras. Madison embodies the essence of retro chic as she poses amidst vintage props and classic backdrops, exuding sophistication and allure. Michael Kai Young\'s masterful photography captures every detail, from the soft glow of ambient lighting to the rich textures of vintage fabrics. Each frame tells a story of nostalgia and beauty, inviting viewers to journey back in time and experience the allure of vintage fashion. With a blend of timeless elegance and contemporary flair, \'Vintage Vibes\' celebrates the enduring appeal of fashion through the ages.', NULL),
-    ('2022-03-09', 'Modern Elegance', 'Step into the world of modern elegance with Sadie as she embodies sophistication and grace in this stunning fashion shoot captured by Colin Gaudette. From sleek silhouettes to bold statement pieces, each photograph showcases the perfect fusion of contemporary style and timeless beauty. Against a backdrop of urban landscapes and architectural marvels, Sadie exudes confidence and poise, effortlessly captivating the viewer with her magnetic presence. With every click of the camera, Colin masterfully captures the essence of modernity, infusing each image with an air of effortless chic. Join us on a visual journey that celebrates the intersection of innovation and classic allure, where every detail is meticulously curated to inspire and captivate.', NULL),
-    ('2021-04-29', 'Bohemian Rhapsody', 'Step into the whimsical world of Bohemian Rhapsody, where the free-spirited essence of boho-chic meets the timeless allure of vintage glamour. With Gwen as our muse, Elijah Yutuc\'s lens captures the essence of wanderlust and artistic expression. From flowing maxi dresses adorned with intricate embroidery to eclectic jewelry pieces that tell stories of faraway lands, every frame exudes a sense of effortless elegance and individuality. Amidst the backdrop of sun-dappled meadows and ethereal landscapes, Gwen embodies the spirit of a modern-day bohemian goddess, radiating confidence and grace with every pose. Join us on a visual journey that celebrates the beauty of self-expression, creativity, and the timeless allure of bohemian style.', NULL),
-    ('2020-05-22', 'Glamour in the City', 'Get ready to experience the epitome of urban glamour in our latest fashion shoot, \'Glamour in the City\'. Join models Joan Smither and Carrey Burns as they take to the bustling streets, capturing the essence of sophistication and style against the backdrop of the city skyline. From sleek skyscrapers to quaint cobblestone streets, this collection showcases the fusion of high fashion and metropolitan allure. Michael Kai Young\'s expert lens brings to life the energy and vibrancy of the city, while Joan and Carrey exude confidence and grace in every shot. Whether it\'s a chic cocktail dress or trendy streetwear, this shoot celebrates the diversity and dynamism of urban fashion. Step into the world of \'Glamour in the City\' and discover the allure of city life through the lens of fashion.', NULL),
-    ('2020-10-27', 'Tropical Paradise', 'Immerse yourself in the vibrant colors and exotic beauty of our \'Tropical Paradise\' fashion shoot. Set against the backdrop of palm-fringed beaches and azure waters, model Anika embodies the essence of island chic in every frame. Photographer Michael Kai Young skillfully captures the allure of paradise, showcasing Anika\'s effortless elegance and natural charm. From flowing sundresses to bold swimsuits, each ensemble exudes tropical flair, perfectly complemented by the lush surroundings. Join us on a visual journey to a world where every moment feels like a dreamy escape to paradise.', NULL),
-    ('2023-08-20', 'Street Style Chronicles', 'Embark on a visual journey through the bustling streets of the city with \'Street Style Chronicles\' Featuring the enigmatic Young Jiayan as the focal point, this captivating photoshoot captures the essence of urban fashion at its finest. From vibrant graffiti-lined alleyways to chic sidewalk cafes, each frame tells a unique story of style, attitude, and self-expression. Micheal Kai\'s keen eye for detail brings out the raw energy and authenticity of street fashion, while Young Jiayan effortlessly embodies the spirit of the city with every pose. Whether it\'s edgy leather jackets or eclectic vintage finds, this collection celebrates the diverse and ever-evolving tapestry of urban style. Join us as we explore the dynamic intersection of fashion, culture, and individuality in the vibrant streetscape.', NULL),
-    ('2020-12-28', 'High Fashion Fusion', 'Step into the world of avant-garde fashion with \'High Fashion Fusion\' Mark Binks, renowned for his visionary photography, collaborates with Jas to push the boundaries of conventional style. This captivating fusion of high fashion and artistic expression showcases Jas\'s versatility as a model, while Binks\'s masterful composition and lighting create a visual feast for the senses. From urban landscapes to sleek studio sets, each image tells a story of elegance, sophistication, and bold creativity. Join us on a journey where fashion transcends its traditional limits and becomes a form of art.', NULL),
-    ('2023-01-02', 'Minimalist Marvel', 'Experience the allure of simplicity in this stunning minimalist fashion shoot featuring the captivating Samira. Against a backdrop of clean lines and neutral tones, Samira exudes effortless elegance and timeless beauty. Colin Gaudette Sabad\'s masterful photography captures the essence of minimalism, highlighting Samira\'s grace and poise with every shot. From sleek silhouettes to understated accessories, this collection celebrates the beauty of restraint and sophistication. Join us as we explore the art of minimalism in fashion, where less truly becomes more.', NULL),
-    ('2021-12-08', 'Ethnic Extravaganza', 'Step into a world of cultural celebration with our Ethnic Extravaganza fashion shoot. Embracing the rich diversity of global heritage, this collection showcases the fusion of traditional elements with contemporary style. Sage exudes confidence and grace as she models vibrant garments inspired by various ethnic cultures. Alvaro Goveia\'s lens captures the intricate details and textures, bringing to life the essence of each ensemble. From intricate embroidery to bold patterns, every outfit tells a story of craftsmanship and creativity. Join us on a journey that celebrates the beauty of cultural exchange and the universal language of fashion.', NULL)
+    ('2023-09-18', NULL),
+    ('2020-07-25', NULL),
+    ('2022-03-09', NULL),
+    ('2021-04-29', NULL),
+    ('2020-05-22', NULL),
+    ('2020-10-27', NULL),
+    ('2023-08-20', NULL),
+    ('2020-12-28', NULL),
+    ('2023-01-02', NULL),
+    ('2021-12-08', NULL)
     ;
+
     
--- should delete photos linked to shoots table on deleting the linked shoots entry
--- need to make phto 
 CREATE TABLE photos (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   shoot_id INT NOT NULL,
@@ -228,5 +213,3 @@ INSERT INTO shoot_models
 VALUES 
 	(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 1), (10, 10)
 ;
-
--- shoots all view

@@ -10,7 +10,6 @@ const emailAndPasswordAreValid = [
 ];
 
 const validContactFormData = [
-  // need to add validation for firstName and lastName
   body('firstName')
     .notEmpty().withMessage('First Name is required.')
     .isLength({ min: 2, max: 25 }).withMessage('First Name must be between 2-25 characters long.'),
@@ -36,37 +35,39 @@ const modelDataValid = [
   body('model_name')
     .isString().withMessage('Model Name must be a string')
     .notEmpty().withMessage('Model Name must be a non-empty string')
-    .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.'),
-  body('agency')
-    .optional({ nullable: true })
-    .isString().withMessage('Agency Name must be a string')
-    .notEmpty().withMessage('Agency Name must be a non-empty string')
-    .isLength({ min: 2, max: 50 }).withMessage('Agency Name must be between 2-50 characters long.'),
-  body('agencyURL')
-    .optional({ nullable: true })
-    .isURL().withMessage('Agency URL must be a valid URL')
+    .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.')
+  //   ,
+  // body('agency')
+  //   .optional({ nullable: true })
+  //   .isString().withMessage('Agency Name must be a string')
+  //   .notEmpty().withMessage('Agency Name must be a non-empty string')
+  //   .isLength({ min: 2, max: 50 }).withMessage('Agency Name must be between 2-50 characters long.'),
+  // body('agencyURL')
+  //   .optional({ nullable: true })
+  //   .isURL().withMessage('Agency URL must be a valid URL')
 ];
 
 
 const photographerDataValid = [
   body('photographer_name')
     .isString().notEmpty().withMessage('Photographer name must be a non-empty string')
-    .isLength({ min: 2, max: 50 }).withMessage('Photographer Name must be between 2-50 characters long.'),
-  body('websiteURL')
-    .optional({ nullable: true })
-    .isURL().withMessage('Website URL must be a valid URL'),
-  body('instagramURL')
-    .optional({ nullable: true })
-    .isURL().withMessage('Instagram URL must be a valid URL'),
-  body('facebookURL')
-    .optional({ nullable: true })
-    .isURL().withMessage('Facebook URL must be a valid URL'),
-  body('twitterURL')
-    .optional({ nullable: true })
-    .isURL().withMessage('Twitter URL must be a valid URL'),
-  body('pinterestURL')
-    .optional({ nullable: true })
-    .isURL().withMessage('Pinterest URL must be a valid URL')
+    .isLength({ min: 2, max: 50 }).withMessage('Photographer Name must be between 2-50 characters long.')
+  //   ,
+  // body('websiteURL')
+  //   .optional({ nullable: true })
+  //   .isURL().withMessage('Website URL must be a valid URL'),
+  // body('instagramURL')
+  //   .optional({ nullable: true })
+  //   .isURL().withMessage('Instagram URL must be a valid URL'),
+  // body('facebookURL')
+  //   .optional({ nullable: true })
+  //   .isURL().withMessage('Facebook URL must be a valid URL'),
+  // body('twitterURL')
+  //   .optional({ nullable: true })
+  //   .isURL().withMessage('Twitter URL must be a valid URL'),
+  // body('pinterestURL')
+  //   .optional({ nullable: true })
+  //   .isURL().withMessage('Pinterest URL must be a valid URL')
 ];
 
 
