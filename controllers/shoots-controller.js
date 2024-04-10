@@ -72,8 +72,8 @@ const getShootByID = async (req, res) => {
         'shoots.shoot_date',
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        'shoots.shoot_title',
-        'shoots.shoot_blurb',
+        // 'shoots.shoot_title',
+        // 'shoots.shoot_blurb',
         knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids')
@@ -84,15 +84,16 @@ const getShootByID = async (req, res) => {
       .leftJoin('models', 'shoot_models.model_id', 'models.id')
       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
       .where('shoots.id', id)
-      .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb');
+      // .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb');
+      .groupBy('shoots.id', 'shoots.shoot_date');
 
     const shootData = {};
     shootData.shoot_id = shoot[0].shoot_id;
     shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
     shootData.photographers = shoot[0].photographers.split(',');
     shootData.models = shoot[0].models.split(',');
-    shootData.shoot_title = shoot[0].shoot_title;
-    shootData.shoot_blurb = shoot[0].shoot_blurb;
+    // shootData.shoot_title = shoot[0].shoot_title;
+    // shootData.shoot_blurb = shoot[0].shoot_blurb;
 
     // Create an array of distinct photo objects with id, photo_url, and display_order properties
     const displayOrders = shoot[0].display_orders.split(',');
@@ -102,7 +103,7 @@ const getShootByID = async (req, res) => {
     const seenIds = new Set(); // Keep track of seen photo ids to ensure uniqueness
     displayOrders.forEach((order, index) => {
       const id = parseInt(photoIds[index]);
-      if (!seenIds.has(id)) {
+      if(!seenIds.has(id)) {
         photo_urls.push({
           id,
           display_order: parseInt(order),
