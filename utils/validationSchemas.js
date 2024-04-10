@@ -1,4 +1,4 @@
-const { query, body, param, validationResult, matchedData } = require('express-validator');
+const { body, param, validationResult, matchedData } = require('express-validator');
 
 const paramsIsNumber = [
   param('id').isInt().withMessage('ID must be a number')
@@ -10,6 +10,7 @@ const emailAndPasswordAreValid = [
 ];
 
 const validContactFormData = [
+  // need to add validation for firstName and lastName
   body('email').isEmail().withMessage('Invalid email format'),
   body('subject')
     .notEmpty().withMessage('Subject is required')
@@ -20,23 +21,6 @@ const validContactFormData = [
     .isLength({ min: 10, max: 500 }).withMessage('Message must be between 10-500 characters long.')
   ];
   
-//   const modelDataValid = [
-//     body('model_name')
-//       .isString().withMessage('Model Name must be a string')
-//       .notEmpty().withMessage('Model Name must be a non-empty string')
-//       .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.'),
-//     body('agency')
-//       .isString().withMessage('Agency Name must be a string')
-//       .notEmpty().withMessage('Agency Name must be a non-empty string')
-//       .optional({ nullable: true }).isString().withMessage('Agency must be a string').notEmpty().withMessage('Agency cannot be an empty string')
-//       .isLength({ min: 2, max: 50 }).withMessage('Agency Name must be between 2-50 characters long.'),
-//     body('agency_url')
-//       .optional({ nullable: true })
-//       .isString().withMessage('Agency URL must be a string')
-//       .notEmpty().withMessage('Agency URL cannot be an empty string')
-//       .isURL().withMessage('Agency URL must be a valid URL')
-// ];
-
 
 const modelDataValid = [
   body('model_name')
@@ -52,7 +36,6 @@ const modelDataValid = [
     .optional({ nullable: true })
     .isURL().withMessage('Agency URL must be a valid URL')
 ];
-
 
 
 const photographerDataValid = [
@@ -81,12 +64,12 @@ const shootDataValid = [
   body('shoot_date')
     .isString().withMessage('Shoot date must be a string')
     .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Shoot date must be in YYYY-MM-DD format'),
-  body('shoot_title')
-    .isString().withMessage('Shoot title must be a string')
-    .isLength({ min: 3, max: 50 }).withMessage('Shoot title must be between 3 and 50 characters long'),
-  body('shoot_blurb')
-    .isString().withMessage('Shoot blurb must be a string')
-    .isLength({ min: 10, max: 1000 }).withMessage('Shoot blurb must be between 10 and 255 characters long'),
+  // body('shoot_title')
+  //   .isString().withMessage('Shoot title must be a string')
+  //   .isLength({ min: 3, max: 50 }).withMessage('Shoot title must be between 3 and 50 characters long'),
+  // body('shoot_blurb')
+  //   .isString().withMessage('Shoot blurb must be a string')
+  //   .isLength({ min: 10, max: 1000 }).withMessage('Shoot blurb must be between 10 and 255 characters long'),
   body('photographer_ids')
     .isArray({ min: 1 }).withMessage('At least one photographer ID is required')
     .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each photographer ID must be a number'),

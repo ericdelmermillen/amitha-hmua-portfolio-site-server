@@ -19,7 +19,7 @@ const getShootSummaries = async (req, res) => {
         'shoots.display_order',
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        'shoots.shoot_title',
+        // 'shoots.shoot_title',
         knex.raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC), ",", 1) AS photo_url')
       )
       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
@@ -27,7 +27,8 @@ const getShootSummaries = async (req, res) => {
       .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
       .leftJoin('models', 'shoot_models.model_id', 'models.id')
       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
-      .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb')
+      // .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb')
+      .groupBy('shoots.id', 'shoots.shoot_date')
       .orderBy('shoots.display_order')
       .limit(limit)
       .offset(offset);
@@ -40,8 +41,8 @@ const getShootSummaries = async (req, res) => {
       ).split('T')[0],
       photographers: shoot.photographers.split(','),
       models: shoot.models.split(','),
-      shoot_title: shoot.shoot_title,
-      shoot_blurb: shoot.shoot_blurb,
+      // shoot_title: shoot.shoot_title,
+      // shoot_blurb: shoot.shoot_blurb,
       thumbnail_url: shoot.photo_url
     }));
 
