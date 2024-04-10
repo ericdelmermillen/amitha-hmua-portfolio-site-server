@@ -15,22 +15,20 @@ const handleContactForm = async (req, res) => {
 
   let transporter = nodemailer.createTransport(config);
 
-  const submittedMessage = 
-    `New Contact form submission:
-
-    From: ${firstName} ${lastName}
-
-    Email: ${email}
- 
-    Subject: ${subject}
-
-    Message: ${message}`
+  const submittedMessage = `
+    <p>New Contact form submission:</p>
+    <p>From: ${firstName} ${lastName}</p>
+    <p>Email: ${email}</p>
+    <p>Subject: ${subject}</p>
+    <p>Message:</p>
+    <p>${message}</p>
+  `;
 
   let emailMessage = {
     from: email,
     to: "amithamillensuwanta@gmail.com",
     subject: subject,
-    text: submittedMessage,
+    text: "New Contact form submission",
     html: submittedMessage,
   };
 
