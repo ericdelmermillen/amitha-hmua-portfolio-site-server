@@ -11,6 +11,16 @@ const emailAndPasswordAreValid = [
 
 const validContactFormData = [
   // need to add validation for firstName and lastName
+  body('firstName')
+    .notEmpty().withMessage('First Name is required.')
+    .isLength({ min: 2, max: 25 }).withMessage('First Name must be between 2-25 characters long.'),
+  body('lastName')
+    .notEmpty().withMessage('Last Name is required.')
+    .isLength({ min: 2, max: 50 }).withMessage('First Name must be between 2-25 characters long.'),
+  body('message')
+    .notEmpty()
+    .withMessage('Message is required')
+    .isLength({ min: 10, max: 500 }).withMessage('Message must be between 10-500 characters long.'),
   body('email').isEmail().withMessage('Invalid email format'),
   body('subject')
     .notEmpty().withMessage('Subject is required')
@@ -64,12 +74,6 @@ const shootDataValid = [
   body('shoot_date')
     .isString().withMessage('Shoot date must be a string')
     .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Shoot date must be in YYYY-MM-DD format'),
-  // body('shoot_title')
-  //   .isString().withMessage('Shoot title must be a string')
-  //   .isLength({ min: 3, max: 50 }).withMessage('Shoot title must be between 3 and 50 characters long'),
-  // body('shoot_blurb')
-  //   .isString().withMessage('Shoot blurb must be a string')
-  //   .isLength({ min: 10, max: 1000 }).withMessage('Shoot blurb must be between 10 and 255 characters long'),
   body('photographer_ids')
     .isArray({ min: 1 }).withMessage('At least one photographer ID is required')
     .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each photographer ID must be a number'),

@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 // contact form
 // not forwarding email: needs to set up for the correct email anyway: make new email
 const handleContactForm = async (req, res) => {
-  const { email, subject, message } = req.body;
+  const { firstName, lastName, email, subject, message } = req.body;
 
   let config = {
     service: 'gmail',
@@ -15,12 +15,23 @@ const handleContactForm = async (req, res) => {
 
   let transporter = nodemailer.createTransport(config);
 
+  const submittedMessage = 
+    `New Contact form submission:
+
+    From: ${firstName} ${lastName}
+
+    Email: ${email}
+ 
+    Subject: ${subject}
+
+    Message: ${message}`
+
   let emailMessage = {
     from: email,
     to: "amithamillensuwanta@gmail.com",
     subject: subject,
-    text: message,
-    html: message,
+    text: submittedMessage,
+    html: submittedMessage,
   };
 
   try {

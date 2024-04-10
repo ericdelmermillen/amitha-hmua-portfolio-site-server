@@ -19,7 +19,6 @@ const getShootSummaries = async (req, res) => {
         'shoots.display_order',
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        // 'shoots.shoot_title',
         knex.raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC), ",", 1) AS photo_url')
       )
       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
@@ -27,7 +26,6 @@ const getShootSummaries = async (req, res) => {
       .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
       .leftJoin('models', 'shoot_models.model_id', 'models.id')
       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
-      // .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb')
       .groupBy('shoots.id', 'shoots.shoot_date')
       .orderBy('shoots.display_order')
       .limit(limit)
@@ -41,8 +39,6 @@ const getShootSummaries = async (req, res) => {
       ).split('T')[0],
       photographers: shoot.photographers.split(','),
       models: shoot.models.split(','),
-      // shoot_title: shoot.shoot_title,
-      // shoot_blurb: shoot.shoot_blurb,
       thumbnail_url: shoot.photo_url
     }));
 
@@ -72,8 +68,6 @@ const getShootByID = async (req, res) => {
         'shoots.shoot_date',
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        // 'shoots.shoot_title',
-        // 'shoots.shoot_blurb',
         knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids')
@@ -84,7 +78,6 @@ const getShootByID = async (req, res) => {
       .leftJoin('models', 'shoot_models.model_id', 'models.id')
       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
       .where('shoots.id', id)
-      // .groupBy('shoots.id', 'shoots.shoot_date', 'shoots.shoot_title', 'shoots.shoot_blurb');
       .groupBy('shoots.id', 'shoots.shoot_date');
 
     const shootData = {};
@@ -92,8 +85,6 @@ const getShootByID = async (req, res) => {
     shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
     shootData.photographers = shoot[0].photographers.split(',');
     shootData.models = shoot[0].models.split(',');
-    // shootData.shoot_title = shoot[0].shoot_title;
-    // shootData.shoot_blurb = shoot[0].shoot_blurb;
 
     // Create an array of distinct photo objects with id, photo_url, and display_order properties
     const displayOrders = shoot[0].display_orders.split(',');
@@ -126,13 +117,13 @@ const getShootByID = async (req, res) => {
 // need to send more specific error if shoot data not valid (min lengths): in shoot route/validationSchema
 const addShoot = async (req, res) => {
   try {
-    const token = req.headers.authorization; 
+    // const token = req.headers.authorization; 
     
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+    // if(!token) {
+    //   return res.status(401).json({ message: 'Token Missing' });
+    // }
 
-    verifyToken(token);
+    // verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -145,8 +136,6 @@ const addShoot = async (req, res) => {
   }
 
   const { 
-    shoot_title, 
-    shoot_blurb, 
     photographer_ids, 
     model_ids, 
     photo_urls
@@ -154,7 +143,7 @@ const addShoot = async (req, res) => {
   
   let { shoot_date } = req.body;
 
-  if(!shoot_date || !shoot_title || !shoot_blurb || !photographer_ids || !model_ids || !photo_urls) {
+  if(!shoot_date || !photographer_ids || !model_ids || !photo_urls) {
     return res.status(400).json({ message: 'Incomplete shoot submitted' });
   }
 
@@ -171,8 +160,6 @@ const addShoot = async (req, res) => {
       // Insert shoot
       const [ shootId ] = await trx('shoots').insert({
         shoot_date,
-        shoot_title,
-        shoot_blurb,
         display_order: 1
       });
 
@@ -230,14 +217,14 @@ const editShootByID = async (req, res) => {
   // verifyToken(token);
   
   const shootID = req.params.id;
-  const { shoot_date, shoot_title, shoot_blurb, photographer_ids, model_ids, photo_urls } = req.body;
+  const { shoot_date, photographer_ids, model_ids, photo_urls } = req.body;
 
   try {
     await knex.transaction(async (trx) => {
       // Update shoot details in the shoots table
       await trx('shoots')
         .where({ id: shootID })
-        .update({ shoot_date, shoot_title, shoot_blurb });
+        .update({ shoot_date });
 
       // Update photographers for the shoot
       await trx('shoot_photographers')
@@ -377,9 +364,9 @@ const updateShootOrder = async (req, res) => {
     // verifyToken(token);
 
   } catch(error) {
-    if (error.message === 'Token expired') {
+    if(error.message === 'Token expired') {
       return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
+    } else if(error.message === 'Invalid token') {
       return res.status(401).json({ message: 'Invalid token' });
     } else {
       return res.status(401).json({ message: 'Unauthorized' });
