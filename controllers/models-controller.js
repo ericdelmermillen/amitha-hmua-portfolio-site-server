@@ -144,6 +144,7 @@ const addModel = async (req, res) => {
 
 // edit model by id
 const editModelById = async (req, res) => {
+  console.log("from Edit model")
   try {
     // const token = req.headers.authorization; 
     
@@ -211,15 +212,14 @@ const deleteModelByID = async (req, res) => {
   //     return res.status(401).json({ message: 'Unauthorized' });
   //   }
   // }
-
   try {
     const id = req.params.id;
-
+    
     const modelExistsInShootModels = await knex('shoot_models').where({ model_id: id });
-
+    
     if(modelExistsInShootModels.length) {
       const shootIds = modelExistsInShootModels.map(shoot => shoot.shoot_id)
-
+      
       try {
         const modelShootsData = await Promise.all(shootIds.map(async (shootId) => {
           const shoot = await knex('shoots').where({ id: shootId }).first();

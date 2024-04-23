@@ -10,6 +10,8 @@ shootsRouter.route('/all')
 
 
 // GET shoot by id
+// add middleware here for the image
+
 shootsRouter.route('/shoot/:id')
   .get(paramsIsNumber, (req, res, next) => {
     const errors = validationResult(req);
@@ -31,9 +33,11 @@ shootsRouter.route('/add')
 
     const errorMsgs = errors.array().map(error => error.msg);
 
-    if(!errors.isEmpty()) {
-      return res.status(400).json({ errors: errorMsgs });
-    }
+    console.log(errorMsgs)
+    
+    // if(!errors.isEmpty()) {
+    //   return res.status(400).json({ errors: errorMsgs });
+    // }
     next();
   }, shootsController.addShoot);
 

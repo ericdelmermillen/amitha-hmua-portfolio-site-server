@@ -46,6 +46,7 @@ modelsRouter.route('/edit/:id')
     const errorMsgs = errors.array().map(error => error.msg);
 
     if(!errors.isEmpty()) {
+      console.log(errors)
       return res.status(400).json({ errors: errorMsgs });
     }
     next();

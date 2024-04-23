@@ -116,6 +116,7 @@ const getShootByID = async (req, res) => {
 // add shoot 
 // need to send more specific error if shoot data not valid (min lengths): in shoot route/validationSchema
 const addShoot = async (req, res) => {
+  
   try {
     // const token = req.headers.authorization; 
     
@@ -348,7 +349,6 @@ const deleteShootByID = async (req, res) => {
     console.log(error);
     return res.status(500).json({error: "Failed to delete shoot"});
   }
-  console.log("shoot, photos, shoot_models, shoot_photographers entries deleted");
 };
 
 
