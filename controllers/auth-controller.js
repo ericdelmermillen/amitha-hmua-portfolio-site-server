@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const express = require('express');
 const knex = require("knex")(require("../knexfile.js"));
 const app = require('../server.js');
-const { getToken } = require('../utils/utils.js');
+const { getToken, generateRefreshToken } = require('../utils/utils.js');
 
 // createUser function
 const createUser = async (req, res) => {
@@ -82,12 +82,14 @@ const userLogin = async (req, res) => {
     user.role = matchedUser.role 
 
     const token = getToken(user);
+    const refreshToken = generateRefreshToken(user.id); // Generate refresh token
 
     res.json({
       success: true,
       message: "Login successful",
       user: user,
-      token: token
+      token: token,
+      refreshToken: refreshToken,
     });
     
   } catch(error) {
@@ -95,6 +97,29 @@ const userLogin = async (req, res) => {
     return res.status(500).json({ error: "An error occurred while logging in" });
   }
 };
+
+
+// token refresh function
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.body;
+
+  // Verify refresh token
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Generate new access token with short expiration time
+    const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+    res.json({
+      success: true,
+      message: "Token refreshed successfully",
+      accessToken: accessToken
+    });
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return res.status(401).json({ error: 'Invalid refresh token' });
+  }
+}
 
 
 // userLogout function
@@ -127,5 +152,6 @@ const logLogout = async (req, res) => {
 module.exports = {
   createUser,
   userLogin,
+  refreshToken,
   logLogout
 };

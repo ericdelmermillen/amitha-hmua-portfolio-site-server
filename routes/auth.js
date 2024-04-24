@@ -19,21 +19,27 @@ authRouter.route('/createuser')
 
 // auth login
 authRouter.route('/login')
-.post(emailAndPasswordAreValid, (req, res, next) => {
-  const errors = validationResult(req);
+  .post(emailAndPasswordAreValid, (req, res, next) => {
+    const errors = validationResult(req);
 
-  const errorMsgs = errors.array().map(error => error.msg);
+    const errorMsgs = errors.array().map(error => error.msg);
+    
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
   
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errorMsgs });
-  }
   next();
 }, authController.userLogin);
 
 
+// auth refresh token
+authRouter.route('/refresh')
+  .post(authController.refreshToken);
+
+
 // auth logout
 authRouter.route('/logout')
-  .post(authController.logLogout)
-  
-  
+  .post(authController.logLogout);
+
+
 module.exports = authRouter;

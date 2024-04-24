@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 // generate jwt
 const getToken = (user) => {
-  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '60m' });
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1m' });
 };
 
 
@@ -23,6 +23,18 @@ const verifyToken = (token) => {
   }
 };
 
+// generate the refresh token
+const generateRefreshToken = (userId) => {
+  const payload = {
+    userId: userId
+  };
+
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '1d' });
+
+  return refreshToken;
+};
+
+
 // date format options: returns config obj for dates
 const dateFormatOptions = () => (
   { year: 'numeric', month: '2-digit', day: '2-digit' }
@@ -32,5 +44,6 @@ const dateFormatOptions = () => (
 module.exports = {
   getToken,
   verifyToken,
+  generateRefreshToken,
   dateFormatOptions
 };
