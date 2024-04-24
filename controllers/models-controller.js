@@ -5,13 +5,13 @@ const { verifyToken } = require('../utils/utils.js');
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
 
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -41,63 +41,16 @@ const getAllModels = async (req, res) => {
 };
 
 
-// get model by id 
-const getModelByID = async (req, res) => {
-  try {
-    // const token = req.headers.authorization; 
-    
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
-
-    // verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if(error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-  }
-
-  try {
-        
-    const id = req.params.id;
-
-    const modelExists = await knex('models').where({ id }).first();
-    
-    if(!modelExists) {
-      return res.status(409).json({
-        success: false,
-        message: `Model number ${id} does not exist`,
-      });
-    }
-
-    res.json({
-      success: true,
-      message: `Model number ${id} fetched successfully`,
-      model: modelExists,
-    });
-    
-  } catch(error) {
-    console.log(error);
-    return res.status(500).json({error: "Failed to fetch model"});
-  }
-};
-
-
 // models/add route
 const addModel = async (req, res) => {
   try {
-  //   const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-  //   if(!token) {
-  //     return res.status(401).json({ message: 'Token Missing' });
-  //   }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-  // verifyToken(token);
+  verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -144,15 +97,14 @@ const addModel = async (req, res) => {
 
 // edit model by id
 const editModelById = async (req, res) => {
-  console.log("from Edit model")
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -194,24 +146,24 @@ const editModelById = async (req, res) => {
 
 // delete model by id
 const deleteModelByID = async (req, res) => {
-  // try {
-  //   const token = req.headers.authorization; 
+  try {
+    const token = req.headers.authorization; 
     
-  //   if(!token) {
-  //     return res.status(401).json({ message: 'Token Missing' });
-  //   }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+  verifyToken(token);
 
-  // } catch(error) {
-  //   if (error.message === 'Token expired') {
-  //     return res.status(401).json({ message: 'Token expired' });
-  //   } else if (error.message === 'Invalid token') {
-  //     return res.status(401).json({ message: 'Invalid token' });
-  //   } else {
-  //     return res.status(401).json({ message: 'Unauthorized' });
-  //   }
-  // }
+  } catch(error) {
+    if(error.message === 'Token expired') {
+      return res.status(401).json({ message: 'Token expired' });
+    } else if(error.message === 'Invalid token') {
+      return res.status(401).json({ message: 'Invalid token' });
+    } else {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+  }
   try {
     const id = req.params.id;
     
@@ -277,7 +229,7 @@ const deleteModelByID = async (req, res) => {
 
 
 module.exports = {
-  getModelByID,
+  // getModelByID,
   getAllModels,
   addModel,
   editModelById,

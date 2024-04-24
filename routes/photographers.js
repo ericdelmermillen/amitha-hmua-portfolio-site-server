@@ -10,20 +10,6 @@ photographersRouter.route('/all')
   .get(photographersController.getAllPhotographers);
 
 
-// get photographer by id
-photographersRouter.route('/photographer/:id')
-  .get(paramsIsNumber, (req, res, next) => {
-    const errors = validationResult(req);
-
-    const errorMsgs = errors.array().map(error => error.msg);
-
-    if(!errors.isEmpty()) {
-      return res.status(400).json({ errors: errorMsgs });
-    }
-    next();
-  }, photographersController.getPhotographerByID);
-  
-
 // add photographer route
 photographersRouter.route('/add')
   .post(photographerDataValid, (req, res, next) => {

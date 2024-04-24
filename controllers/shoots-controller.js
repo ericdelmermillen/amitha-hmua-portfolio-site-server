@@ -92,13 +92,13 @@ const getShootByID = async (req, res) => {
     const photoIds = shoot[0].photo_ids.split(','); // Extract photo ids
     const photo_urls = [];
     const seenIds = new Set(); // Keep track of seen photo ids to ensure uniqueness
-    displayOrders.forEach((order, index) => {
-      const id = parseInt(photoIds[index]);
+    displayOrders.forEach((order, idx) => {
+      const id = parseInt(photoIds[idx]);
       if(!seenIds.has(id)) {
         photo_urls.push({
           id,
           display_order: parseInt(order),
-          photo_url: photoUrls[index]
+          photo_url: photoUrls[idx]
         });
         seenIds.add(id);
       }
@@ -114,17 +114,19 @@ const getShootByID = async (req, res) => {
 
 
 // add shoot 
+// adjust to receive photos from multi-part file call
 // need to send more specific error if shoot data not valid (min lengths): in shoot route/validationSchema
+// need to send uploaded photo(s) to AWS abd receive the urls back to be able to add them to the db: need to store the constructed urls to send them to the client
 const addShoot = async (req, res) => {
   
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -208,14 +210,15 @@ const addShoot = async (req, res) => {
 
 
 // edit shoot by id
+// needs to delete existing photos and photo_urls from the shoot: call aws to delete the files then call aws to add the new photos then add the urls back to the database
 const editShootByID = async (req, res) => {
-  // const token = req.headers.authorization; 
+  const token = req.headers.authorization; 
     
-  // if(!token) {
-  //   return res.status(401).json({ message: 'Token Missing' });
-  // }
+  if(!token) {
+    return res.status(401).json({ message: 'Token Missing' });
+  }
 
-  // verifyToken(token);
+  verifyToken(token);
   
   const shootID = req.params.id;
   const { shoot_date, photographer_ids, model_ids, photo_urls } = req.body;
@@ -271,8 +274,9 @@ const editShootByID = async (req, res) => {
 
 
 // editPhotoOrderByShootID
+// might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
 const editPhotoOrderByShootID = async (req, res) => {
-  // const token = req.headers.authorization; 
+  const token = req.headers.authorization; 
     
   // if(!token) {
   //   return res.status(401).json({ message: 'Token Missing' });
@@ -309,15 +313,16 @@ const editPhotoOrderByShootID = async (req, res) => {
 
 
 
-// delete shoots
+// delete shoot
+// needs to take the photo_urls and call aws to delete them as well as delete the urls from the server
 const deleteShootByID = async (req, res) => {
-  // const token = req.headers.authorization; 
+  const token = req.headers.authorization; 
     
-  // if(!token) {
-  //   return res.status(401).json({ message: 'Token Missing' });
-  // }
+  if(!token) {
+    return res.status(401).json({ message: 'Token Missing' });
+  }
 
-  // verifyToken(token);
+  verifyToken(token);
 
   try {
     const { id } = req.params;
@@ -355,13 +360,13 @@ const deleteShootByID = async (req, res) => {
 // route for updating shoots order: will need to either update the display order of all the shoots or overwrite/update all the shoots
 const updateShootOrder = async (req, res) => {
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {

@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 // generate jwt
 const getToken = (user) => {
-  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1m' });
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '15m' });
 };
 
 
@@ -22,6 +22,7 @@ const verifyToken = (token) => {
     }
   }
 };
+
 
 // generate the refresh token
 const generateRefreshToken = (userId) => {

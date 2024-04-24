@@ -18,7 +18,9 @@ app.use(cors(
   corsOptions
 ));
 
-// --
+// -- test route for posting to aws here
+
+//  --
 
 // need to set up .env for environment variables
 const PORT = process.env.PORT || 8080;
@@ -29,7 +31,8 @@ const shootsRouter = require('./routes/shoots.js');
 const contactRouter = require('./routes/contact.js');
 const modelsRouter = require('./routes/models.js');
 const photographersRouter = require('./routes/photographers.js');
-const { contentType } = require('express/lib/response.js');
+// remove this?
+// const { contentType } = require('express/lib/response.js');
 
 // auth route for: login for admin
 app.use('/api/auth', authRouter);

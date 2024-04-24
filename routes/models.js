@@ -9,21 +9,6 @@ modelsRouter.route('/all')
   .get(modelsController.getAllModels);
 
 
-// get models by id
-modelsRouter.route('/model/:id')
-  .get(paramsIsNumber, (req, res, next) => {
-    const errors = validationResult(req);
-
-    const errorMsgs = errors.array().map(error => error.msg);
-
-    if(!errors.isEmpty()) {
-      return res.status(400).json({ errors: errorMsgs });
-    }
-    next();
-  }, modelsController.getModelByID);
-  
-
-
 // add model route  
 modelsRouter.route('/add')
   .post(modelDataValid, (req, res, next) => {

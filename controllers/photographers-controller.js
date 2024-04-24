@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken } = require('../utils/utils.js');
 
@@ -6,13 +6,13 @@ const { verifyToken } = require('../utils/utils.js');
 // get all photographers for create shoot modal photographer selector 
 const getAllPhotographers = async (req, res) => {
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -41,64 +41,16 @@ const getAllPhotographers = async (req, res) => {
   }
 };
 
-
-// get photographer by id
-// will need for edit photographer functionality
-const getPhotographerByID = async (req, res) => {
-  try {
-    // const token = req.headers.authorization; 
-    
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
-
-    // verifyToken(token);
-
-  } catch(error) {
-    if (error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-  }
-
-  try {
-    const id = req.params.id;
-    
-    const photographerExists = await knex('photographers').where({ id }).first();
-    
-    if(!photographerExists) {
-      return res.status(409).json({
-        success: false,
-        message: `Photographer number ${id} does not exist`,
-      });
-    }
-
-    res.json({
-      success: true,
-      message: `Photographer number ${id} fetched successfully`,
-      photographer: photographerExists,
-    });
-    
-  } catch(error) {
-    console.log(error);
-    return res.status(500).json({error: "Failed to fetch photographer"});
-  }
-};
-
-
 // photographers/add route
 const addPhotographer = async (req, res) => {
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -150,13 +102,13 @@ const addPhotographer = async (req, res) => {
 // edit photographer by id
 const editPhotographerById = async (req, res) => {
   try {
-  //   const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-  //   if(!token) {
-  //     return res.status(401).json({ message: 'Token Missing' });
-  //   }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-  // verifyToken(token);
+  verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -198,13 +150,13 @@ const editPhotographerById = async (req, res) => {
 // delete photographer by id
 const deletePhotographerByID = async (req, res) => {
   try {
-    // const token = req.headers.authorization; 
+    const token = req.headers.authorization; 
     
-    // if(!token) {
-    //   return res.status(401).json({ message: 'Token Missing' });
-    // }
+    if(!token) {
+      return res.status(401).json({ message: 'Token Missing' });
+    }
 
-    // verifyToken(token);
+    verifyToken(token);
 
   } catch(error) {
     if(error.message === 'Token expired') {
@@ -280,7 +232,6 @@ const deletePhotographerByID = async (req, res) => {
 
 
 module.exports = {
-  getPhotographerByID,
   getAllPhotographers,
   addPhotographer,
   editPhotographerById,

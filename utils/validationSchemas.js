@@ -1,4 +1,4 @@
-const { body, param, validationResult, matchedData } = require('express-validator');
+const { body, param } = require('express-validator');
 
 const paramsIsNumber = [
   param('id').isInt().withMessage('ID must be a number')
@@ -36,15 +36,6 @@ const modelDataValid = [
     .isString().withMessage('Model Name must be a string')
     .notEmpty().withMessage('Model Name must be a non-empty string')
     .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.')
-  //   ,
-  // body('agency')
-  //   .optional({ nullable: true })
-  //   .isString().withMessage('Agency Name must be a string')
-  //   .notEmpty().withMessage('Agency Name must be a non-empty string')
-  //   .isLength({ min: 2, max: 50 }).withMessage('Agency Name must be between 2-50 characters long.'),
-  // body('agencyURL')
-  //   .optional({ nullable: true })
-  //   .isURL().withMessage('Agency URL must be a valid URL')
 ];
 
 
@@ -52,22 +43,6 @@ const photographerDataValid = [
   body('photographer_name')
     .isString().notEmpty().withMessage('Photographer name must be a non-empty string')
     .isLength({ min: 2, max: 50 }).withMessage('Photographer Name must be between 2-50 characters long.')
-  //   ,
-  // body('websiteURL')
-  //   .optional({ nullable: true })
-  //   .isURL().withMessage('Website URL must be a valid URL'),
-  // body('instagramURL')
-  //   .optional({ nullable: true })
-  //   .isURL().withMessage('Instagram URL must be a valid URL'),
-  // body('facebookURL')
-  //   .optional({ nullable: true })
-  //   .isURL().withMessage('Facebook URL must be a valid URL'),
-  // body('twitterURL')
-  //   .optional({ nullable: true })
-  //   .isURL().withMessage('Twitter URL must be a valid URL'),
-  // body('pinterestURL')
-  //   .optional({ nullable: true })
-  //   .isURL().withMessage('Pinterest URL must be a valid URL')
 ];
 
 
@@ -80,10 +55,12 @@ const shootDataValid = [
     .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each photographer ID must be a number'),
   body('model_ids')
     .isArray({ min: 1 }).withMessage('At least one model ID is required')
-    .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each model ID must be a number'),
-  body('photo_urls')
-    .isArray({ min: 1 }).withMessage('At least one photo URL is required')
-    .custom(urls => urls.every(url => typeof url === 'string' && isValidURL(url))).withMessage('Each photo URL must be a valid URL')
+    .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each model ID must be a number')
+  // reenable after aws image posting is working --
+  //   ,
+  // body('photo_urls')
+  //   .isArray({ min: 1 }).withMessage('At least one photo URL is required')
+  //   .custom(urls => urls.every(url => typeof url === 'string' && isValidURL(url))).withMessage('Each photo URL must be a valid URL')
 ];
 
 

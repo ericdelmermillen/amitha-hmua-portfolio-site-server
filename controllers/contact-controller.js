@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 
 // contact form
-// not forwarding email: needs to set up for the correct email anyway: make new email
+// needs to set up for the correct email: make new email
 const handleContactForm = async (req, res) => {
   const { firstName, lastName, email, subject, message } = req.body;
 

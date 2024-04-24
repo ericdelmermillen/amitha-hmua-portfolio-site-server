@@ -10,8 +10,6 @@ shootsRouter.route('/all')
 
 
 // GET shoot by id
-// add middleware here for the image
-
 shootsRouter.route('/shoot/:id')
   .get(paramsIsNumber, (req, res, next) => {
     const errors = validationResult(req);
@@ -26,7 +24,7 @@ shootsRouter.route('/shoot/:id')
   
 
 // POST /shoots/add
-// client needs to be able to compress then send uploaded photo(s) to AWS abd receive the urls back to be able to add them to the db
+// need to send uploaded photo(s) to AWS and receive the urls back to be able to add them to the db
 shootsRouter.route('/add')
   .post(shootDataValid, (req, res, next) => {
     const errors = validationResult(req);
@@ -56,6 +54,7 @@ shootsRouter.route('/edit/:id')
   }, shootsController.editShootByID);
 
   
+// might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
 // update the display order of the photos in a given shoot
 shootsRouter.route('/updateshootphotoorder/:id')
   .patch(paramsIsNumber, photoOrderDataValid, async (req, res, next) => {
