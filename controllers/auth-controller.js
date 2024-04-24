@@ -98,7 +98,6 @@ const userLogin = async (req, res) => {
   }
 };
 
-
 // token refresh function
 const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
