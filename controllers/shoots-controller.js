@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken');
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
 
@@ -399,7 +398,6 @@ const updateShootOrder = async (req, res) => {
 };
 
 
-// need to export all functions
 module.exports = {
   getShootSummaries,
   getShootByID,

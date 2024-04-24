@@ -31,8 +31,6 @@ const shootsRouter = require('./routes/shoots.js');
 const contactRouter = require('./routes/contact.js');
 const modelsRouter = require('./routes/models.js');
 const photographersRouter = require('./routes/photographers.js');
-// remove this?
-// const { contentType } = require('express/lib/response.js');
 
 // auth route for: login for admin
 app.use('/api/auth', authRouter);

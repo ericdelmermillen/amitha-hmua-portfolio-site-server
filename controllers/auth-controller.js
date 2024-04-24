@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-// const express = require('express');
 const knex = require("knex")(require("../knexfile.js"));
-// const app = require('../server.js');
 const { getToken, generateRefreshToken } = require('../utils/utils.js');
 
 // createUser function

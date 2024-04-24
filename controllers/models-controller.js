@@ -1,4 +1,3 @@
-const jwt = require('jsonwebtoken');
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken } = require('../utils/utils.js');
 
