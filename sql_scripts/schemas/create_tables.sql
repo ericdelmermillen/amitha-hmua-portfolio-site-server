@@ -62,17 +62,17 @@ CREATE TABLE shoots (
   display_order INT DEFAULT NULL
 );
 
-DELIMITER //
-CREATE TRIGGER set_display_order
-BEFORE INSERT ON shoots
-FOR EACH ROW
-BEGIN
-    DECLARE last_id INT;
-    SET last_id = (SELECT IFNULL(MAX(id), 0) FROM shoots);
-    SET NEW.display_order = last_id + 1;
-END;
-//
-DELIMITER ;
+-- DELIMITER //
+-- CREATE TRIGGER set_display_order
+-- BEFORE INSERT ON shoots
+-- FOR EACH ROW
+-- BEGIN
+--     DECLARE last_id INT;
+--     SET last_id = (SELECT IFNULL(MAX(id), 0) FROM shoots);
+--     SET NEW.display_order = last_id + 1;
+-- END;
+-- //
+-- DELIMITER ;
 
 
 --
@@ -82,16 +82,16 @@ INSERT INTO shoots
     (shoot_date, 
     display_order)
 VALUES
-    ('2023-09-18', NULL),
-    ('2020-07-25', NULL),
-    ('2022-03-09', NULL),
-    ('2021-04-29', NULL),
-    ('2020-05-22', NULL),
-    ('2020-10-27', NULL),
-    ('2023-08-20', NULL),
-    ('2020-12-28', NULL),
-    ('2023-01-02', NULL),
-    ('2021-12-08', NULL)
+    ('2023-09-18', 1),
+    ('2020-07-25', 2),
+    ('2022-03-09', 3),
+    ('2021-04-29', 4),
+    ('2020-05-22', 5),
+    ('2020-10-27', 6),
+    ('2023-08-20', 7),
+    ('2020-12-28', 8),
+    ('2023-01-02', 9),
+    ('2021-12-08', 10)
     ;
 
     

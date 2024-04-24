@@ -119,8 +119,9 @@ const getShootByID = async (req, res) => {
 const addShoot = async (req, res) => {
   const token = req.headers.authorization; 
 
+  // Verify the token
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
+    res.status(401).send({ message: "Unauthorized" });
     return;
   }
 
@@ -132,6 +133,7 @@ const addShoot = async (req, res) => {
   
   let { shoot_date } = req.body;
 
+  // Check for required fields
   if(!shoot_date || !photographer_ids || !model_ids || !photo_urls) {
     return res.status(400).json({ message: 'Incomplete shoot submitted' });
   }
@@ -142,17 +144,16 @@ const addShoot = async (req, res) => {
   try {
     // Start transaction
     await knex.transaction(async (trx) => {
-       
-      // Increment the display order for existing shoots where it is not null, otherwise use shoot id
-      await trx('shoots').update('display_order', knex.raw('COALESCE(display_order + 1, id)'));
+      // Increment the display_order for existing shoots
+      await trx('shoots').update('display_order', trx.raw('display_order + 1'));
 
-      // Insert shoot
+      // Insert the new shoot
       const [ shootId ] = await trx('shoots').insert({
         shoot_date,
         display_order: 1
       });
 
-      // Check if all photographers exist
+      // Link photographers to the shoot
       for(const photographerId of photographer_ids) {
         const [existingPhotographer] = await trx('photographers').where('id', photographerId);
         if(!existingPhotographer) {
@@ -165,7 +166,7 @@ const addShoot = async (req, res) => {
         });
       }
 
-      // Check if all models exist
+      // Link models to the shoot
       for(const modelId of model_ids) {
         const [existingModel] = await trx('models').where('id', modelId);
         if(!existingModel) {
@@ -178,7 +179,7 @@ const addShoot = async (req, res) => {
         });
       }
 
-      // Insert photos
+      // Insert photo URLs
       for(const photoUrl of photo_urls) {
         await trx('photos').insert({
           shoot_id: shootId,
