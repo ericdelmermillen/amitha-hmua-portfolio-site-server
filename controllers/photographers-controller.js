@@ -4,23 +4,11 @@ const { verifyToken } = require('../utils/utils.js');
 
 // get all photographers for create shoot modal photographer selector 
 const getAllPhotographers = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-    verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   try {
@@ -42,23 +30,11 @@ const getAllPhotographers = async (req, res) => {
 
 // photographers/add route
 const addPhotographer = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-    verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   try {
@@ -100,23 +76,11 @@ const addPhotographer = async (req, res) => {
 
 // edit photographer by id
 const editPhotographerById = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-  verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   try {
@@ -148,23 +112,11 @@ const editPhotographerById = async (req, res) => {
 
 // delete photographer by id
 const deletePhotographerByID = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-    verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   try {

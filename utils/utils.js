@@ -2,24 +2,23 @@ const jwt = require('jsonwebtoken');
 
 // generate jwt
 const getToken = (user) => {
-  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '15m' });
+  return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1m' });
 };
 
 
 // verify jwt
 const verifyToken = (token) => {
   try {
-    const tokenString = token.replace("Bearer ", "")
-    const decoded = jwt.verify(tokenString, process.env.JWT_SECRET);
+    const tokenString = token.replace("Bearer ", "");
+    jwt.verify(tokenString, process.env.JWT_SECRET);
     
-    return decoded;
+    return true;
     
   } catch(error) {
     if(error.name === 'TokenExpiredError') {
-      throw new Error('Token expired');
-    } else {
-      throw new Error('Unauthorized');
-    }
+      return false;
+    } 
+    return false;
   }
 };
 
@@ -30,7 +29,7 @@ const generateRefreshToken = (userId) => {
     userId: userId
   };
 
-  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '1d' });
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '1m' });
 
   return refreshToken;
 };

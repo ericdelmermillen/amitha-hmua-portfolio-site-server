@@ -3,23 +3,11 @@ const { verifyToken } = require('../utils/utils.js');
 
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
+  const token = req.headers.authorization; 
 
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
-
-    verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if(error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   try {
@@ -42,23 +30,11 @@ const getAllModels = async (req, res) => {
 
 // models/add route
 const addModel = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-  verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if(error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   try {
@@ -96,45 +72,33 @@ const addModel = async (req, res) => {
 
 // edit model by id
 const editModelById = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-    verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if(error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   try {
     
-  const { id } = req.params;
-  const { model_name } = req.body;
+    const { id } = req.params;
+    const { model_name } = req.body;
 
-  // Check if the model with the specified ID exists
-  const existingModel = await knex('models').where({ id }).first();
-  if (!existingModel) {
-    return res.status(404).json({ message: `Model with ID ${id} does not exist` });
-  }
-  
-  // Update the model in the database
-  await knex('models')
-    .where({ id })
-    .update({ model_name });
+    // Check if the model with the specified ID exists
+    const existingModel = await knex('models').where({ id }).first();
+    if (!existingModel) {
+      return res.status(404).json({ message: `Model with ID ${id} does not exist` });
+    }
+    
+    // Update the model in the database
+    await knex('models')
+      .where({ id })
+      .update({ model_name });
 
-  // Fetch the updated model from the database
-  const updatedModel = await knex('models').where({ id }).first();
+    // Fetch the updated model from the database
+    const updatedModel = await knex('models').where({ id }).first();
 
-  return res.status(200).json({ message: `Model with ID ${id} updated successfully`, updatedModel});
+    return res.status(200).json({ message: `Model with ID ${id} updated successfully`, updatedModel});
 
   } catch(error) {
     console.error('Error updating model:', error);
@@ -145,24 +109,13 @@ const editModelById = async (req, res) => {
 
 // delete model by id
 const deleteModelByID = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-  verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if(error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
+
   try {
     const id = req.params.id;
     
@@ -228,7 +181,6 @@ const deleteModelByID = async (req, res) => {
 
 
 module.exports = {
-  // getModelByID,
   getAllModels,
   addModel,
   editModelById,

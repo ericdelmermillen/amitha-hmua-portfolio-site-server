@@ -117,24 +117,11 @@ const getShootByID = async (req, res) => {
 // need to send more specific error if shoot data not valid (min lengths): in shoot route/validationSchema
 // need to send uploaded photo(s) to AWS abd receive the urls back to be able to add them to the db: need to store the constructed urls to send them to the client
 const addShoot = async (req, res) => {
-  
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-    verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if (error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   const { 
@@ -212,12 +199,11 @@ const addShoot = async (req, res) => {
 // needs to delete existing photos and photo_urls from the shoot: call aws to delete the files then call aws to add the new photos then add the urls back to the database
 const editShootByID = async (req, res) => {
   const token = req.headers.authorization; 
-    
-  if(!token) {
-    return res.status(401).json({ message: 'Token Missing' });
-  }
 
-  verifyToken(token);
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
+  }
   
   const shootID = req.params.id;
   const { shoot_date, photographer_ids, model_ids, photo_urls } = req.body;
@@ -276,12 +262,11 @@ const editShootByID = async (req, res) => {
 // might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
 const editPhotoOrderByShootID = async (req, res) => {
   const token = req.headers.authorization; 
-    
-  // if(!token) {
-  //   return res.status(401).json({ message: 'Token Missing' });
-  // }
 
-  // verifyToken(token);
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
+  }
   
   const { id } = req.params;
 
@@ -316,12 +301,11 @@ const editPhotoOrderByShootID = async (req, res) => {
 // needs to take the photo_urls and call aws to delete them as well as delete the urls from the server
 const deleteShootByID = async (req, res) => {
   const token = req.headers.authorization; 
-    
-  if(!token) {
-    return res.status(401).json({ message: 'Token Missing' });
-  }
 
-  verifyToken(token);
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
+  }
 
   try {
     const { id } = req.params;
@@ -358,23 +342,11 @@ const deleteShootByID = async (req, res) => {
 
 // route for updating shoots order: will need to either update the display order of all the shoots or overwrite/update all the shoots
 const updateShootOrder = async (req, res) => {
-  try {
-    const token = req.headers.authorization; 
-    
-    if(!token) {
-      return res.status(401).json({ message: 'Token Missing' });
-    }
+  const token = req.headers.authorization; 
 
-    verifyToken(token);
-
-  } catch(error) {
-    if(error.message === 'Token expired') {
-      return res.status(401).json({ message: 'Token expired' });
-    } else if(error.message === 'Invalid token') {
-      return res.status(401).json({ message: 'Invalid token' });
-    } else {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
   }
 
   const newShootsOrder = req.body.new_shoot_order;
