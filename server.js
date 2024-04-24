@@ -146,6 +146,3 @@ app.use('/api/photographers', photographersRouter);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} 🚀`);
 });
-
-
-// set up jwt refreshing for all protected routes
