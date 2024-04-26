@@ -51,11 +51,13 @@ const shootDataValid = [
     .isString().withMessage('Shoot date must be a string')
     .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Shoot date must be in YYYY-MM-DD format'),
   body('photographer_ids')
-    .isArray({ min: 1 }).withMessage('At least one photographer ID is required')
-    .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each photographer ID must be a number'),
+    .isString().withMessage('Photographer IDs must be provided as a string')
+    .isLength({ min: 1 }).withMessage('At least one photographer ID is required')
+    .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each photographer ID must be a number'),
   body('model_ids')
-    .isArray({ min: 1 }).withMessage('At least one model ID is required')
-    .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each model ID must be a number')
+    .isString().withMessage('Model IDs must be provided as a string')
+    .isLength({ min: 1 }).withMessage('At least one model ID is required')
+    .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each model ID must be a number')
   // reenable after aws image posting is working --
   //   ,
   // body('photo_urls')

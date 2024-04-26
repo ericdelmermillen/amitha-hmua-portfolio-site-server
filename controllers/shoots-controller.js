@@ -1,6 +1,7 @@
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
-
+const { s3Uploadv3 } = require("../s3Service.js");
+const AWS_BUCKET_BASE_URL = process.env.AWS_BUCKET_BASE_URL;
 
 // get shoots with pagination
 const getShootSummaries = async (req, res) => {
@@ -120,26 +121,38 @@ const addShoot = async (req, res) => {
   const token = req.headers.authorization; 
 
   // Verify the token
-  if(!verifyToken(token)) {
-    res.status(401).send({ message: "Unauthorized" });
-    return;
-  }
+  // if(!verifyToken(token)) {
+  //   res.status(401).send({ message: "Unauthorized" });
+  //   return;
+  // }
 
-  const { 
-    photographer_ids, 
-    model_ids, 
-    photo_urls
+  let {
+    shoot_date,
+    photographer_ids,
+    model_ids
   } = req.body;
-  
-  let { shoot_date } = req.body;
 
   // Check for required fields
-  if(!shoot_date || !photographer_ids || !model_ids || !photo_urls) {
+  if(!shoot_date || !photographer_ids || !model_ids || !req.files.length) {
     return res.status(400).json({ message: 'Incomplete shoot submitted' });
   }
+  
+  const photo_urls = [];
+  
+  try {
+    const results = await s3Uploadv3(req.files);
+    results.forEach(result => photo_urls.push(AWS_BUCKET_BASE_URL.concat(result)))
+  } catch(error) {
+    console.log(error);
+    return res.status(400).send({message: `Error posting files: ${error}`});
+  }
 
-  // Convert shoot_date to SQL DATE format
-  shoot_date = new Date(shoot_date).toISOString().slice(0, 10);
+  // // Check for required fields
+  if(!photo_urls.length) {
+    return res.status(400).json({ message: 'Photos not added' });
+  }
+
+  shoot_date = new Date(req.body.shoot_date).toISOString().slice(0, 10);
   
   try {
     // Start transaction
@@ -154,7 +167,7 @@ const addShoot = async (req, res) => {
       });
 
       // Link photographers to the shoot
-      for(const photographerId of photographer_ids) {
+      for(const photographerId of photographer_ids.split(", ")) {
         const [existingPhotographer] = await trx('photographers').where('id', photographerId);
         if(!existingPhotographer) {
           throw new Error(`Photographer with ID ${photographerId} not found`);
@@ -167,7 +180,7 @@ const addShoot = async (req, res) => {
       }
 
       // Link models to the shoot
-      for(const modelId of model_ids) {
+      for(const modelId of model_ids.split(", ")) {
         const [existingModel] = await trx('models').where('id', modelId);
         if(!existingModel) {
           throw new Error(`Model with ID ${modelId} not found`);

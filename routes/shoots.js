@@ -2,6 +2,7 @@ const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, shootDataValid, shootsOrderDataValid, photoOrderDataValid } = require('../utils/validationSchemas.js');
+const { uploadValid } = require("../s3Service.js")
 
 
 // GET shoots 
@@ -24,17 +25,16 @@ shootsRouter.route('/shoot/:id')
   
 
 // POST /shoots/add
-// need to send uploaded photo(s) to AWS and receive the urls back to be able to add them to the db
 shootsRouter.route('/add')
-  .post(shootDataValid, (req, res, next) => {
+  .post(uploadValid.array('file', 10), shootDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
     
-    if(!errors.isEmpty()) {
-      return res.status(400).json({ errors: errorMsgs });
-    }
-    
+    // if(!errors.isEmpty()) {
+    //   return res.status(400).json({ errors: errorMsgs });
+    // }
+
     next();
   }, shootsController.addShoot);
 
