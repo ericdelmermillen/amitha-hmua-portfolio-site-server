@@ -13,7 +13,7 @@ const fileFilter = (req, file, callBack) => {
   }
 }
 
-const uploadValid = multer({ 
+const upload = multer({ 
   storage, 
   fileFilter, 
   limits: {fileSize: 1000000, files: 10}
@@ -25,11 +25,13 @@ const uploadValid = multer({
 const s3Uploadv3 = async (files) => {
   const s3client = new S3Client();
   const fileNames = [];
-
+  
   const params = files.map(file => {
+    const fileType = file.mimetype.split("/")[1]
+    console.log(fileType)
     return {
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: `images/${uuid()}-${file.originalname}`,
+      Key: `images/${uuid()}.${fileType}`,
       Body: file.buffer
     };
   });
@@ -47,5 +49,5 @@ const s3Uploadv3 = async (files) => {
 module.exports = {
   s3Uploadv3,
   fileFilter,
-  uploadValid
+  upload
 }

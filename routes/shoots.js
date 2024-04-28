@@ -2,7 +2,7 @@ const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, shootDataValid, shootsOrderDataValid, photoOrderDataValid } = require('../utils/validationSchemas.js');
-const { uploadValid } = require("../s3Service.js")
+const { upload } = require("../s3Service.js")
 
 
 // GET shoots 
@@ -26,14 +26,15 @@ shootsRouter.route('/shoot/:id')
 
 // POST /shoots/add
 shootsRouter.route('/add')
-  .post(uploadValid.array('file', 10), shootDataValid, (req, res, next) => {
+  .post(upload.array('file', 10), shootDataValid, (req, res, next) => {
+
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
     
-    // if(!errors.isEmpty()) {
-    //   return res.status(400).json({ errors: errorMsgs });
-    // }
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
 
     next();
   }, shootsController.addShoot);

@@ -6,7 +6,7 @@ const multer = require('multer');
 const app = express();
 
 // import of s3 service file
-// const { s3Uploadv3 } = require("./s3Service.js");
+const { s3Uploadv3 } = require("./s3Service.js");
 
 // necessary for parsing the req.body
 app.use(express.json());
@@ -49,7 +49,7 @@ const upload = multer({
 });
 
 // posting route: posting multiple files to AWS S3: uses aws sdk v3 passing an array of file objects
-app.post('/upload', upload.array("file"), async (req, res) => {
+app.post('/upload', upload.array("file", 10), async (req, res) => {
   console.log("from upload")
   try {
     const results = await s3Uploadv3(req.files);

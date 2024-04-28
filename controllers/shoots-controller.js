@@ -132,6 +132,7 @@ const addShoot = async (req, res) => {
     model_ids
   } = req.body;
 
+
   // Check for required fields
   if(!shoot_date || !photographer_ids || !model_ids || !req.files.length) {
     return res.status(400).json({ message: 'Incomplete shoot submitted' });
