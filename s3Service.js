@@ -28,7 +28,7 @@ const s3Uploadv3 = async (files) => {
   
   const params = files.map(file => {
     const fileType = file.mimetype.split("/")[1]
-    console.log(fileType)
+
     return {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: `images/${uuid()}.${fileType}`,
