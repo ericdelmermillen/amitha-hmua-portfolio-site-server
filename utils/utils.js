@@ -5,7 +5,6 @@ const getToken = (user) => {
   return jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '15m' });
 };
 
-
 // verify jwt
 const verifyToken = (token) => {
   try {
@@ -22,7 +21,6 @@ const verifyToken = (token) => {
   }
 };
 
-
 // generate the refresh token
 const generateRefreshToken = (userId) => {
   const payload = {
@@ -33,7 +31,6 @@ const generateRefreshToken = (userId) => {
 
   return refreshToken;
 };
-
 
 // date format options: returns config obj for dates
 const dateFormatOptions = () => (

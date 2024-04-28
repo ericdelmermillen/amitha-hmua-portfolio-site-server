@@ -38,7 +38,6 @@ photographersRouter.route('/edit/:id')
   }, photographersController.editPhotographerById);
 
 // delete photographer route
-// will need to make deleting a photographer delete all shoots/photos that reference them
 photographersRouter.route('/delete/:id')
   .delete(paramsIsNumber, (req, res, next) => {
     const errors = validationResult(req);

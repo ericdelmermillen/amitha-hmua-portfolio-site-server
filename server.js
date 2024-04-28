@@ -19,9 +19,6 @@ const corsOptions = TESTING ?  { }:  { origin: process.env.CLIENT_HOST};
 app.use(cors(
   corsOptions
 ));
-
-// need to set up .env for environment variables
-const PORT = process.env.PORT || 8080;
  
 // import routes
 const authRouter = require('./routes/auth.js')
@@ -33,18 +30,17 @@ const photographersRouter = require('./routes/photographers.js');
 // auth route for: login for admin
 app.use('/api/auth', authRouter);
 
-// shoots route for: summary of shoots, shoot by id, add a shoot, edit a shoot, delete a shoot, update shoot order
-app.use('/api/shoots', shootsRouter);
-
 // contact form route
 app.use('/api/contact', contactRouter);
-
-// models: get all models, get model by id, add a model, edit a model, delete a model
-app.use('/api/models', modelsRouter);
 
 // photographers: get all photographers, edit a photographer, add a photographer, delete a photographer
 app.use('/api/photographers', photographersRouter);
 
+// models: get all models, get model by id, add a model, edit a model, delete a model
+app.use('/api/models', modelsRouter);
+
+// shoots route for: summary of shoots, shoot by id, add a shoot, edit a shoot, delete a shoot, update shoot order
+app.use('/api/shoots', shootsRouter);
 
 // multer error handling: place after route?
 app.use((error, req, res, next) => {
@@ -68,6 +64,8 @@ app.use((error, req, res, next) => {
     }
   }
 })
+
+const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT} 🚀`);

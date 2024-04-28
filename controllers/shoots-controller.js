@@ -5,6 +5,8 @@ const AWS_BUCKET_BASE_URL = process.env.AWS_BUCKET_BASE_URL;
 
 // get shoots with pagination
 const getShootSummaries = async (req, res) => {
+  // need to plan for filter shoots by tag: do I need to use url params?
+  // should the shoots component display the "Other __ shoots"?
 
   try {
     const { page = 1, limit = 10 } = req.query; 
@@ -52,10 +54,12 @@ const getShootSummaries = async (req, res) => {
 
 // get shoot by id with all photos (max 10)
 const getShootByID = async (req, res) => {
+  // should the shootDetails page display the tags?
   try {
     const id = req.params.id;
 
     const shootExists = await knex('shoots').where({ id }).first();
+
     if(!shootExists) {
       return res.status(404).json({ error: 'Shoot not found' });
     }
@@ -114,17 +118,13 @@ const getShootByID = async (req, res) => {
 
 
 // add shoot 
-// adjust to receive photos from multi-part file call
-// need to send more specific error if shoot data not valid (min lengths): in shoot route/validationSchema
-// need to send uploaded photo(s) to AWS abd receive the urls back to be able to add them to the db: need to store the constructed urls to send them to the client
 const addShoot = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // Verify the token
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({ message: "Unauthorized" });
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    res.status(401).send({ message: "Unauthorized" });
+    return;
+  }
 
   let {
     shoot_date,
@@ -142,7 +142,7 @@ const addShoot = async (req, res) => {
   
   try {
     const results = await s3Uploadv3(req.files);
-    results.forEach(result => photo_urls.push(AWS_BUCKET_BASE_URL.concat(result)))
+    results.forEach(result => photo_urls.push(AWS_BUCKET_BASE_URL.concat(result)));
   } catch(error) {
     console.log(error);
     return res.status(400).send({message: `Error posting files: ${error}`});
@@ -169,7 +169,7 @@ const addShoot = async (req, res) => {
 
       // Link photographers to the shoot
       for(const photographerId of photographer_ids.split(", ")) {
-        const [existingPhotographer] = await trx('photographers').where('id', photographerId);
+        const [ existingPhotographer ] = await trx('photographers').where('id', photographerId);
         if(!existingPhotographer) {
           throw new Error(`Photographer with ID ${photographerId} not found`);
         }
@@ -182,7 +182,7 @@ const addShoot = async (req, res) => {
 
       // Link models to the shoot
       for(const modelId of model_ids.split(", ")) {
-        const [existingModel] = await trx('models').where('id', modelId);
+        const [ existingModel ] = await trx('models').where('id', modelId);
         if(!existingModel) {
           throw new Error(`Model with ID ${modelId} not found`);
         }
@@ -311,7 +311,6 @@ const editPhotoOrderByShootID = async (req, res) => {
 }
 
 
-
 // delete shoot
 // needs to take the photo_urls and call aws to delete them as well as delete the urls from the server
 const deleteShootByID = async (req, res) => {
@@ -355,7 +354,7 @@ const deleteShootByID = async (req, res) => {
 };
 
 
-// route for updating shoots order: will need to either update the display order of all the shoots or overwrite/update all the shoots
+// route for updating shoots order: update the display order of all the shoots
 const updateShootOrder = async (req, res) => {
   const token = req.headers.authorization; 
 

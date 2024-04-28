@@ -19,15 +19,13 @@ const upload = multer({
   limits: {fileSize: 1000000, files: 10}
 });
 
-
-// does not automatically return the urls
 // exports.s3Uploadv3 = async (files) => {
 const s3Uploadv3 = async (files) => {
   const s3client = new S3Client();
   const fileNames = [];
   
   const params = files.map(file => {
-    const fileType = file.mimetype.split("/")[1]
+    const fileType = file.mimetype.split("/")[1];
 
     return {
       Bucket: process.env.AWS_BUCKET_NAME,
@@ -50,4 +48,4 @@ module.exports = {
   s3Uploadv3,
   fileFilter,
   upload
-}
+};

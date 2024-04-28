@@ -86,7 +86,7 @@ const editModelById = async (req, res) => {
 
     // Check if the model with the specified ID exists
     const existingModel = await knex('models').where({ id }).first();
-    if (!existingModel) {
+    if(!existingModel) {
       return res.status(404).json({ message: `Model with ID ${id} does not exist` });
     }
     

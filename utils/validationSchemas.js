@@ -30,7 +30,6 @@ const validContactFormData = [
     .isLength({ min: 10, max: 500 }).withMessage('Message must be between 10-500 characters long.')
   ];
   
-
 const modelDataValid = [
   body('model_name')
     .isString().withMessage('Model Name must be a string')
@@ -38,13 +37,11 @@ const modelDataValid = [
     .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.')
 ];
 
-
 const photographerDataValid = [
   body('photographer_name')
     .isString().notEmpty().withMessage('Photographer name must be a non-empty string')
     .isLength({ min: 2, max: 50 }).withMessage('Photographer Name must be between 2-50 characters long.')
 ];
-
 
 const shootDataValid = [
   body('shoot_date')
@@ -58,13 +55,7 @@ const shootDataValid = [
     .isString().withMessage('Model IDs must be provided as a string')
     .isLength({ min: 1 }).withMessage('At least one model ID is required')
     .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each model ID must be a number')
-  // reenable after aws image posting is working --
-  //   ,
-  // body('photo_urls')
-  //   .isArray({ min: 1 }).withMessage('At least one photo URL is required')
-  //   .custom(urls => urls.every(url => typeof url === 'string' && isValidURL(url))).withMessage('Each photo URL must be a valid URL')
 ];
-
 
 const photoOrderDataValid = [
   body('new_photo_order')
@@ -75,7 +66,6 @@ const photoOrderDataValid = [
     )).withMessage('Each update must have photo_id and display_order as numbers')
 ];
 
-
 const shootsOrderDataValid = [
   body('new_shoot_order')
     .isArray({ min: 1 }).withMessage('At least one shoot order update is required')
@@ -85,16 +75,6 @@ const shootsOrderDataValid = [
     )).withMessage('Each update must have shoot_id and display_order as numbers')
 ];
 
-
-// Helper function to validate URL
-function isValidURL(url) {
-  // Regular expression to check URL format
-  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
-  return urlRegex.test(url);
-};
-
-
-// need: validTokenPresent validation schema
 
 module.exports = {
   paramsIsNumber,

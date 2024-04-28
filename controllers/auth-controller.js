@@ -66,7 +66,7 @@ const userLogin = async (req, res) => {
 
     const passwordMatch = await bcrypt.compare(password, matchedUser.password);        
 
-    if (!passwordMatch) {
+    if(!passwordMatch) {
       return res.status(401).json({
         success: false,
         message: "Not authorized",
@@ -77,7 +77,6 @@ const userLogin = async (req, res) => {
     const user = {};
     user.id = matchedUser.id;
     user.role = matchedUser.role;
-    user.role = matchedUser.role 
 
     const token = getToken(user);
     const refreshToken = generateRefreshToken(user.id); // Generate refresh token
