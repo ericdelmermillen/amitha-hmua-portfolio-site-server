@@ -70,7 +70,9 @@ const getShootByID = async (req, res) => {
       .select(
         'shoots.id as shoot_id',
         'shoots.shoot_date',
+        knex.raw('GROUP_CONCAT(DISTINCT photographers.id) AS photographer_ids'),
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
+        knex.raw('GROUP_CONCAT(DISTINCT models.id) AS model_ids'), 
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
@@ -83,12 +85,15 @@ const getShootByID = async (req, res) => {
       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
       .where('shoots.id', id)
       .groupBy('shoots.id', 'shoots.shoot_date');
-
+    
     const shootData = {};
     shootData.shoot_id = shoot[0].shoot_id;
     shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
+    shootData.photographer_ids = shoot[0].photographer_ids;
     shootData.photographers = shoot[0].photographers.split(',');
+    shootData.model_ids = shoot[0].model_ids;
     shootData.models = shoot[0].models.split(',');
+    
 
     // Create an array of distinct photo objects with id, photo_url, and display_order properties
     const displayOrders = shoot[0].display_orders.split(',');
