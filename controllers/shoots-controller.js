@@ -358,10 +358,12 @@ const deleteShootByID = async (req, res) => {
 const updateShootOrder = async (req, res) => {
   const token = req.headers.authorization; 
 
-  if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
-  }
+  console.log("updateorder")
+
+  // if(!verifyToken(token)) {
+  //   res.status(401).send({message: "unauthorized"})
+  //   return;
+  // }
 
   const newShootsOrder = req.body.new_shoot_order;
 

@@ -5,6 +5,8 @@ const { paramsIsNumber, shootDataValid, shootsOrderDataValid, photoOrderDataVali
 const { upload } = require("../s3Service.js")
 
 
+// refactor AWS posting to use sdkV2
+
 // GET shoots 
 shootsRouter.route('/all')
   .get(shootsController.getShootSummaries);
