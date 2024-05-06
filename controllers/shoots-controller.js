@@ -278,42 +278,42 @@ const editShootByID = async (req, res) => {
 };
 
 
-// editPhotoOrderByShootID
-// might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
-const editPhotoOrderByShootID = async (req, res) => {
-  const token = req.headers.authorization; 
+// // editPhotoOrderByShootID
+// // might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
+// const editPhotoOrderByShootID = async (req, res) => {
+//   const token = req.headers.authorization; 
 
-  if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
-  }
+//   if(!verifyToken(token)) {
+//     res.status(401).send({message: "unauthorized"})
+//     return;
+//   }
   
-  const { id } = req.params;
+//   const { id } = req.params;
 
-  const newPhotoOrder = req.body.new_photo_order;
+//   const newPhotoOrder = req.body.new_photo_order;
 
-  try {
-    // Start a transaction to ensure data integrity
-    await knex.transaction(async (trx) => {
-      // Iterate through each photo in the new order
+//   try {
+//     // Start a transaction to ensure data integrity
+//     await knex.transaction(async (trx) => {
+//       // Iterate through each photo in the new order
 
-      for(const photo of newPhotoOrder) {
-        const { photo_id, display_order } = photo;
+//       for(const photo of newPhotoOrder) {
+//         const { photo_id, display_order } = photo;
         
-        // Update the display order of the photo in the database
-        await trx('photos')
-          .where({ id: photo_id, shoot_id: id })
-          .update({ display_order: display_order });
-      }
-    });
+//         // Update the display order of the photo in the database
+//         await trx('photos')
+//           .where({ id: photo_id, shoot_id: id })
+//           .update({ display_order: display_order });
+//       }
+//     });
 
-    // Sending a success response
-    res.status(200).json({ message: `Photo order for shoot ${id} updated successfully` });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
+//     // Sending a success response
+//     res.status(200).json({ message: `Photo order for shoot ${id} updated successfully` });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// }
 
 
 // delete shoot
@@ -363,12 +363,10 @@ const deleteShootByID = async (req, res) => {
 const updateShootOrder = async (req, res) => {
   const token = req.headers.authorization; 
 
-  console.log("updateorder")
-
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
+  }
 
   const newShootsOrder = req.body.new_shoot_order;
 
@@ -397,6 +395,6 @@ module.exports = {
   addShoot,
   deleteShootByID,
   editShootByID,
-  editPhotoOrderByShootID,
+  // editPhotoOrderByShootID,
   updateShootOrder
 };

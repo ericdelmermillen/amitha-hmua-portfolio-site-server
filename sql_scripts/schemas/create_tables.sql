@@ -55,6 +55,21 @@ INSERT INTO models (model_name)
     ('Sage Saganaki')
 ;
 
+CREATE TABLE tags (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  tag_name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO tags (tag_name)
+	VALUES
+    ('Bridal'),
+    ('Editorial'),
+    ('Commercial'),
+    ('Beauty'),
+    ('Hair'),
+    ('Wig')
+;
+
 
 CREATE TABLE shoots (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -212,4 +227,19 @@ INSERT INTO shoot_models
 	(shoot_id, model_id)
 VALUES 
 	(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 1), (10, 10)
+;
+
+CREATE TABLE shoot_tags (
+  shoot_id INT NOT NULL,
+  tag_id INT NOT NULL,
+  PRIMARY KEY (shoot_id, tag_id),
+  FOREIGN KEY (shoot_id) REFERENCES shoots(id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);
+
+
+INSERT INTO shoot_tags
+	(shoot_id, tag_id)
+VALUES 
+	(1, 1), (1, 4), (2, 2), (2, 5), (3, 2), (3, 3), (4, 4), (5, 1), (5, 5), (5, 6), (6, 7), (7, 2), (7, 3), (8, 2), (8,1), (9, 3), (9,7), (10, 2), (10,6)
 ;

@@ -58,17 +58,17 @@ shootsRouter.route('/edit/:id')
   
 // might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
 // update the display order of the photos in a given shoot
-shootsRouter.route('/updateshootphotoorder/:id')
-  .patch(paramsIsNumber, photoOrderDataValid, async (req, res, next) => {
-    const errors = validationResult(req);
+// shootsRouter.route('/updateshootphotoorder/:id')
+//   .patch(paramsIsNumber, photoOrderDataValid, async (req, res, next) => {
+//     const errors = validationResult(req);
 
-    const errorMsgs = errors.array().map(error => error.msg);
+//     const errorMsgs = errors.array().map(error => error.msg);
 
-    if(!errors.isEmpty()) {
-      return res.status(400).json({ errors: errorMsgs });
-    }
-    next();
-  }, shootsController.editPhotoOrderByShootID);
+//     if(!errors.isEmpty()) {
+//       return res.status(400).json({ errors: errorMsgs });
+//     }
+//     next();
+//   }, shootsController.editPhotoOrderByShootID);
 
 
 // delete shoot
