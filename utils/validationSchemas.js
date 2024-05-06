@@ -30,6 +30,12 @@ const validContactFormData = [
     .isLength({ min: 10, max: 500 }).withMessage('Message must be between 10-500 characters long.')
   ];
   
+const photographerDataValid = [
+  body('photographer_name')
+    .isString().notEmpty().withMessage('Photographer name must be a non-empty string')
+    .isLength({ min: 2, max: 50 }).withMessage('Photographer Name must be between 2-50 characters long.')
+];
+
 const modelDataValid = [
   body('model_name')
     .isString().withMessage('Model Name must be a string')
@@ -37,11 +43,13 @@ const modelDataValid = [
     .isLength({ min: 2, max: 50 }).withMessage('Model Name must be between 2-50 characters long.')
 ];
 
-const photographerDataValid = [
-  body('photographer_name')
-    .isString().notEmpty().withMessage('Photographer name must be a non-empty string')
-    .isLength({ min: 2, max: 50 }).withMessage('Photographer Name must be between 2-50 characters long.')
+const tagDataValid = [
+  body('tag_name')
+    .isString().withMessage('Tag Name must be a string')
+    .notEmpty().withMessage('Tag Name must be a non-empty string')
+    .isLength({ min: 2, max: 50 }).withMessage('Tag Name must be between 2-50 characters long.')
 ];
+
 
 const shootDataValid = [
   body('shoot_date')
@@ -80,8 +88,9 @@ module.exports = {
   paramsIsNumber,
   emailAndPasswordAreValid, 
   validContactFormData,
-  modelDataValid,
   photographerDataValid,
+  modelDataValid,
+  tagDataValid,
   shootDataValid,
   shootsOrderDataValid,
   photoOrderDataValid

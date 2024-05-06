@@ -140,7 +140,7 @@ const deletePhotographerByID = async (req, res) => {
 
         return res.status(409).json({
           success: false,
-          message: 'Photographer can not be deleted because they appear in existing shoots',
+          message: 'Photographer can not be deleted because they appear in existing shoot(s)',
           photographerShoots: photographerShoots
         });
       } catch(error) {

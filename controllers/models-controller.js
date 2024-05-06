@@ -136,7 +136,7 @@ const deleteModelByID = async (req, res) => {
 
         return res.status(409).json({
           success: false,
-          message: 'Model can not be deleted because they appear in existing shoots',
+          message: 'Model can not be deleted because they appear in existing shoot(s)',
           modelShoots: modelShoots
         });
     } catch (error) {
