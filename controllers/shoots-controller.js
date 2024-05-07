@@ -120,7 +120,7 @@ const getShootByID = async (req, res) => {
       }
     });
 
-    shootData.tags_ids = shoot[0].tag_ids.split(',');
+    shootData.tag_ids = shoot[0].tag_ids.split(',');
     shootData.tags = shoot[0].tags.split(',');
     shootData.photo_urls = photo_urls;
 
@@ -251,8 +251,6 @@ const editShootByID = async (req, res) => {
   
   const shootID = req.params.id;
   const { shoot_date, photographer_ids, model_ids, tag_ids, photo_urls } = req.body;
-
-  console.log(tag_ids)
 
   try {
     await knex.transaction(async (trx) => {
