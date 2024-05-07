@@ -22,6 +22,7 @@ shootsRouter.route('/shoot/:id')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
+
     next();
   }, shootsController.getShootByID);
   
@@ -29,12 +30,12 @@ shootsRouter.route('/shoot/:id')
 // POST /shoots/add
 shootsRouter.route('/add')
   .post(upload.array('file', 10), shootDataValid, (req, res, next) => {
-
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
     
     if(!errors.isEmpty()) {
+      console.log(`errorMsgs: ${errorMsgs}`)
       return res.status(400).json({ errors: errorMsgs });
     }
 

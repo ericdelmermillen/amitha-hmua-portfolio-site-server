@@ -21,8 +21,8 @@ const getShootSummaries = async (req, res) => {
         'shoots.display_order',
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        knex.raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC), ",", 1) AS photo_url'),
-        knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags') 
+        knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags'),
+        knex.raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC), ",", 1) AS photo_url')
       )
       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
       .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
@@ -44,8 +44,8 @@ const getShootSummaries = async (req, res) => {
       ).split('T')[0],
       photographers: shoot.photographers.split(','),
       models: shoot.models.split(','),
-      thumbnail_url: shoot.photo_url,
-      tags: shoot.tags.split(',') 
+      tags: shoot.tags.split(','),
+      thumbnail_url: shoot.photo_url
     }));
 
   return res.json(shootsData);
@@ -92,15 +92,13 @@ const getShootByID = async (req, res) => {
       .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id')
       .where('shoots.id', id)
       .groupBy('shoots.id', 'shoots.shoot_date');
-
-    console.log(shoot[0].tag_ids)
     
     const shootData = {};
     shootData.shoot_id = shoot[0].shoot_id;
     shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
-    shootData.photographer_ids = shoot[0].photographer_ids;
+    shootData.photographer_ids = shoot[0].photographer_ids.split(',');
     shootData.photographers = shoot[0].photographers.split(',');
-    shootData.model_ids = shoot[0].model_ids;
+    shootData.model_ids = shoot[0].model_ids.split(',');
     shootData.models = shoot[0].models.split(',');
     
 
@@ -138,20 +136,21 @@ const getShootByID = async (req, res) => {
 const addShoot = async (req, res) => {
   const token = req.headers.authorization; 
 
-  if(!verifyToken(token)) {
-    res.status(401).send({ message: "Unauthorized" });
-    return;
-  }
+  // if(!verifyToken(token)) {
+  //   res.status(401).send({ message: "Unauthorized" });
+  //   return;
+  // }
 
   let {
     shoot_date,
     photographer_ids,
-    model_ids
+    model_ids,
+    tag_ids
   } = req.body;
 
 
   // Check for required fields
-  if(!shoot_date || !photographer_ids || !model_ids || !req.files.length) {
+  if(!req.files.length) {
     return res.status(400).json({ message: 'Incomplete shoot submitted' });
   }
   
@@ -210,6 +209,19 @@ const addShoot = async (req, res) => {
         });
       }
 
+      // Link tags to the shoot
+      for(const tagId of tag_ids.split(", ")) {
+        const [ existingTag ] = await trx('tags').where('id', tagId);
+        if(!existingTag) {
+          throw new Error(`Tag with ID ${tagId} not found`);
+        }
+        // Link model to shoot
+        await trx('shoot_tags').insert({
+          shoot_id: shootId,
+          tag_id: tagId
+        });
+      }
+
       // Insert photo URLs
       for(const photoUrl of photo_urls) {
         await trx('photos').insert({
@@ -232,13 +244,15 @@ const addShoot = async (req, res) => {
 const editShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
-  if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
-  }
+  // if(!verifyToken(token)) {
+  //   res.status(401).send({message: "unauthorized"})
+  //   return;
+  // }
   
   const shootID = req.params.id;
-  const { shoot_date, photographer_ids, model_ids, photo_urls } = req.body;
+  const { shoot_date, photographer_ids, model_ids, tag_ids, photo_urls } = req.body;
+
+  console.log(tag_ids)
 
   try {
     await knex.transaction(async (trx) => {
@@ -254,7 +268,7 @@ const editShootByID = async (req, res) => {
 
       // Insert new photographer entries
       await trx('shoot_photographers').insert(
-        photographer_ids.map((photographer_id) => ({
+        photographer_ids.split(", ").map((photographer_id) => ({
           shoot_id: shootID,
           photographer_id,
         }))
@@ -265,9 +279,20 @@ const editShootByID = async (req, res) => {
 
       // Insert new model entries
       await trx('shoot_models').insert(
-        model_ids.map((model_id) => ({
+        model_ids.split(", ").map((model_id) => ({
           shoot_id: shootID,
           model_id,
+        }))
+      );
+
+      // Update tags for the shoot
+      await trx('shoot_tags').where({ shoot_id: shootID }).del(); // Delete existing entries
+
+      // Insert new model entries
+      await trx('shoot_tags').insert(
+        tag_ids.split(", ").map((tag_id) => ({
+          shoot_id: shootID,
+          tag_id,
         }))
       );
 
@@ -295,10 +320,10 @@ const editShootByID = async (req, res) => {
 const deleteShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
-  if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
-  }
+  // if(!verifyToken(token)) {
+  //   res.status(401).send({message: "unauthorized"})
+  //   return;
+  // }
 
   try {
     const { id } = req.params;

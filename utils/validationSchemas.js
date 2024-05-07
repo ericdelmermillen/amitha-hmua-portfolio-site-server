@@ -62,8 +62,13 @@ const shootDataValid = [
   body('model_ids')
     .isString().withMessage('Model IDs must be provided as a string')
     .isLength({ min: 1 }).withMessage('At least one model ID is required')
-    .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each model ID must be a number')
+    .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each model ID must be a number'),
+  body('tag_ids')
+    .isString().withMessage('Tag IDs must be provided as a string')
+    .isLength({ min: 1 }).withMessage('At least one tag ID is required')
+    .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each tag ID must be a number')
 ];
+
 
 const photoOrderDataValid = [
   body('new_photo_order')
