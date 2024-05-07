@@ -21,13 +21,16 @@ const getShootSummaries = async (req, res) => {
         'shoots.display_order',
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        knex.raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC), ",", 1) AS photo_url')
+        knex.raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC), ",", 1) AS photo_url'),
+        knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags') 
       )
       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
       .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
       .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
       .leftJoin('models', 'shoot_models.model_id', 'models.id')
       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
+      .leftJoin('shoot_tags', 'shoots.id', 'shoot_tags.shoot_id')
+      .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id') 
       .groupBy('shoots.id', 'shoots.shoot_date')
       .orderBy('shoots.display_order')
       .limit(limit)
@@ -41,10 +44,11 @@ const getShootSummaries = async (req, res) => {
       ).split('T')[0],
       photographers: shoot.photographers.split(','),
       models: shoot.models.split(','),
-      thumbnail_url: shoot.photo_url
+      thumbnail_url: shoot.photo_url,
+      tags: shoot.tags.split(',') 
     }));
 
-  res.json(shootsData);
+  return res.json(shootsData);
 
   } catch (error) {
     console.error('Error fetching shoot summaries:', error);
@@ -54,7 +58,6 @@ const getShootSummaries = async (req, res) => {
 
 // get shoot by id with all photos (max 10)
 const getShootByID = async (req, res) => {
-  // should the shootDetails page display the tags?
   try {
     const id = req.params.id;
 
@@ -74,6 +77,8 @@ const getShootByID = async (req, res) => {
         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
         knex.raw('GROUP_CONCAT(DISTINCT models.id) AS model_ids'), 
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
+        knex.raw('GROUP_CONCAT(DISTINCT tags.id) AS tag_ids'), 
+        knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids')
@@ -83,8 +88,12 @@ const getShootByID = async (req, res) => {
       .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
       .leftJoin('models', 'shoot_models.model_id', 'models.id')
       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
+      .leftJoin('shoot_tags', 'shoots.id', 'shoot_tags.shoot_id')
+      .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id')
       .where('shoots.id', id)
       .groupBy('shoots.id', 'shoots.shoot_date');
+
+    console.log(shoot[0].tag_ids)
     
     const shootData = {};
     shootData.shoot_id = shoot[0].shoot_id;
@@ -112,6 +121,9 @@ const getShootByID = async (req, res) => {
         seenIds.add(id);
       }
     });
+
+    shootData.tags_ids = shoot[0].tag_ids.split(',');
+    shootData.tags = shoot[0].tags.split(',');
     shootData.photo_urls = photo_urls;
 
     res.json(shootData);
@@ -276,44 +288,6 @@ const editShootByID = async (req, res) => {
     res.status(500).json({ message: 'Error editing shoot' });
   }
 };
-
-
-// // editPhotoOrderByShootID
-// // might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
-// const editPhotoOrderByShootID = async (req, res) => {
-//   const token = req.headers.authorization; 
-
-//   if(!verifyToken(token)) {
-//     res.status(401).send({message: "unauthorized"})
-//     return;
-//   }
-  
-//   const { id } = req.params;
-
-//   const newPhotoOrder = req.body.new_photo_order;
-
-//   try {
-//     // Start a transaction to ensure data integrity
-//     await knex.transaction(async (trx) => {
-//       // Iterate through each photo in the new order
-
-//       for(const photo of newPhotoOrder) {
-//         const { photo_id, display_order } = photo;
-        
-//         // Update the display order of the photo in the database
-//         await trx('photos')
-//           .where({ id: photo_id, shoot_id: id })
-//           .update({ display_order: display_order });
-//       }
-//     });
-
-//     // Sending a success response
-//     res.status(200).json({ message: `Photo order for shoot ${id} updated successfully` });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// }
 
 
 // delete shoot
