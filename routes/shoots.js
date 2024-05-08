@@ -43,34 +43,19 @@ shootsRouter.route('/add')
   }, shootsController.addShoot);
 
 
-// edit shoot by id
+  // PUT /shoots/edit/:id
 shootsRouter.route('/edit/:id')
-  .put(paramsIsNumber, shootDataValid, (req, res, next) => {
+  .put(upload.array('file', 10), shootDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
 
     if(!errors.isEmpty()) {
+      console.log(errorMsgs)
       return res.status(400).json({ errors: errorMsgs });
     }
     next();
   }, shootsController.editShootByID);
-
-  
-// might not need this since I will be overwriting the shoot when the user edits it via shoots/edit/:id
-// update the display order of the photos in a given shoot
-// shootsRouter.route('/updateshootphotoorder/:id')
-//   .patch(paramsIsNumber, photoOrderDataValid, async (req, res, next) => {
-//     const errors = validationResult(req);
-
-//     const errorMsgs = errors.array().map(error => error.msg);
-
-//     if(!errors.isEmpty()) {
-//       return res.status(400).json({ errors: errorMsgs });
-//     }
-//     next();
-//   }, shootsController.editPhotoOrderByShootID);
-
 
 // delete shoot
 shootsRouter.route('/delete/:id')

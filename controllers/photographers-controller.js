@@ -6,10 +6,10 @@ const { verifyToken } = require('../utils/utils.js');
 const getAllPhotographers = async (req, res) => {
   const token = req.headers.authorization; 
 
-  if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
-  }
+  // if(!verifyToken(token)) {
+  //   res.status(401).send({message: "unauthorized"})
+  //   return;
+  // }
 
   try {
     const photographersData = await knex('photographers');

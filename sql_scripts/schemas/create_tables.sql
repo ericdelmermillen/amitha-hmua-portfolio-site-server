@@ -40,7 +40,7 @@ CREATE TABLE models (
   model_name VARCHAR(255) NOT NULL
 );
 
--- INSERT INTO models (model_name, agency, agencyURL)
+
 INSERT INTO models (model_name)
 	VALUES
     ('Samira Salastname'),
@@ -241,5 +241,5 @@ CREATE TABLE shoot_tags (
 INSERT INTO shoot_tags
 	(shoot_id, tag_id)
 VALUES 
-	(1, 1), (1, 4), (2, 2), (2, 5), (3, 2), (3, 3), (4, 4), (5, 1), (5, 5), (5, 6), (6, 7), (7, 2), (7, 3), (8, 2), (8,1), (9, 3), (9,7), (10, 2), (10,6)
+	(1, 1), (1, 4), (2, 2), (2, 5), (3, 2), (3, 3), (4, 4), (5, 1), (5, 5), (5, 6), (6, 3), (7, 2), (7, 3), (8, 2), (8, 1), (9, 3), (9, 6), (10, 2), (10,6)
 ;

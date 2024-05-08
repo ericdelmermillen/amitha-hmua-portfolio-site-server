@@ -2,6 +2,8 @@ const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
 const { s3Uploadv3 } = require("../s3Service.js");
 const AWS_BUCKET_BASE_URL = process.env.AWS_BUCKET_BASE_URL;
+const express = require('express');
+const app = express();
 
 // get shoots with pagination
 const getShootSummaries = async (req, res) => {
@@ -132,14 +134,15 @@ const getShootByID = async (req, res) => {
 };
 
 
-// add shoot 
+// // add shoot 
+// // refactor to expect urls for photos: no need to send formData
 const addShoot = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({ message: "Unauthorized" });
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    res.status(401).send({ message: "Unauthorized" });
+    return;
+  }
 
   let {
     shoot_date,
@@ -152,7 +155,7 @@ const addShoot = async (req, res) => {
   // Check for required fields
   if(!req.files.length) {
     return res.status(400).json({ message: 'Incomplete shoot submitted' });
-  }
+  };
   
   const photo_urls = [];
   
@@ -238,79 +241,302 @@ const addShoot = async (req, res) => {
   }
 };
 
+// edit shoot 
+// const editShootByID = async (req, res) => {
+//   const token = req.headers.authorization; 
 
-// edit shoot by id
-// needs to delete existing photos and photo_urls from the shoot: call aws to delete the files then call aws to add the new photos then add the urls back to the database
-const editShootByID = async (req, res) => {
-  const token = req.headers.authorization; 
+//   if(!verifyToken(token)) {
+//     res.status(401).send({ message: "Unauthorized" });
+//     return;
+//   }
+
+//   let {
+//     shoot_date,
+//     tag_ids,
+//     photographer_ids,
+//     model_ids,
+//     photo_urls
+//   } = req.body;
+
+//   const shootID = req.params.id;
+  
+//   // // Check for required fields
+//   if(!photo_urls.length) {
+//     return res.status(400).json({ message: 'Photos not added' });
+//   }
+
+//   shoot_date = new Date(req.body.shoot_date).toISOString().slice(0, 10);
+  
+//   try {
+//     // Start transaction
+//     await knex.transaction(async (trx) => {
+//       // Increment the display_order for existing shoots
+//       await trx('shoots').update('display_order', trx.raw('display_order + 1'));
+
+//       // Insert the new shoot
+//       const [ shootId ] = await trx('shoots').insert({
+//         shoot_date,
+//         display_order: 1
+//       });
+
+//       // Link photographers to the shoot
+//       for(const photographerId of photographer_ids) {
+//         const [ existingPhotographer ] = await trx('photographers').where('id', photographerId);
+//         if(!existingPhotographer) {
+//           throw new Error(`Photographer with ID ${photographerId} not found`);
+//         }
+//         // Link photographer to shoot
+//         await trx('shoot_photographers').insert({
+//           shoot_id: shootId,
+//           photographer_id: photographerId
+//         });
+//       }
+
+//       // Link models to the shoot
+//       for(const modelId of model_ids) {
+//         const [ existingModel ] = await trx('models').where('id', modelId);
+//         if(!existingModel) {
+//           throw new Error(`Model with ID ${modelId} not found`);
+//         }
+//         // Link model to shoot
+//         await trx('shoot_models').insert({
+//           shoot_id: shootId,
+//           model_id: modelId
+//         });
+//       }
+
+//       // Link tags to the shoot
+//       for(const tagId of tag_ids) {
+//         const [ existingTag ] = await trx('tags').where('id', tagId);
+//         if(!existingTag) {
+//           throw new Error(`Tag with ID ${tagId} not found`);
+//         }
+//         // Link model to shoot
+//         await trx('shoot_tags').insert({
+//           shoot_id: shootId,
+//           tag_id: tagId
+//         });
+//       }
+
+//       // Insert photo URLs
+//       for(const photoUrl of photo_urls) {
+//         await trx('photos').insert({
+//           shoot_id: shootId,
+//           photo_url: photoUrl
+//         });
+//       }
+//     });
+
+//     res.status(201).json({ message: 'Shoot added successfully' });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: error.message || 'Internal server error' });
+//   }
+// };
+
+
+// // edit shoot by id
+// // needs to delete existing photos and photo_urls from the shoot: call aws to delete the files then call aws to add the new photos then add the urls back to the database
+// const editShootByID = async (req, res) => {
+//   const token = req.headers.authorization; 
 
   // if(!verifyToken(token)) {
   //   res.status(401).send({message: "unauthorized"})
   //   return;
   // }
+
+//   const shootID = req.params.id;
+
+//   let {
+//     shoot_date,
+//     photographer_ids,
+//     model_ids,
+//     tag_ids
+//   } = req.body;
+
+//   // Check for required fields
+//   if(!req.files.length) {
+//     console.log("no req.files sent")
+//     return res.status(400).json({ message: 'Incomplete shoot submitted' });
+//   };
+
+//   const photo_urls = [];
+
+//   // AWS S3 file uploads
+//   try {
+//     const results = await s3Uploadv3(req.files);
+//     results.forEach(result => photo_urls.push(AWS_BUCKET_BASE_URL.concat(result)));
+//   } catch(error) {
+//     console.log(error);
+//     return res.status(400).send({message: `Error posting files: ${error}`});
+//   }
   
+//   try {
+//     await knex.transaction(async (trx) => {
+//       // Update shoot details in the shoots table
+//       await trx('shoots')
+//         .where({ id: shootID })
+//         .update({ shoot_date });
+
+//       // Update photographers for the shoot
+//       await trx('shoot_photographers')
+//         .where({ shoot_id: shootID })
+//         .del(); // Delete existing entries
+
+//       // Insert new photographer entries
+//       await trx('shoot_photographers').insert(
+//         photographer_ids.split(", ").map((photographer_id) => ({
+//           shoot_id: shootID,
+//           photographer_id,
+//         }))
+//       );
+
+//       // Update models for the shoot
+//       await trx('shoot_models').where({ shoot_id: shootID }).del(); // Delete existing entries
+
+//       // Insert new model entries
+//       await trx('shoot_models').insert(
+//         model_ids.split(", ").map((model_id) => ({
+//           shoot_id: shootID,
+//           model_id,
+//         }))
+//       );
+
+//       // Update tags for the shoot
+//       await trx('shoot_tags').where({ shoot_id: shootID }).del(); // Delete existing entries
+
+//       // Insert new model entries
+//       await trx('shoot_tags').insert(
+//         tag_ids.split(", ").map((tag_id) => ({
+//           shoot_id: shootID,
+//           tag_id,
+//         }))
+//       );
+
+//       // Delete entries in the photo table where id is equal to shootID
+//       await trx('photos').where({ shoot_id: shootID }).del();
+
+//       await trx('photos').insert(
+//         photo_urls.map((photo_url) => ({
+//           shoot_id: shootID,
+//           photo_url,
+//         }))
+//       );
+//     });
+
+//     res.status(200).json({ message: 'Shoot updated successfully' });
+//   } catch (error) {
+//     console.error('Error editing shoot:', error);
+//     res.status(500).json({ message: 'Error editing shoot' });
+//   }
+// };
+
+
+
+const editShootByID = async (req, res) => {
+  const token = req.headers.authorization; 
+
+  if (!verifyToken(token)) {
+    res.status(401).send({ message: "Unauthorized" });
+    return;
+  }
+
   const shootID = req.params.id;
-  const { shoot_date, photographer_ids, model_ids, tag_ids, photo_urls } = req.body;
 
+  // Check if the shoot exists
+  const existingShoot = await knex('shoots').where('id', shootID).first();
+  if (!existingShoot) {
+    return res.status(404).json({ message: 'Shoot not found' });
+  }
+
+  let {
+    shoot_date,
+    tag_ids,
+    photographer_ids,
+    model_ids,
+    photo_urls
+  } = req.body;
+  
+  // Check for required fields
+  if (!photo_urls || !photo_urls.length) {
+    return res.status(400).json({ message: 'Photos not added' });
+  }
+
+  shoot_date = new Date(req.body.shoot_date).toISOString().slice(0, 10);
+  
   try {
+    // Start transaction
     await knex.transaction(async (trx) => {
-      // Update shoot details in the shoots table
+      // Update shoot details
       await trx('shoots')
-        .where({ id: shootID })
-        .update({ shoot_date });
+        .where('id', shootID)
+        .update({
+          shoot_date,
+        });
 
-      // Update photographers for the shoot
-      await trx('shoot_photographers')
-        .where({ shoot_id: shootID })
-        .del(); // Delete existing entries
+      // Delete existing associations
+      await trx('shoot_photographers').where('shoot_id', shootID).del();
+      await trx('shoot_models').where('shoot_id', shootID).del();
+      await trx('shoot_tags').where('shoot_id', shootID).del();
+      await trx('photos').where('shoot_id', shootID).del();
 
-      // Insert new photographer entries
-      await trx('shoot_photographers').insert(
-        photographer_ids.split(", ").map((photographer_id) => ({
+      // Link photographers to the shoot
+      for (const photographerId of photographer_ids) {
+        const [existingPhotographer] = await trx('photographers').where('id', photographerId);
+        if (!existingPhotographer) {
+          throw new Error(`Photographer with ID ${photographerId} not found`);
+        }
+        // Link photographer to shoot
+        await trx('shoot_photographers').insert({
           shoot_id: shootID,
-          photographer_id,
-        }))
-      );
+          photographer_id: photographerId
+        });
+      }
 
-      // Update models for the shoot
-      await trx('shoot_models').where({ shoot_id: shootID }).del(); // Delete existing entries
-
-      // Insert new model entries
-      await trx('shoot_models').insert(
-        model_ids.split(", ").map((model_id) => ({
+      // Link models to the shoot
+      for (const modelId of model_ids) {
+        const [existingModel] = await trx('models').where('id', modelId);
+        if (!existingModel) {
+          throw new Error(`Model with ID ${modelId} not found`);
+        }
+        // Link model to shoot
+        await trx('shoot_models').insert({
           shoot_id: shootID,
-          model_id,
-        }))
-      );
+          model_id: modelId
+        });
+      }
 
-      // Update tags for the shoot
-      await trx('shoot_tags').where({ shoot_id: shootID }).del(); // Delete existing entries
-
-      // Insert new model entries
-      await trx('shoot_tags').insert(
-        tag_ids.split(", ").map((tag_id) => ({
+      // Link tags to the shoot
+      for (const tagId of tag_ids) {
+        const [existingTag] = await trx('tags').where('id', tagId);
+        if (!existingTag) {
+          throw new Error(`Tag with ID ${tagId} not found`);
+        }
+        // Link tag to shoot
+        await trx('shoot_tags').insert({
           shoot_id: shootID,
-          tag_id,
-        }))
-      );
+          tag_id: tagId
+        });
+      }
 
-      // Delete entries in the photo table where id is equal to shootID
-      await trx('photos').where({ shoot_id: shootID }).del();
-
-      await trx('photos').insert(
-        photo_urls.map((photo_url) => ({
+      // Insert photo URLs
+      for (const photoUrl of photo_urls) {
+        await trx('photos').insert({
           shoot_id: shootID,
-          photo_url,
-        }))
-      );
+          photo_url: photoUrl
+        });
+      }
     });
 
     res.status(200).json({ message: 'Shoot updated successfully' });
   } catch (error) {
-    console.error('Error editing shoot:', error);
-    res.status(500).json({ message: 'Error editing shoot' });
+    console.error(error);
+    res.status(500).json({ message: error.message || 'Internal server error' });
   }
 };
+
+
+// --
 
 
 // delete shoot
@@ -392,6 +618,5 @@ module.exports = {
   addShoot,
   deleteShootByID,
   editShootByID,
-  // editPhotoOrderByShootID,
   updateShootOrder
 };
