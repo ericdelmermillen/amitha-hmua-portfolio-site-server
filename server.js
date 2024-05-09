@@ -19,6 +19,17 @@ const corsOptions = TESTING ?  { }:  { origin: process.env.CLIENT_HOST};
 app.use(cors(
   corsOptions
 ));
+
+// test AWS signed URL route
+// import { generateUploadURL } from './s3.js';
+const { generateUploadURL } = require('./s3.js');
+
+app.get('/s3url', async (req, res) => {
+  const url = await generateUploadURL()
+  res.send({url})
+})
+
+
  
 // import routes
 const authRouter = require('./routes/auth.js')

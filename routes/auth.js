@@ -2,6 +2,16 @@ const authController = require('../controllers/auth-controller.js');
 const authRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { emailAndPasswordAreValid } = require('../utils/validationSchemas.js');
+// AWS s3 url generation
+const { generateUploadURL } = require('../s3.js');
+
+
+
+
+authRouter.get('/s3url', async (req, res) => {
+  const url = await generateUploadURL()
+  res.send({url})
+})
 
 
 // auth create user
