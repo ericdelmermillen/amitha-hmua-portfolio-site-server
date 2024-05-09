@@ -1,11 +1,8 @@
 const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
 const { validationResult } = require('express-validator');
-const { paramsIsNumber, shootDataValid, shootsOrderDataValid, photoOrderDataValid } = require('../utils/validationSchemas.js');
-const { upload } = require("../s3Service.js")
+const { paramsIsNumber, shootDataValid, shootsOrderDataValid } = require('../utils/validationSchemas.js');
 
-
-// refactor AWS posting to use sdkV2
 
 // GET shoots 
 shootsRouter.route('/all')
@@ -29,7 +26,7 @@ shootsRouter.route('/shoot/:id')
 
 // POST /shoots/add
 shootsRouter.route('/add')
-  .post(upload.array('file', 10), shootDataValid, (req, res, next) => {
+  .post(shootDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
@@ -45,7 +42,7 @@ shootsRouter.route('/add')
 
   // PUT /shoots/edit/:id
 shootsRouter.route('/edit/:id')
-  .put(upload.array('file', 10), shootDataValid, (req, res, next) => {
+  .put((req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);

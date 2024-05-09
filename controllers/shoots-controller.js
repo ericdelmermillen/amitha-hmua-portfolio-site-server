@@ -1,6 +1,6 @@
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
-const { s3Uploadv3 } = require("../s3Service.js");
+// const { s3Uploadv3 } = require("../s3Service.js");
 const AWS_BUCKET_BASE_URL = process.env.AWS_BUCKET_BASE_URL;
 const express = require('express');
 const app = express();
