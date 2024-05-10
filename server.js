@@ -17,9 +17,6 @@ app.use(cors(
   corsOptions
 ));
 
-// test AWS signed URL route
-const { generateUploadURL } = require('./s3.js');
-
 // import routes
 const authRouter = require('./routes/auth.js')
 const shootsRouter = require('./routes/shoots.js');

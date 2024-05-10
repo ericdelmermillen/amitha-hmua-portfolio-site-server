@@ -1,5 +1,7 @@
 const nodemailer = require('nodemailer');
 
+// email sending can be very slow: add a: "Working on it..." toast and a "Message sent successfully"
+
 // contact form
 // needs to set up for the correct email: make new email
 const handleContactForm = async (req, res) => {

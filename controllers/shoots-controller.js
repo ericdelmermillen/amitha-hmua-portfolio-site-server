@@ -1,6 +1,5 @@
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
-// const { s3Uploadv3 } = require("../s3Service.js");
 const AWS_BUCKET_BASE_URL = process.env.AWS_BUCKET_BASE_URL;
 const express = require('express');
 const app = express();
@@ -44,9 +43,9 @@ const getShootSummaries = async (req, res) => {
       shoot_date: new Date(
         shoot.shoot_date).toISOString('en-US', dateFormatOptions
       ).split('T')[0],
+      tags: shoot.tags.split(','),
       photographers: shoot.photographers.split(','),
       models: shoot.models.split(','),
-      tags: shoot.tags.split(','),
       thumbnail_url: shoot.photo_url
     }));
 
@@ -54,7 +53,7 @@ const getShootSummaries = async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching shoot summaries:', error);
-    res.status(500).send('Error fetching shoot summaries');
+    return res.status(500).send('Error fetching shoot summaries');
   }
 }
 
@@ -98,6 +97,8 @@ const getShootByID = async (req, res) => {
     const shootData = {};
     shootData.shoot_id = shoot[0].shoot_id;
     shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
+    shootData.tag_ids = shoot[0].tag_ids.split(',');
+    shootData.tags = shoot[0].tags.split(',');
     shootData.photographer_ids = shoot[0].photographer_ids.split(',');
     shootData.photographers = shoot[0].photographers.split(',');
     shootData.model_ids = shoot[0].model_ids.split(',');
@@ -107,7 +108,7 @@ const getShootByID = async (req, res) => {
     // Create an array of distinct photo objects with id, photo_url, and display_order properties
     const displayOrders = shoot[0].display_orders.split(',');
     const photoUrls = shoot[0].photo_urls.split(',');
-    const photoIds = shoot[0].photo_ids.split(','); // Extract photo ids
+    const photoIds = shoot[0].photo_ids.split(','); 
     const photo_urls = [];
     const seenIds = new Set(); // Keep track of seen photo ids to ensure uniqueness
     displayOrders.forEach((order, idx) => {
@@ -126,10 +127,10 @@ const getShootByID = async (req, res) => {
     shootData.tags = shoot[0].tags.split(',');
     shootData.photo_urls = photo_urls;
 
-    res.json(shootData);
+    return res.json(shootData);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -218,10 +219,10 @@ const addShoot = async (req, res) => {
       }
     });
 
-    res.status(201).json({ message: 'Shoot added successfully' });
+    return res.status(201).json({ message: 'Shoot added successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message || 'Internal server error' });
+    return res.status(500).json({ message: error.message || 'Internal server error' });
   }
 };
 
@@ -230,15 +231,14 @@ const editShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({ message: "Unauthorized" });
-    return;
+    return res.status(401).send({ message: "Unauthorized" });
   }
 
   const shootID = req.params.id;
 
   // Check if the shoot exists
   const existingShoot = await knex('shoots').where('id', shootID).first();
-  if (!existingShoot) {
+  if(!existingShoot) {
     return res.status(404).json({ message: 'Shoot not found' });
   }
 
@@ -254,7 +254,6 @@ const editShootByID = async (req, res) => {
   if(!photo_urls || !photo_urls.length) {
     return res.status(400).json({ message: 'Photos not added' });
   }
-
 
   shoot_date = new Date(req.body.shoot_date).toISOString().slice(0, 10);
   
@@ -277,7 +276,7 @@ const editShootByID = async (req, res) => {
       // Link photographers to the shoot
       for(const photographerId of photographer_ids) {
         const [existingPhotographer] = await trx('photographers').where('id', photographerId);
-        if (!existingPhotographer) {
+        if(!existingPhotographer) {
           throw new Error(`Photographer with ID ${photographerId} not found`);
         }
         // Link photographer to shoot
@@ -288,9 +287,9 @@ const editShootByID = async (req, res) => {
       }
 
       // Link models to the shoot
-      for (const modelId of model_ids) {
+      for(const modelId of model_ids) {
         const [existingModel] = await trx('models').where('id', modelId);
-        if (!existingModel) {
+        if(!existingModel) {
           throw new Error(`Model with ID ${modelId} not found`);
         }
         // Link model to shoot
@@ -301,9 +300,9 @@ const editShootByID = async (req, res) => {
       }
 
       // Link tags to the shoot
-      for (const tagId of tag_ids) {
+      for(const tagId of tag_ids) {
         const [existingTag] = await trx('tags').where('id', tagId);
-        if (!existingTag) {
+        if(!existingTag) {
           throw new Error(`Tag with ID ${tagId} not found`);
         }
         // Link tag to shoot
@@ -314,7 +313,7 @@ const editShootByID = async (req, res) => {
       }
 
       // Insert photo URLs
-      for (const photoUrl of photo_urls) {
+      for(const photoUrl of photo_urls) {
         await trx('photos').insert({
           shoot_id: shootID,
           photo_url: photoUrl
@@ -322,26 +321,21 @@ const editShootByID = async (req, res) => {
       }
     });
 
-    res.status(200).json({ message: 'Shoot updated successfully' });
+    return res.status(200).json({ message: 'Shoot updated successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: error.message || 'Internal server error' });
+    return res.status(500).json({ message: error.message || 'Internal server error' });
   }
 };
-
-
-// --
-
 
 // delete shoot
 // needs to take the photo_urls and call aws to delete them as well as delete the urls from the server
 const deleteShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    return res.status(401).send({message: "unauthorized"})
+  }
 
   try {
     const { id } = req.params;
@@ -364,7 +358,7 @@ const deleteShootByID = async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       message: `Shoot number ${id} deleted successfully`,
     });
@@ -398,10 +392,10 @@ const updateShootOrder = async (req, res) => {
       })
     );
 
-    res.status(200).json({ message: 'Shoots display order updated successfully' });
+    return res.status(200).json({ message: 'Shoots display order updated successfully' });
   } catch (error) {
     console.error('Error updating shoot display order:', error);
-    res.status(500).json({ message: 'Error updating shoot display order' });
+    return res.status(500).json({ message: 'Error updating shoot display order' });
   }
 };
 

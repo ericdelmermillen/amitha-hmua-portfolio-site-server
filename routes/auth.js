@@ -2,15 +2,6 @@ const authController = require('../controllers/auth-controller.js');
 const authRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { emailAndPasswordAreValid } = require('../utils/validationSchemas.js');
-// AWS s3 url generation
-const { generateUploadURL } = require('../s3.js');
-
-
-// get signed AWS URL
-authRouter.route('/getsignedURL')
-  .get((req, res, next) => {
-  next();
-}, authController.getSignedURL);
 
 
 // auth create user
@@ -46,9 +37,16 @@ authRouter.route('/refresh')
   .post(authController.refreshToken);
 
 
+// get signed AWS URL
+authRouter.route('/getsignedURL')
+  .get((req, res, next) => {
+  next();
+}, authController.getSignedURL);
+  
+  
 // auth logout
 authRouter.route('/logout')
-  .post(authController.logLogout);
+  .post(authController.logout);
 
 
 module.exports = authRouter;

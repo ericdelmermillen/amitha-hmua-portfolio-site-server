@@ -81,9 +81,9 @@ const userLogin = async (req, res) => {
     user.role = matchedUser.role;
 
     const token = getToken(user);
-    const refreshToken = generateRefreshToken(user.id); // Generate refresh token
+    const refreshToken = generateRefreshToken(user.id); 
 
-    res.json({
+    return res.json({
       success: true,
       message: "Login successful",
       user: user,
@@ -124,8 +124,7 @@ const getSignedURL = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({ message: "Unauthorized" });
-    return;
+    return res.status(401).send({ message: "Unauthorized" });
   }
 
   const url = await generateUploadURL();
@@ -134,23 +133,22 @@ const getSignedURL = async (req, res) => {
 
 
 // userLogout function
-// client can get the user_id from the jwt
-const logLogout = async (req, res) => {
+const logout = async (req, res) => {
   const { user_id } = req.body;
 
   if(!user_id) {
-    res.status(400).send({message: "Invalid or missing User ID"})
+    return res.status(400).send({message: "Invalid or missing User ID"})
   } else if(isNaN(+user_id)) {
-    res.status(400).send({message: "User ID must be a number"})
+    return res.status(400).send({message: "User ID must be a number"})
   }
 
   try {
     const matchedUser = await knex('users').where('id', user_id).first();
 
     if(!matchedUser) {
-      res.status(404).json({ message: `User with id of ${user_id} not found`});
+      return res.status(404).json({ message: `User with id of ${user_id} not found`});
     } else {
-      res.status(200).json({ message: 'Successfully Logged Out' });
+      return res.status(200).json({ message: 'Successfully Logged Out' });
     }
     
   } catch(error) {
@@ -164,6 +162,6 @@ module.exports = {
   createUser,
   userLogin,
   refreshToken,
-  logLogout,
+  logout,
   getSignedURL
 };

@@ -2,21 +2,20 @@ const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken } = require('../utils/utils.js');
 
 
-// get all photographers for create shoot modal photographer selector 
+// get all photographers for addEdit shoot modal photographer selector 
 const getAllPhotographers = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    return res.status(401).send({message: "unauthorized"})
+  }
 
   try {
     const photographersData = await knex('photographers');
 
     const photographers = photographersData.map(({ id, photographer_name }) => ({ id, photographer_name }));
 
-    res.json({
+    return res.json({
       success: true,
       message: "Photographers fetched successfully",
       photographers: photographers,
@@ -33,8 +32,7 @@ const addPhotographer = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"})
   }
 
   try {
@@ -61,7 +59,7 @@ const addPhotographer = async (req, res) => {
 
     const photographers = photographersData.map(({ id, photographer_name }) => ({ id, photographer_name }));
 
-    res.json({
+    return res.json({
       success: true,
       message: "Photographer added successfully",
       photographers: photographers,
@@ -79,8 +77,7 @@ const editPhotographerById = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"})
   }
 
   try {
@@ -102,7 +99,10 @@ const editPhotographerById = async (req, res) => {
 
     const photographerExists = await knex('photographers').where({ id }).first();
 
-    return res.status(200).json({ message: `Photographer with ID ${id} updated successfully`, photographer: photographerExists });
+    return res.status(200).json({ 
+      message: `Photographer with ID ${id} updated successfully`, 
+      photographer: photographerExists });
+
   } catch (error) {
     console.error('Error updating photographer:', error);
     return res.status(500).json({ error: 'Internal server error' });
@@ -115,8 +115,7 @@ const deletePhotographerByID = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"})
   }
 
   try {
@@ -169,7 +168,7 @@ const deletePhotographerByID = async (req, res) => {
 
     const photographersData = await knex('photographers');
 
-    res.json({
+    return res.json({
       success: true,
       message: `Photographer number ${id} deleted successfully`,
       photographers: photographersData,

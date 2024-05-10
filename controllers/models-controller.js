@@ -5,17 +5,16 @@ const { verifyToken } = require('../utils/utils.js');
 const getAllModels = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    return res.status(401).send({message: "unauthorized"})
+  }
 
   try {
     const modelsData = await knex('models');
 
     const models = modelsData.map(({ id, model_name }) => ({ id, model_name }));
 
-    res.json({
+    return res.json({
       success: true,
       message: "Models fetched successfully",
       models: models
@@ -33,8 +32,7 @@ const addModel = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"})
   }
 
   try {
@@ -57,7 +55,7 @@ const addModel = async (req, res) => {
 
     const models = modelsData.map(({ id, model_name }) => ({ id, model_name }));
 
-    res.json({
+    return res.json({
       success: true,
       message: "Model added successfully",
       models: models,
@@ -75,8 +73,7 @@ const editModelById = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"})
   }
 
   try {
@@ -112,8 +109,7 @@ const deleteModelByID = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"})
   }
 
   try {
@@ -167,7 +163,7 @@ const deleteModelByID = async (req, res) => {
 
     const models = modelsData.map((model) => ({ id: model.id, model_name: model.model_name }));
 
-    res.json({
+    return res.json({
       success: true,
       message: `Model deleted successfully`,
       models: models,
