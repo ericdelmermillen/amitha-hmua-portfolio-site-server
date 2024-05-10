@@ -6,12 +6,11 @@ const { emailAndPasswordAreValid } = require('../utils/validationSchemas.js');
 const { generateUploadURL } = require('../s3.js');
 
 
-
 // get signed AWS URL
-authRouter.get('/s3url', async (req, res) => {
-  const url = await generateUploadURL()
-  res.send({url})
-})
+authRouter.route('/getsignedURL')
+  .get((req, res, next) => {
+  next();
+}, authController.getSignedURL);
 
 
 // auth create user

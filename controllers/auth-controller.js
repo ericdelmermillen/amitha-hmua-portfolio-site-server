@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const knex = require("knex")(require("../knexfile.js"));
-const { getToken, generateRefreshToken } = require('../utils/utils.js');
+const { getToken, verifyToken, generateRefreshToken } = require('../utils/utils.js');
+const { generateUploadURL } = require('../s3.js');
+
 
 // createUser function
 const createUser = async (req, res) => {
@@ -117,6 +119,19 @@ const refreshToken = async (req, res) => {
   }
 }
 
+// get signed AWS S3 URL
+const getSignedURL = async (req, res) => {
+  const token = req.headers.authorization; 
+
+  if(!verifyToken(token)) {
+    res.status(401).send({ message: "Unauthorized" });
+    return;
+  }
+
+  const url = await generateUploadURL();
+  res.send({url});
+}
+
 
 // userLogout function
 // client can get the user_id from the jwt
@@ -149,5 +164,6 @@ module.exports = {
   createUser,
   userLogin,
   refreshToken,
-  logLogout
+  logLogout,
+  getSignedURL
 };
