@@ -6,16 +6,17 @@ const app = express();
 
 // get shoots with pagination
 const getShootSummaries = async (req, res) => {
-  // need to plan for filter shoots by tag: do I need to use url params?
-  // should the shoots component display the "Other __ shoots"?
-
   try {
-    const { page = 1, limit = 10 } = req.query; 
+    const { page = 1, limit = 10 } = req.query;
+    
+    // Get tag_id from query params
+    const tag_id = req.query.tag_id;
 
-    // calling for page X therefore offset by X - 1
+    // Calling for page X therefore offset by X - 1
     const offset = (page - 1) * limit;
 
-    const shoots = await knex('shoots')
+    // Build the query to select shoots
+    const shootsQuery = knex('shoots')
       .select(
         'shoots.id as shoot_id',
         'shoots.shoot_date',
@@ -37,25 +38,46 @@ const getShootSummaries = async (req, res) => {
       .limit(limit)
       .offset(offset);
 
-    const shootsData = shoots.map(shoot => ({
+    // Apply tag_id filter if provided
+    if(tag_id !== undefined) {
+      shootsQuery.whereExists(function() {
+        this.select(knex.raw(1))
+          .from('shoot_tags')
+          .whereRaw('shoot_tags.shoot_id = shoots.id')
+          .where('shoot_tags.tag_id', tag_id);
+      });
+    }
+
+    // Execute the query
+    const shoots = await shootsQuery;
+
+    // Format the shoot data
+    const shootSummaries = shoots.map(shoot => ({
       shoot_id: shoot.shoot_id,
       display_order: shoot.display_order,
-      shoot_date: new Date(
-        shoot.shoot_date).toISOString('en-US', dateFormatOptions
-      ).split('T')[0],
+      shoot_date: new Date(shoot.shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0],
       tags: shoot.tags.split(','),
       photographers: shoot.photographers.split(','),
       models: shoot.models.split(','),
       thumbnail_url: shoot.photo_url
     }));
 
-  return res.json(shootsData);
+    const isFinalPage = shoots.length === 0;
+    const responseData = {
+      shootSummaries,
+      isFinalPage
+    };
 
+
+    // return res.json(shootsData);
+    return res.json(responseData);
   } catch (error) {
     console.error('Error fetching shoot summaries:', error);
     return res.status(500).send('Error fetching shoot summaries');
   }
-}
+};
+
+
 
 // get shoot by id with all photos (max 10)
 const getShootByID = async (req, res) => {

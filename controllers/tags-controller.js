@@ -3,12 +3,6 @@ const { verifyToken } = require('../utils/utils.js');
 
 // get all tags for add shoot/edit tags selector
 const getAllTags = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
 
   try {
     const tagsData = await knex('tags');
@@ -32,12 +26,10 @@ const getAllTags = async (req, res) => {
 const addTag = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
-
-  console.log("addTag controller")
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "Unauthorized"})
+    return;
+  }
 
   try {
     const { tag_name } = req.body;
@@ -76,10 +68,10 @@ const addTag = async (req, res) => {
 const editTagById = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
+  }
 
   try {
     
@@ -113,10 +105,10 @@ const editTagById = async (req, res) => {
 const deleteTagByID = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   res.status(401).send({message: "unauthorized"})
-  //   return;
-  // }
+  if(!verifyToken(token)) {
+    res.status(401).send({message: "unauthorized"})
+    return;
+  }
 
   try {
     const id = req.params.id;

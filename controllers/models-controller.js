@@ -3,11 +3,6 @@ const { verifyToken } = require('../utils/utils.js');
 
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
-  }
 
   try {
     const modelsData = await knex('models');
