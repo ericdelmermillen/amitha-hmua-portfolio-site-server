@@ -13,7 +13,7 @@ const getAllPhotographers = async (req, res) => {
     return res.json({
       success: true,
       message: "Photographers fetched successfully",
-      photographers: photographers,
+      photographers: photographers
     });
 
   } catch(error) {
@@ -57,7 +57,7 @@ const addPhotographer = async (req, res) => {
     return res.json({
       success: true,
       message: "Photographer added successfully",
-      photographers: photographers,
+      photographers: photographers
     });
     
   } catch(error) {
@@ -72,7 +72,7 @@ const editPhotographerById = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -102,7 +102,7 @@ const editPhotographerById = async (req, res) => {
     console.error('Error updating photographer:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
-}
+};
 
 
 // delete photographer by id
@@ -110,7 +110,7 @@ const deletePhotographerByID = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -120,7 +120,7 @@ const deletePhotographerByID = async (req, res) => {
 
     if(photographerExistsInShootPhotographers.length) {
 
-      const shootIds = photographerExistsInShootPhotographers.map(shoot => shoot.shoot_id)
+      const shootIds = photographerExistsInShootPhotographers.map(shoot => shoot.shoot_id);
 
       try {
         const photographerShootsData = await Promise.all(shootIds.map(async (shootId) => {
@@ -148,7 +148,7 @@ const deletePhotographerByID = async (req, res) => {
     if(!photographerExists) {
       return res.status(409).json({
         success: false,
-        message: `Photographer number ${id} does not exist`,
+        message: `Photographer number ${id} does not exist`
       });
     }
 
@@ -157,7 +157,7 @@ const deletePhotographerByID = async (req, res) => {
     if(!deleted) {
       return res.status(500).json({
         success: false,
-        message: `Photographer number ${id} not deleted`,
+        message: `Photographer number ${id} not deleted`
       });
     }
 
@@ -166,7 +166,7 @@ const deletePhotographerByID = async (req, res) => {
     return res.json({
       success: true,
       message: `Photographer number ${id} deleted successfully`,
-      photographers: photographersData,
+      photographers: photographersData
     });
     
   } catch(error) {

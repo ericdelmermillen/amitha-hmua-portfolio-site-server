@@ -2,7 +2,9 @@ const { body, param } = require('express-validator');
 const { isValidURL } = require('./utils.js');
 
 const paramsIsNumber = [
-  param('id').isInt().withMessage('ID must be a number')
+  param('id')
+    .isInt().
+    withMessage('ID must be a number')
 ];
 
 const emailAndPasswordAreValid = [
@@ -51,26 +53,6 @@ const tagDataValid = [
     .isLength({ min: 2, max: 50 }).withMessage('Tag Name must be between 2-50 characters long.')
 ];
 
-
-// const shootDataValid = [
-//   // body('shoot_date')
-//   //   .isString().withMessage('Shoot date must be a string')
-//   //   .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Shoot date must be in YYYY-MM-DD format'),
-//   // body('photographer_ids')
-//   //   .isString().withMessage('Photographer IDs must be provided as a string')
-//   //   .isLength({ min: 1 }).withMessage('At least one photographer ID is required')
-//   //   .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each photographer ID must be a number'),
-//   // body('model_ids')
-//   //   .isString().withMessage('Model IDs must be provided as a string')
-//   //   .isLength({ min: 1 }).withMessage('At least one model ID is required')
-//   //   .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each model ID must be a number'),
-//   // body('tag_ids')
-//   //   .isString().withMessage('Tag IDs must be provided as a string')
-//   //   .isLength({ min: 1 }).withMessage('At least one tag ID is required')
-//   //   .custom(ids => ids.split(',').every(id => /^\d+$/.test(id.trim()))).withMessage('Each tag ID must be a number')
-// ];
-
-// test this --
 const shootDataValid = [
   body('shoot_date')
     .isString().withMessage('Shoot date must be a string')
@@ -88,7 +70,6 @@ const shootDataValid = [
     .isArray({ min: 1 }).withMessage('At least one photo URL is required')
     .custom(urls => urls.every(url => typeof url === 'string' && isValidURL(url))).withMessage('Each photo URL must be a valid URL')
 ];
-
 
 const shootsOrderDataValid = [
   body('new_shoot_order')

@@ -40,7 +40,7 @@ const addModel = async (req, res) => {
     if(modelExists) {
       return res.status(409).json({
         success: false,
-        message: "A model with that name already exists",
+        message: "A model with that name already exists"
       });
     }
 
@@ -53,7 +53,7 @@ const addModel = async (req, res) => {
     return res.json({
       success: true,
       message: "Model added successfully",
-      models: models,
+      models: models
     });
     
   } catch(error) {
@@ -68,7 +68,7 @@ const editModelById = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -104,7 +104,7 @@ const deleteModelByID = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -141,7 +141,7 @@ const deleteModelByID = async (req, res) => {
     if(!modelExists) {
       return res.status(409).json({
         success: false,
-        message: `Model number ${id} does not exist`,
+        message: `Model number ${id} does not exist`
       });
     }
 
@@ -150,7 +150,7 @@ const deleteModelByID = async (req, res) => {
     if(!deleted) {
       return res.status(500).json({
         success: false,
-        message: `Model number ${id} not deleted`,
+        message: `Model number ${id} not deleted`
       });
     }
 
@@ -161,7 +161,7 @@ const deleteModelByID = async (req, res) => {
     return res.json({
       success: true,
       message: `Model deleted successfully`,
-      models: models,
+      models: models
     });
     
   } catch(error) {

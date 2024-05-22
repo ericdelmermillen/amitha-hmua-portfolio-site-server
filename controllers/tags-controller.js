@@ -27,7 +27,7 @@ const addTag = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "Unauthorized"})
+    res.status(401).send({message: "Unauthorized"});
     return;
   }
 
@@ -54,7 +54,7 @@ const addTag = async (req, res) => {
     res.json({
       success: true,
       message: "Tag added successfully",
-      models: tags,
+      tags: tags
     });
     
   } catch(error) {

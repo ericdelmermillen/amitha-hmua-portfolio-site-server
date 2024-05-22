@@ -12,7 +12,7 @@ contactRouter.route('/')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
-      
+     
     next();
   }, contactController.handleContactForm);
 
