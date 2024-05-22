@@ -32,7 +32,7 @@ shootsRouter.route('/add')
     const errorMsgs = errors.array().map(error => error.msg);
     
     if(!errors.isEmpty()) {
-      console.log(`errorMsgs: ${errorMsgs}`)
+      console.log(`errorMsgs: ${errorMsgs}`);
       return res.status(400).json({ errors: errorMsgs });
     }
 

@@ -1,6 +1,5 @@
 const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
-const AWS_BUCKET_BASE_URL = process.env.AWS_BUCKET_BASE_URL;
 const express = require('express');
 const app = express();
 
@@ -68,15 +67,12 @@ const getShootSummaries = async (req, res) => {
       isFinalPage
     };
 
-
-    // return res.json(shootsData);
     return res.json(responseData);
   } catch (error) {
     console.error('Error fetching shoot summaries:', error);
     return res.status(500).send('Error fetching shoot summaries');
   }
 };
-
 
 
 // get shoot by id with all photos (max 10)
@@ -162,8 +158,7 @@ const addShoot = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({ message: "Unauthorized" });
-    return;
+    return res.status(401).send({ message: "Unauthorized" });
   }
 
   let {
@@ -260,6 +255,7 @@ const editShootByID = async (req, res) => {
 
   // Check if the shoot exists
   const existingShoot = await knex('shoots').where('id', shootID).first();
+
   if(!existingShoot) {
     return res.status(404).json({ message: 'Shoot not found' });
   }
@@ -286,7 +282,7 @@ const editShootByID = async (req, res) => {
       await trx('shoots')
         .where('id', shootID)
         .update({
-          shoot_date,
+          shoot_date
         });
 
       // Delete existing associations
@@ -310,7 +306,7 @@ const editShootByID = async (req, res) => {
 
       // Link models to the shoot
       for(const modelId of model_ids) {
-        const [existingModel] = await trx('models').where('id', modelId);
+        const [ existingModel ] = await trx('models').where('id', modelId);
         if(!existingModel) {
           throw new Error(`Model with ID ${modelId} not found`);
         }
@@ -323,7 +319,7 @@ const editShootByID = async (req, res) => {
 
       // Link tags to the shoot
       for(const tagId of tag_ids) {
-        const [existingTag] = await trx('tags').where('id', tagId);
+        const [ existingTag ] = await trx('tags').where('id', tagId);
         if(!existingTag) {
           throw new Error(`Tag with ID ${tagId} not found`);
         }
@@ -356,7 +352,7 @@ const deleteShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -367,7 +363,7 @@ const deleteShootByID = async (req, res) => {
     if(!shootExists) {
       return res.status(409).json({
         success: false,
-        message: `Shoot number ${id} does not exist`,
+        message: `Shoot number ${id} does not exist`
       });
     }
 
@@ -376,13 +372,13 @@ const deleteShootByID = async (req, res) => {
     if(!deleted) {
       return res.status(500).json({
         success: false,
-        message: `Shoot number ${id} not deleted`,
+        message: `Shoot number ${id} not deleted`
       });
     }
 
     return res.json({
       success: true,
-      message: `Shoot number ${id} deleted successfully`,
+      message: `Shoot number ${id} deleted successfully`
     });
     
   } catch(error) {
@@ -397,8 +393,7 @@ const updateShootOrder = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"});
   }
 
   const newShootsOrder = req.body.new_shoot_order;

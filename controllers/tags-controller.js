@@ -27,8 +27,7 @@ const addTag = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "Unauthorized"});
-    return;
+    return res.status(401).send({message: "Unauthorized"});
   }
 
   try {
@@ -69,8 +68,7 @@ const editTagById = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -101,13 +99,12 @@ const editTagById = async (req, res) => {
 };
 
 
-// // delete model by id
+// // delete tag by id
 const deleteTagByID = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    res.status(401).send({message: "unauthorized"})
-    return;
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -116,7 +113,7 @@ const deleteTagByID = async (req, res) => {
     const tagExistsInShootTags = await knex('shoot_tags').where({ tag_id: id });
     
     if(tagExistsInShootTags.length) {
-      const shootIds = tagExistsInShootTags.map(shoot => shoot.shoot_id)
+      const shootIds = tagExistsInShootTags.map(shoot => shoot.shoot_id);
       
       try {
         const tagShootsData = await Promise.all(shootIds.map(async (shootId) => {
@@ -134,7 +131,6 @@ const deleteTagByID = async (req, res) => {
           tagShoots: tagShoots
         });
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ error: "Failed to retrieve shoots" });
     }
   }
@@ -144,7 +140,7 @@ const deleteTagByID = async (req, res) => {
     if(!tagExists) {
       return res.status(409).json({
         success: false,
-        message: `Tag number ${id} does not exist`,
+        message: `Tag number ${id} does not exist`
       });
     }
 
@@ -153,7 +149,7 @@ const deleteTagByID = async (req, res) => {
     if(!deleted) {
       return res.status(500).json({
         success: false,
-        message: `Tag number ${id} not deleted`,
+        message: `Tag number ${id} not deleted`
       });
     }
 
@@ -164,7 +160,7 @@ const deleteTagByID = async (req, res) => {
     res.json({
       success: true,
       message: `Tag deleted successfully`,
-      tags: tags,
+      tags: tags
     });
     
   } catch(error) {
