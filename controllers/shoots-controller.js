@@ -2,6 +2,7 @@ const knex = require("knex")(require("../knexfile.js"));
 const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
 const express = require('express');
 const app = express();
+const { deleteFiles } = require("../s3.js");
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
 
@@ -359,6 +360,77 @@ const editShootByID = async (req, res) => {
 
 // delete shoot
 // needs to take the photo_urls and call aws to delete them as well as delete the urls from the server
+// const deleteShootByID = async (req, res) => {
+//   const token = req.headers.authorization; 
+
+//   if(!verifyToken(token)) {
+//     return res.status(401).send({message: "unauthorized"});
+//   }
+
+//   try {
+//     const { id } = req.params;
+    
+//     const shootExists = await knex('shoots').where({ id }).first();
+    
+//     if(!shootExists) {
+//       return res.status(409).json({
+//         success: false,
+//         message: `Shoot number ${id} does not exist`
+//       });
+//     }
+
+//     // delete photos ---
+//     await knex.raw('SET SESSION group_concat_max_len = 2560');
+
+//     const shoot = await knex('shoots')
+//       .select(
+//         'shoots.id as shoot_id',
+//         'shoots.shoot_date',
+//         knex.raw('GROUP_CONCAT(DISTINCT photographers.id) AS photographer_ids'),
+//         knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
+//         knex.raw('GROUP_CONCAT(DISTINCT models.id) AS model_ids'), 
+//         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
+//         knex.raw('GROUP_CONCAT(DISTINCT tags.id) AS tag_ids'), 
+//         knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags'),
+//         knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
+//         knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
+//         knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids')
+//       )
+//       .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
+//       .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
+//       .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
+//       .leftJoin('models', 'shoot_models.model_id', 'models.id')
+//       .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
+//       .leftJoin('shoot_tags', 'shoots.id', 'shoot_tags.shoot_id')
+//       .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id')
+//       .where('shoots.id', id)
+//       .groupBy('shoots.id', 'shoots.shoot_date');
+    
+//     console.log(shoot)
+//     // --
+    
+
+//     const deleted = await knex('shoots').where({ id }).del();
+
+//     if(!deleted) {
+//       return res.status(500).json({
+//         success: false,
+//         message: `Shoot number ${id} not deleted`
+//       });
+//     }
+
+//     return res.json({
+//       success: true,
+//       message: `Shoot number ${id} deleted successfully`
+//     });
+    
+//   } catch(error) {
+//     console.log(error);
+//     return res.status(500).json({error: "Failed to delete shoot"});
+//   }
+// };
+
+
 const deleteShootByID = async (req, res) => {
   const token = req.headers.authorization; 
 
@@ -368,24 +440,25 @@ const deleteShootByID = async (req, res) => {
 
   try {
     const { id } = req.params;
-    
-    const shootExists = await knex('shoots').where({ id }).first();
-    
-    if(!shootExists) {
-      return res.status(409).json({
-        success: false,
-        message: `Shoot number ${id} does not exist`
-      });
-    }
 
-    const deleted = await knex('shoots').where({ id }).del();
+    // Start a transaction
+    await knex.transaction(async (trx) => {
+      // Delete shoot_photos
+      // await trx('shoot_photos').where('shoot_id', id).del();
 
-    if(!deleted) {
-      return res.status(500).json({
-        success: false,
-        message: `Shoot number ${id} not deleted`
-      });
-    }
+      // Delete shoot_models
+      await trx('shoot_models').where('shoot_id', id).del();
+
+      // Delete shoot_photographers
+      await trx('shoot_photographers').where('shoot_id', id).del();
+
+      // Delete the shoot itself
+      const deleted = await trx('shoots').where('id', id).del();
+
+      if (!deleted) {
+        throw new Error(`Shoot number ${id} not deleted`);
+      }
+    });
 
     return res.json({
       success: true,
@@ -393,8 +466,8 @@ const deleteShootByID = async (req, res) => {
     });
     
   } catch(error) {
-    console.log(error);
-    return res.status(500).json({error: "Failed to delete shoot"});
+    console.error(error);
+    return res.status(500).json({ error: "Failed to delete shoot" });
   }
 };
 

@@ -13,28 +13,26 @@ const TESTING = process.env.TESTING || false;
 const corsOptions = TESTING ?  { }:  { origin: process.env.CLIENT_HOST};
 
 // cors options use
-app.use(cors(
-  corsOptions
-));
-
+app.use(cors(corsOptions));
 
 // aws sdkv3 delete object --
-  const { deleteFile } = require("./s3.js");
+  const { deleteFiles } = require("./s3.js");
 // ---
 
 
 // test deleting route
 app.delete("/api/images/delete/:id", async (req, res) => {
   const id = +req.params.id
-  const { objName } = req.body;
-  // console.log(`objName: ${objName}`)
+  const { objNames } = req.body;
 
-
-  
-  const deleteResponse = await deleteFile(objName)
-  // console.log(deleteResponse)
-
-  res.send("Deleted")
+  try {
+    const deleteResponse = await deleteFiles(objNames);
+    console.log(deleteResponse); // optional: log the response for debugging
+    res.send("Deleted");
+  } catch (error) {
+    console.error("Error deleting file:", error);
+    res.status(500).send("Error deleting files");
+  }
 })
 
 // import routes
