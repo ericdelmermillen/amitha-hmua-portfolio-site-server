@@ -17,6 +17,26 @@ app.use(cors(
   corsOptions
 ));
 
+
+// aws sdkv3 delete object --
+  const { deleteFile } = require("./s3.js");
+// ---
+
+
+// test deleting route
+app.delete("/api/images/delete/:id", async (req, res) => {
+  const id = +req.params.id
+  const { objName } = req.body;
+  // console.log(`objName: ${objName}`)
+
+
+  
+  const deleteResponse = await deleteFile(objName)
+  // console.log(deleteResponse)
+
+  res.send("Deleted")
+})
+
 // import routes
 const authRouter = require('./routes/auth.js')
 const shootsRouter = require('./routes/shoots.js');
