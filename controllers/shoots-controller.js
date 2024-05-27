@@ -3,6 +3,8 @@ const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
 const express = require('express');
 const app = express();
 
+const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
+
 // get shoots with pagination
 const getShootSummaries = async (req, res) => {
   try {
@@ -58,7 +60,10 @@ const getShootSummaries = async (req, res) => {
       tags: shoot.tags.split(','),
       photographers: shoot.photographers.split(','),
       models: shoot.models.split(','),
-      thumbnail_url: shoot.photo_url
+      // for testing: photos stored as urls vs photos stored as S3 object names
+      thumbnail_url: shoot.photo_url.includes("http") 
+        ? shoot.photo_url
+        : `${AWS_BUCKET_PATH}${shoot.photo_url}`
     }));
 
     const isFinalPage = shoots.length === 0;
@@ -135,7 +140,10 @@ const getShootByID = async (req, res) => {
         photo_urls.push({
           id,
           display_order: parseInt(order),
-          photo_url: photoUrls[idx]
+          // for testing: photos stored as urls vs photos stored as S3 object names
+          photo_url: photoUrls[idx].includes("http")
+            ? photoUrls[idx]
+            : `${AWS_BUCKET_PATH}${photoUrls[idx]}`
         });
         seenIds.add(id);
       }
@@ -267,6 +275,9 @@ const editShootByID = async (req, res) => {
     model_ids,
     photo_urls
   } = req.body;
+
+  console.log(`photo_urls: ${photo_urls}`)
+  console.log(`photo_urls.length: ${photo_urls.length}`)
   
   // Check for required fields
   if(!photo_urls || !photo_urls.length) {
