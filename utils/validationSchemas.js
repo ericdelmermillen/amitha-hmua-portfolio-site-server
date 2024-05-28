@@ -68,7 +68,7 @@ const shootDataValid = [
     .custom(ids => ids.every(id => typeof id === 'number')).withMessage('Each model ID must be a number'),
   body('photo_urls')
     .isArray({ min: 1 }).withMessage('At least one photo URL is required')
-    // .custom(urls => urls.every(url => typeof url === 'string' && isValidURL(url))).withMessage('Each photo URL must be a valid URL')
+    // .custom(urls => urls.every(url => typeof url === 'string').withMessage('Each photo URL must be a string'))
 ];
 
 const shootsOrderDataValid = [

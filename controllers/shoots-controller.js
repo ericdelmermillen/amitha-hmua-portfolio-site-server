@@ -1,7 +1,7 @@
-const knex = require("knex")(require("../knexfile.js"));
-const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
 const express = require('express');
 const app = express();
+const knex = require("knex")(require("../knexfile.js"));
+const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
 const { deleteFiles } = require("../s3.js");
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
@@ -237,6 +237,7 @@ const addShoot = async (req, res) => {
 
       // Insert photo URLs
       for(const photoUrl of photo_urls) {
+        // await trx('photos').insert({
         await trx('photos').insert({
           shoot_id: shootId,
           photo_url: photoUrl
@@ -246,6 +247,15 @@ const addShoot = async (req, res) => {
 
     return res.status(201).json({ message: 'Shoot added successfully' });
   } catch (error) {
+    
+    // delete aws objs on fail
+    try {
+      const objKeys = photo_urls.map(url => `images/${url}`);
+      await deleteFiles(objKeys);
+    } catch (deleteError) {
+      console.error('Error deleting files from AWS:', deleteError);
+    }
+    
     console.error(error);
     return res.status(500).json({ message: error.message || 'Internal server error' });
   }
@@ -325,11 +335,12 @@ const editShootByID = async (req, res) => {
       } catch(error) {
         // Handle errors in AWS object deletion
         console.error("Error deleting file from AWS:", error);
+        return res.status(500).send("Error deleting files from AWS");
       }
 
       // Link photographers to the shoot
       for(const photographerId of photographer_ids) {
-        const [existingPhotographer] = await trx('photographers').where('id', photographerId);
+        const [ existingPhotographer ] = await trx('photographers').where('id', photographerId);
         if(!existingPhotographer) {
           throw new Error(`Photographer with ID ${photographerId} not found`);
         }

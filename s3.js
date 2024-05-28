@@ -31,22 +31,6 @@ const generateUploadURL = async function () {
   return uploadURL;
 };
 
-// Delete file function using SDK v3
-// const deleteFile = async (fileName) => {
-//   try {
-//     const deleteParams = {
-//       Bucket: process.env.AWS_BUCKET_NAME,
-//       Key: fileName
-//     };
-
-//     const response = await s3Client.send(new DeleteObjectCommand(deleteParams));
-//     return response;
-//   } catch (error) {
-//     console.error('Error deleting file:', error);
-//     throw error; 
-//   }
-// };
-
 // Delete multiple files function using SDK v3
 const deleteFiles = async (fileNames) => {
   try {
