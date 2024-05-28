@@ -17,6 +17,8 @@ VALUES (
     '12345678');
 
 
+
+
 CREATE TABLE photographers (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   photographer_name VARCHAR(255) NOT NULL
@@ -76,21 +78,6 @@ CREATE TABLE shoots (
   shoot_date DATE,
   display_order INT DEFAULT NULL
 );
-
--- DELIMITER //
--- CREATE TRIGGER set_display_order
--- BEFORE INSERT ON shoots
--- FOR EACH ROW
--- BEGIN
---     DECLARE last_id INT;
---     SET last_id = (SELECT IFNULL(MAX(id), 0) FROM shoots);
---     SET NEW.display_order = last_id + 1;
--- END;
--- //
--- DELIMITER ;
-
-
---
 
 
 INSERT INTO shoots 
