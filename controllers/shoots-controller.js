@@ -127,7 +127,6 @@ const getShootByID = async (req, res) => {
     shootData.photographers = shoot[0].photographers.split(',');
     shootData.model_ids = shoot[0].model_ids.split(',');
     shootData.models = shoot[0].models.split(',');
-    
 
     // Create an array of distinct photo objects with id, photo_url, and display_order properties
     const displayOrders = shoot[0].display_orders.split(',');
@@ -260,10 +259,10 @@ const editShootByID = async (req, res) => {
     return res.status(401).send({ message: "Unauthorized" });
   }
 
-  const shootID = req.params.id;
+  const { id } = req.params;
 
   // Check if the shoot exists
-  const existingShoot = await knex('shoots').where('id', shootID).first();
+  const existingShoot = await knex('shoots').where('id', id).first();
 
   if(!existingShoot) {
     return res.status(404).json({ message: 'Shoot not found' });
@@ -287,18 +286,46 @@ const editShootByID = async (req, res) => {
   try {
     // Start transaction
     await knex.transaction(async (trx) => {
+    
+      // get the photo obj keys
+      const photoObjKeys = await trx('photos')
+        .select('photo_url')
+        .where('shoot_id', id);
+      
       // Update shoot details
       await trx('shoots')
-        .where('id', shootID)
+        .where('id', id)
         .update({
           shoot_date
         });
 
       // Delete existing associations
-      await trx('shoot_photographers').where('shoot_id', shootID).del();
-      await trx('shoot_models').where('shoot_id', shootID).del();
-      await trx('shoot_tags').where('shoot_id', shootID).del();
-      await trx('photos').where('shoot_id', shootID).del();
+      await trx('shoot_photographers').where('shoot_id', id).del();
+      await trx('shoot_models').where('shoot_id', id).del();
+      await trx('shoot_tags').where('shoot_id', id).del();
+      await trx('photos').where('shoot_id', id).del();
+
+      // Prepare AWS object keys for deletion
+      const objKeys = [];
+
+      for(const obj of photoObjKeys) {
+        // get rid of dummy urls
+        if(!obj.photo_url.includes("http") && !photo_urls.includes(obj.photo_url)) {
+          objKeys.push(`images/${obj.photo_url}`);
+        }
+      }
+      
+      try {
+        // Deleting AWS objects after successful deletion of shoot data
+        const deleteResponse = await deleteFiles(objKeys);
+        // Check if deletion was successful
+        if(!deleteResponse) {
+          throw new Error("Error deleting files from AWS");
+        }
+      } catch(error) {
+        // Handle errors in AWS object deletion
+        console.error("Error deleting file from AWS:", error);
+      }
 
       // Link photographers to the shoot
       for(const photographerId of photographer_ids) {
@@ -308,11 +335,11 @@ const editShootByID = async (req, res) => {
         }
         // Link photographer to shoot
         await trx('shoot_photographers').insert({
-          shoot_id: shootID,
+          shoot_id: id,
           photographer_id: photographerId
         });
       }
-
+      
       // Link models to the shoot
       for(const modelId of model_ids) {
         const [ existingModel ] = await trx('models').where('id', modelId);
@@ -321,7 +348,7 @@ const editShootByID = async (req, res) => {
         }
         // Link model to shoot
         await trx('shoot_models').insert({
-          shoot_id: shootID,
+          shoot_id: id,
           model_id: modelId
         });
       }
@@ -334,7 +361,7 @@ const editShootByID = async (req, res) => {
         }
         // Link tag to shoot
         await trx('shoot_tags').insert({
-          shoot_id: shootID,
+          shoot_id: id,
           tag_id: tagId
         });
       }
@@ -342,12 +369,12 @@ const editShootByID = async (req, res) => {
       // Insert photo URLs
       for(const photoUrl of photo_urls) {
         await trx('photos').insert({
-          shoot_id: shootID,
+          shoot_id: id,
           photo_url: photoUrl
         });
       }
     });
-
+    
     return res.status(200).json({ message: 'Shoot updated successfully' });
   } catch (error) {
     console.error(error);
@@ -397,7 +424,7 @@ const deleteShootByID = async (req, res) => {
 
     // Prepare AWS object keys for deletion
     const objKeys = [];
-    
+
     for(const obj of photoObjKeys) {
       // get rid of dummy urls
       if(!obj.photo_url.includes("http")) {
