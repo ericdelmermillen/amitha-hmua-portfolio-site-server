@@ -36,7 +36,8 @@ app.delete("/api/images/delete/:id", async (req, res) => {
 })
 
 // import routes
-const authRouter = require('./routes/auth.js')
+const authRouter = require('./routes/auth.js');
+const bioRouter = require('./routes/bio.js');
 const shootsRouter = require('./routes/shoots.js');
 const contactRouter = require('./routes/contact.js');
 const modelsRouter = require('./routes/models.js');
@@ -45,6 +46,9 @@ const photographersRouter = require('./routes/photographers.js');
 
 // auth route for: createUser, login for admin, get AWS signed URL
 app.use('/api/auth', authRouter);
+
+// auth route for: createUser, login for admin, get AWS signed URL
+app.use('/api/bio', bioRouter);
 
 // contact form route
 app.use('/api/contact', contactRouter);
