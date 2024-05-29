@@ -6,8 +6,12 @@ const bioRouter = require("express").Router();
 
 // getBio route
 bioRouter.route("/")
-  .get(bioController.getBio)
+  .get(bioController.getBio);
 
+  // updateBio route
+  // add validation after
+bioRouter.route("/update")
+  .put(bioController.updateBio);
 
 
   module.exports = bioRouter;

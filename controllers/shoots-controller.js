@@ -64,7 +64,7 @@ const getShootSummaries = async (req, res) => {
       // for testing: photos stored as urls vs photos stored as S3 object names
       thumbnail_url: shoot.photo_url.includes("http") 
         ? shoot.photo_url
-        : `${AWS_BUCKET_PATH}${shoot.photo_url}`
+        : `${AWS_BUCKET_PATH}images/${shoot.photo_url}`
     }));
 
     const isFinalPage = shoots.length === 0;
@@ -143,7 +143,7 @@ const getShootByID = async (req, res) => {
           // for testing: photos stored as urls vs photos stored as S3 object names
           photo_url: photoUrls[idx].includes("http")
             ? photoUrls[idx]
-            : `${AWS_BUCKET_PATH}${photoUrls[idx]}`
+            : `${AWS_BUCKET_PATH}images/${photoUrls[idx]}`
         });
         seenIds.add(id);
       }

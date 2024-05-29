@@ -1,5 +1,7 @@
 const knex = require("knex")(require("../knexfile.js"));
-// const { verifyToken } = require('../utils/utils.js');
+const { verifyToken } = require('../utils/utils.js');
+
+const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
 
 // getBio to show bio page
 const getBio = async (req, res) => {
@@ -14,12 +16,12 @@ const getBio = async (req, res) => {
       } = bioData;
 
       // will need to send this concatenated with the aws bucket url and folder name
-      const bioImgURL = bioData.bio_img_url;
+      const bioImgURL = `${AWS_BUCKET_PATH}bio/${bioData.bio_img_url}`;
       
       return res.json({
         bioName, 
-        bioImgURL,
-        bioText});
+        bioText,
+        bioImgURL});
     } else {
       console.log("No bio data found in database");
       return res.status(404).json({message: "Bio data not found"});
@@ -31,6 +33,23 @@ const getBio = async (req, res) => {
   }
 }
 
+const updateBio = async (req, res, next) => {
+  const token = req.headers.authorization; 
+
+  // if(!verifyToken(token)) {
+  //   return res.status(401).send({message: "unauthorized"});
+  // }
+
+  try {
+
+  } catch(error) {
+
+  }
+
+  res.json({message: "Bio page updated"});
+}
+
 module.exports = {
-  getBio
+  getBio,
+  updateBio
 }
