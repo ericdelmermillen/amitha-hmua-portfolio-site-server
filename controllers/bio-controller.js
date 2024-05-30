@@ -3,6 +3,7 @@ const { verifyToken } = require('../utils/utils.js');
 const { deleteFiles } = require("../s3.js");
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
+const AWS_BIO_DIRNAME = process.env.AWS_BIO_DIRNAME;
 
 // getBio to show bio page
 const getBio = async (req, res) => {
@@ -16,7 +17,7 @@ const getBio = async (req, res) => {
         bio_text: bioText 
       } = bioData;
 
-      const bioImgURL = `${AWS_BUCKET_PATH}bio/${bioData.bio_img_url}`;
+      const bioImgURL = `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bioData.bio_img_url}`;
       
       return res.json({
         bioName, 
@@ -38,18 +39,22 @@ const getBio = async (req, res) => {
 const updateBio = async (req, res) => {
   const token = req.headers.authorization; 
 
-  // if(!verifyToken(token)) {
-  //   return res.status(401).send({ message: "unauthorized" });
-  // }
+  if(!verifyToken(token)) {
+    return res.status(401).send({ message: "unauthorized" });
+  }
 
   const { 
     bio_name, 
     bio_img_url, 
-    bio_text 
+    bio_text, 
+    updated_Photo
   } = req.body;
 
+  console.log(`updated_Photo: ${updated_Photo}`)
+  // return res.json({message: "old photo"})
+  
   // Validate request data
-  if (!bio_name || !bio_img_url || !bio_text) {
+  if(!bio_name || !bio_img_url || !bio_text) {
     return res.status(400).json({ message: "Incomplete Bio update data sent" });
   }
   
@@ -76,19 +81,21 @@ const updateBio = async (req, res) => {
         bio_text: updatedBioText,
         bio_img_url: updatedBioImgURL
       } = updatedBioData;
-      
-      // Delete old AWS objects on successful update
-      try {
-        await deleteFiles([`bio/${prevBioImgURL}`]);
-      } catch (deleteError) {
-        console.error('Error deleting files from AWS:', deleteError);
+
+      if(updated_Photo) {
+        // Delete old AWS objects on successful update
+        try {
+          await deleteFiles([`${AWS_BIO_DIRNAME}/${prevBioImgURL}`]);
+        } catch (deleteError) {
+          console.error('Error deleting files from AWS:', deleteError);
+        }
       }
       
       return res.json({
         message: "Bio updated successfully",
         bioName: updatedBioName,
         bioText: updatedBioText,
-        bioImgURL: updatedBioImgURL
+        bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${updatedBioImgURL}`
       });
     }
 
@@ -112,8 +119,7 @@ const updateBio = async (req, res) => {
     
     return res.status(500).send("Error updating Bio page");
   }
-}
-
+};
 
 
 module.exports = {

@@ -30,7 +30,7 @@ INSERT INTO bio (
 )
 VALUES
   ("Amitha Millen-Suwanta",
-  "287484496_10160013661675768_1085638352451915416_n.jpg",
+  "ddd1f452-69ca-4ee3-8996-164c9c8c3fd6.jpeg",
   "Meet Amitha, a dynamic makeup artist and fashion stylist who thrives on celebrating the unique beauty of each person. With a deep understanding that beauty knows no bounds, she rejects the notion of a one-size-fits-all approach to makeup. Instead, she crafts bespoke experiences for her clients, considering their individuality, comfort levels, and personal style.\nLocated in the heart of Toronto, Ontario, Amitha's professional journey has been a whirlwind of diverse experiences within the beauty industry. Though she revels in all aspects of her craft, her passion ignites most brightly within the realms of Fashion and Bridal makeup.\nFrom esteemed corporations to celebrated singers, actors, and brands across Canada, the USA, and the UK, Amitha and her team ensure that each client embarks on a unique and unforgettable beauty journey."
   );
 

@@ -124,6 +124,8 @@ const getSignedURL = async (req, res) => {
   const token = req.headers.authorization; 
   const dirname = req.query;
 
+
+
   if(!verifyToken(token)) {
     return res.status(401).send({ message: "Unauthorized" });
   }

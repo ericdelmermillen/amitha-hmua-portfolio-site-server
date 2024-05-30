@@ -25,8 +25,6 @@ const generateUploadURL = async function (dirname) {
 
   const awsDirname = dirname.dirname;
 
-  console.log(awsDirname)
-
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
     // Key: `images/${uuid()}.jpeg`
