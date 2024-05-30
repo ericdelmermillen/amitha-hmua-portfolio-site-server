@@ -5,6 +5,8 @@ const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
 const { deleteFiles } = require("../s3.js");
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
+const AWS_SHOOTS_DIRNAME = process.env.AWS_SHOOTS_DIRNAME;
+
 
 // get shoots with pagination
 const getShootSummaries = async (req, res) => {
@@ -64,7 +66,7 @@ const getShootSummaries = async (req, res) => {
       // for testing: photos stored as urls vs photos stored as S3 object names
       thumbnail_url: shoot.photo_url.includes("http") 
         ? shoot.photo_url
-        : `${AWS_BUCKET_PATH}images/${shoot.photo_url}`
+        : `${AWS_BUCKET_PATH}${AWS_SHOOTS_DIRNAME}/${shoot.photo_url}`
     }));
 
     const isFinalPage = shoots.length === 0;
@@ -143,7 +145,7 @@ const getShootByID = async (req, res) => {
           // for testing: photos stored as urls vs photos stored as S3 object names
           photo_url: photoUrls[idx].includes("http")
             ? photoUrls[idx]
-            : `${AWS_BUCKET_PATH}images/${photoUrls[idx]}`
+            : `${AWS_BUCKET_PATH}${AWS_SHOOTS_DIRNAME}/${photoUrls[idx]}`
         });
         seenIds.add(id);
       }
@@ -174,7 +176,8 @@ const addShoot = async (req, res) => {
     tag_ids,
     photographer_ids,
     model_ids,
-    photo_urls
+    photo_urls,
+    dirname
   } = req.body;
 
     // Check for required fields
@@ -250,7 +253,7 @@ const addShoot = async (req, res) => {
     
     // delete aws objs on fail
     try {
-      const objKeys = photo_urls.map(url => `images/${url}`);
+      const objKeys = photo_urls.map(url => `${AWS_SHOOTS_DIRNAME}/${url}`);
       await deleteFiles(objKeys);
     } catch (deleteError) {
       console.error('Error deleting files from AWS:', deleteError);
@@ -321,7 +324,7 @@ const editShootByID = async (req, res) => {
       for(const obj of photoObjKeys) {
         // get rid of dummy urls
         if(!obj.photo_url.includes("http") && !photo_urls.includes(obj.photo_url)) {
-          objKeys.push(`images/${obj.photo_url}`);
+          objKeys.push(`${AWS_SHOOTS_DIRNAME}/${obj.photo_url}`);
         }
       }
       
@@ -439,7 +442,8 @@ const deleteShootByID = async (req, res) => {
     for(const obj of photoObjKeys) {
       // get rid of dummy urls
       if(!obj.photo_url.includes("http")) {
-        objKeys.push(`images/${obj.photo_url}`);
+        // objKeys.push(`images/${obj.photo_url}`);
+        objKeys.push(`${AWS_SHOOTS_DIRNAME}/${obj.photo_url}`);
       }
     }
 

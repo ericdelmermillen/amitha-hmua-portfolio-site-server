@@ -21,13 +21,21 @@ const s3Client = new S3Client({
 });
 
 // Generate upload URL function using SDK v3
-const generateUploadURL = async function () {
+const generateUploadURL = async function (dirname) {
+
+  const awsDirname = dirname.dirname;
+
+  console.log(awsDirname)
+
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: `images/${uuid()}.jpeg`
+    // Key: `images/${uuid()}.jpeg`
+    Key: `${awsDirname}/${uuid()}.jpeg`
   });
 
+
   const uploadURL = await getSignedUrl(s3Client, command, { expiresIn: 60 });
+  // console.log(uploadURL)
   return uploadURL;
 };
 
