@@ -5,6 +5,34 @@ const app = express();
 // necessary for parsing the req.body
 app.use(express.json());
 
+// helmet for security on requests
+const helmet = require("helmet");
+app.use(helmet());
+
+// need to research each config option and set up later
+// app.use(helmet({
+//   contentSecurityPolicy: {
+//     directives: {
+//       defaultSrc: ["'self'"],
+//       scriptSrc: ["'self'", "'unsafe-inline'", "https://example.com"], // Allow scripts from self and example.com
+//       styleSrc: ["'self'", "'unsafe-inline'", "https://example.com"], // Allow styles from self and example.com
+//       imgSrc: ["'self'", "data:", "https://example.com"], // Allow images from self, data URIs, and example.com
+//       connectSrc: ["'self'", "https://api.example.com"], // Allow connections to self and api.example.com
+//       fontSrc: ["'self'", "https://example.com"], // Allow fonts from self and example.com
+//       objectSrc: ["'none'"], // Disallow plugins like Flash
+//       frameAncestors: ["'none'"], // Disallow embedding the site in iframes
+//       formAction: ["'self'"], // Allow form actions only from self
+//       upgradeInsecureRequests: [], // Automatically upgrade HTTP requests to HTTPS
+//     },
+//   },
+//   referrerPolicy: { policy: 'no-referrer-when-downgrade' },
+//   frameguard: { action: 'sameorigin' }, // Only allow framing on the same origin
+//   hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // Enforce HTTPS for one year
+//   hidePoweredBy: true, // Hide X-Powered-By header
+//   noSniff: true, // Prevent MIME type sniffing
+//   xssFilter: true, // Enable XSS filter in browsers
+// }));
+
 // need to set up cors for cross origin access
 const cors = require('cors');
 

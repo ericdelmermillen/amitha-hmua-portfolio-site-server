@@ -17,7 +17,9 @@ const getBio = async (req, res) => {
         bio_text: bioText 
       } = bioData;
 
-      const bioImgURL = `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bioData.bio_img_url}`;
+      const bioImgURL = bioData.bio_img_url 
+        ? `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bioData.bio_img_url}`
+        : ""
       
       return res.json({
         bioName, 
@@ -50,9 +52,6 @@ const updateBio = async (req, res) => {
     updated_Photo
   } = req.body;
 
-  console.log(`updated_Photo: ${updated_Photo}`)
-  // return res.json({message: "old photo"})
-  
   // Validate request data
   if(!bio_name || !bio_img_url || !bio_text) {
     return res.status(400).json({ message: "Incomplete Bio update data sent" });
