@@ -8,8 +8,14 @@ const paramsIsNumber = [
 ];
 
 const emailAndPasswordAreValid = [
-  body('email').isEmail().withMessage('Invalid email format'),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+  body('email')
+    .isEmail()
+    .withMessage('Invalid email format'),
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long')
+    .isString()
+    .withMessage('Password must be a string')
 ];
 
 const validContactFormData = [

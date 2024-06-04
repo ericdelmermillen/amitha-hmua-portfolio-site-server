@@ -32,7 +32,7 @@ const createUser = async (req, res) => {
     res.json({
       success: true,
       message: "User created successfully",
-      userID: userId,
+      userID: userId
     });
 
   } catch(error) {
@@ -41,16 +41,10 @@ const createUser = async (req, res) => {
   }
 };
 
+
 // userLogin function
 const userLogin = async (req, res) => {
   const { email, password } = req.body;
-
-  if(!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing either email or password",
-    });
-  }
 
   try {
     const matchedUser = await knex('users').where({ email }).first();
