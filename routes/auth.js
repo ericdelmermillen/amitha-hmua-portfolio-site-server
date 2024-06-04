@@ -7,16 +7,15 @@ const { emailAndPasswordAreValid } = require('../utils/validationSchemas.js');
 // auth create user
 authRouter.route('/createuser')
   .post(emailAndPasswordAreValid, (req, res, next) => {
-      const errors = validationResult(req);
-      const errorMsgs = errors.array().map(error => error.msg);
-
-      console.log(errorMsgs)
+    const errors = validationResult(req);
+    const errorMsgs = errors.array().map(error => error.msg);
       
-      if(!errors.isEmpty()) {
-        return res.status(400).json({ errors: errorMsgs });
-      }
-      next();
-    }, authController.createUser);
+    if(!errors.isEmpty()) {
+      return res.status(400).json({ errors: errorMsgs });
+    }
+    
+    next();
+  }, authController.createUser);
 
 
 // auth login

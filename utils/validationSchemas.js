@@ -18,6 +18,30 @@ const emailAndPasswordAreValid = [
     .withMessage('Password must be a string')
 ];
 
+const bioDataIsValid = [
+  body("bio_name")
+    .notEmpty()
+    .withMessage("Bio Name must not be empty")
+    .isString()
+    .withMessage("Bio Name must be a string")
+    .isLength({min: 2, max: 50})
+    .withMessage("Bio Name must be between 2-50 characters"),
+  body("bio_text")
+    .notEmpty()
+    .withMessage("Bio Text must not be empty")
+    .isString()
+    .withMessage("Bio Text must be a string")
+    .isLength({min: 25, max: 2000})
+    .withMessage("Bio Text must be between 25-2000 characters"),
+  body("bio_img_url")
+    .notEmpty()
+    .withMessage("Bio image url must not be empty")
+    .isString()
+    .withMessage("Bio Text must be a string")
+    .isLength({min: 10, max: 200})
+    .withMessage("Bio img url must be between 10-200 characters")
+];
+
 const validContactFormData = [
   body('firstName')
     .notEmpty().withMessage('First Name is required.')
@@ -90,6 +114,7 @@ const shootsOrderDataValid = [
 module.exports = {
   paramsIsNumber,
   emailAndPasswordAreValid, 
+  bioDataIsValid,
   validContactFormData,
   photographerDataValid,
   modelDataValid,

@@ -78,7 +78,7 @@ const userLogin = async (req, res) => {
       message: "Login successful",
       user: user,
       token: token,
-      refreshToken: refreshToken,
+      refreshToken: refreshToken
     });
     
   } catch(error) {
@@ -115,6 +115,7 @@ const getSignedURL = async (req, res) => {
   const dirname = req.query;
 
   if(!verifyToken(token)) {
+    console.log("not authorized")
     return res.status(401).send({ message: "Unauthorized" });
   }
 

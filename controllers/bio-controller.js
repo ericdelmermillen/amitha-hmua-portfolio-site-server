@@ -42,7 +42,7 @@ const updateBio = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    return res.status(401).send({ message: "unauthorized" });
+    return res.status(401).send({ message: "Unauthorized" });
   }
 
   const { 
@@ -51,11 +51,6 @@ const updateBio = async (req, res) => {
     bio_text, 
     updated_Photo
   } = req.body;
-
-  // Validate request data
-  if(!bio_name || !bio_img_url || !bio_text) {
-    return res.status(400).json({ message: "Incomplete Bio update data sent" });
-  }
   
   try {
     // Get existing bio data
