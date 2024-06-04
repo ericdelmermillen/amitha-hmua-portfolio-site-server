@@ -37,7 +37,6 @@ const getBio = async (req, res) => {
 }
 
 // updateBio
-// add validation schema for bio data
 const updateBio = async (req, res) => {
   const token = req.headers.authorization; 
 

@@ -33,13 +33,18 @@ const handleContactForm = async (req, res) => {
     text: "New Contact form submission",
     html: submittedMessage,
   };
-
+  
   try {
+    // response sending before request to transporter due to very long wait for confirmation
+    // 
+    res.status(201).json({
+      message: "Thanks! Your message to Amitha has been sent!"})
+
     let info = await transporter.sendMail(emailMessage);
-    console.log('Email sent:', info.response);
-    return res.status(201).json({
-      message: "Thanks! Your message to Amitha has been sent!"
-    });
+    return 
+    // res.status(201).json({
+    //   message: "Thanks! Your message to Amitha has been sent!"
+    // });
   } catch(error) {
     console.error('Error sending email:', error);
     return res.status(500).json({ error: "Failed to send email." });
