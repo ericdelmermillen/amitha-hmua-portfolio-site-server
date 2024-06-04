@@ -1,11 +1,15 @@
 const nodemailer = require('nodemailer');
 
-// email sending can be very slow: add a: "Working on it..." toast and a "Message sent successfully"
-
 // contact form
 // needs to set up for the correct email: make new email
 const handleContactForm = async (req, res) => {
-  const { firstName, lastName, email, subject, message } = req.body;
+  const { 
+    firstName, 
+    lastName, 
+    email, 
+    subject, 
+    message 
+  } = req.body;
 
   let config = {
     service: 'gmail',
@@ -29,22 +33,18 @@ const handleContactForm = async (req, res) => {
   let emailMessage = {
     from: email,
     to: "amithamillensuwanta@gmail.com",
-    subject: subject,
+    subject: `Contact Form Submission: ${subject}`,
     text: "New Contact form submission",
     html: submittedMessage,
   };
   
   try {
     // response sending before request to transporter due to very long wait for confirmation
-    // 
     res.status(201).json({
       message: "Thanks! Your message to Amitha has been sent!"})
 
-    let info = await transporter.sendMail(emailMessage);
-    return 
-    // res.status(201).json({
-    //   message: "Thanks! Your message to Amitha has been sent!"
-    // });
+    return await transporter.sendMail(emailMessage);
+
   } catch(error) {
     console.error('Error sending email:', error);
     return res.status(500).json({ error: "Failed to send email." });
