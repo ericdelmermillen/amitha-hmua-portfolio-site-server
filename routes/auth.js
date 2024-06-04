@@ -9,6 +9,8 @@ authRouter.route('/createuser')
   .post(emailAndPasswordAreValid, (req, res, next) => {
       const errors = validationResult(req);
       const errorMsgs = errors.array().map(error => error.msg);
+
+      console.log(errorMsgs)
       
       if(!errors.isEmpty()) {
         return res.status(400).json({ errors: errorMsgs });

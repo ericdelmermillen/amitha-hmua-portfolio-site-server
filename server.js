@@ -48,20 +48,21 @@ app.use(cors(corsOptions));
 // ---
 
 
-// test deleting route
-app.delete("/api/images/delete/:id", async (req, res) => {
-  const id = +req.params.id
-  const { objNames } = req.body;
+// // test deleting route
+// gets names of aws 3s bucket objects from req.body: no db look up
+// app.delete("/api/images/delete/:id", async (req, res) => {
+//   const id = +req.params.id
+//   const { objNames } = req.body;
 
-  try {
-    const deleteResponse = await deleteFiles(objNames);
-    console.log(deleteResponse); // optional: log the response for debugging
-    res.send("Deleted");
-  } catch (error) {
-    console.error("Error deleting file:", error);
-    res.status(500).send("Error deleting files");
-  }
-})
+//   try {
+//     const deleteResponse = await deleteFiles(objNames);
+//     console.log(deleteResponse); // optional: log the response for debugging
+//     res.send("Deleted");
+//   } catch (error) {
+//     console.error("Error deleting file:", error);
+//     res.status(500).send("Error deleting files");
+//   }
+// })
 
 // import routes
 const authRouter = require('./routes/auth.js');

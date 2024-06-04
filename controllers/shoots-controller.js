@@ -94,7 +94,9 @@ const getShootByID = async (req, res) => {
       return res.status(404).json({ error: 'Shoot not found' });
     }
 
+    // will this be an issue when posting the db to aws? ---
     await knex.raw('SET SESSION group_concat_max_len = 2560');
+    // --
 
     const shoot = await knex('shoots')
       .select(

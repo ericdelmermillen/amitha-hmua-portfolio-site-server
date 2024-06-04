@@ -1,20 +1,16 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const knex = require("knex")(require("../knexfile.js"));
-const { getToken, verifyToken, generateRefreshToken } = require('../utils/utils.js');
 const { generateUploadURL } = require('../s3.js');
+const { getToken, 
+  verifyToken, 
+  generateRefreshToken 
+} = require('../utils/utils.js');
 
 
 // createUser function
 const createUser = async (req, res) => {
   const { email, password } = req.body;
-
-  if(!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing either email or password",
-    });
-  }
   
   try {
     const userExists = await knex('users').where({ email: email }).first();
@@ -123,8 +119,6 @@ const refreshToken = async (req, res) => {
 const getSignedURL = async (req, res) => {
   const token = req.headers.authorization; 
   const dirname = req.query;
-
-
 
   if(!verifyToken(token)) {
     return res.status(401).send({ message: "Unauthorized" });

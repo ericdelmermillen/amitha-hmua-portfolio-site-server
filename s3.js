@@ -33,7 +33,7 @@ const generateUploadURL = async function (dirname) {
 
 
   const uploadURL = await getSignedUrl(s3Client, command, { expiresIn: 60 });
-  // console.log(uploadURL)
+
   return uploadURL;
 };
 
@@ -56,7 +56,6 @@ const deleteFiles = async (fileNames) => {
     throw error; 
   }
 };
-
 
 
 module.exports = {
