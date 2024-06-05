@@ -62,11 +62,6 @@ const addPhotographer = async (req, res) => {
 
 // edit photographer by id
 const editPhotographerById = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   try {
     const { id } = req.params;

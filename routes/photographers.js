@@ -41,8 +41,16 @@ photographersRouter.route('/edit/:id')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
+    
+    const token = req.headers.authorization; 
+
+    if(!verifyToken(token)) {
+      return res.status(401).send({message: "unauthorized"});
+    }
+    
     next();
   }, photographersController.editPhotographerById);
+
 
 // delete photographer route
 photographersRouter.route('/delete/:id')
