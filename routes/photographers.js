@@ -66,7 +66,6 @@ photographersRouter.route('/delete/:id')
     const token = req.headers.authorization; 
 
     if(!verifyToken(token)) {
-      console.log("rejected in route")
       return res.status(401).send({message: "unauthorized"});
     }
     

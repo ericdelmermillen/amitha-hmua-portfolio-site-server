@@ -2,6 +2,7 @@ const modelsController = require('../controllers/models-controller.js');
 const modelsRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, modelDataValid } = require('../utils/validationSchemas.js');
+const { verifyToken } = require('../utils/utils.js');
 
 
 // get models route
@@ -18,6 +19,12 @@ modelsRouter.route('/add')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
+    
+    const token = req.headers.authorization; 
+    
+    if(!verifyToken(token)) {
+      return res.status(401).send({message: "unauthorized"});
+    }
 
     next();
   }, modelsController.addModel);
@@ -33,6 +40,13 @@ modelsRouter.route('/edit/:id')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
+
+    const token = req.headers.authorization; 
+    
+    if(!verifyToken(token)) {
+      return res.status(401).send({message: "unauthorized"});
+    }
+    
     next();
   }, modelsController.editModelById);
 
@@ -47,6 +61,14 @@ modelsRouter.route('/delete/:id')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
+
+    const token = req.headers.authorization; 
+    
+    if(!verifyToken(token)) {
+      console.log("rejected in route")
+      return res.status(401).send({message: "unauthorized"});
+    }
+    
     next();
   }, modelsController.deleteModelByID);
 

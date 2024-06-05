@@ -1,5 +1,4 @@
 const knex = require("knex")(require("../knexfile.js"));
-const { verifyToken } = require('../utils/utils.js');
 
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
@@ -23,11 +22,6 @@ const getAllModels = async (req, res) => {
 
 // models/add route
 const addModel = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
-  }
 
   try {
     const { model_name } = req.body;
@@ -64,11 +58,6 @@ const addModel = async (req, res) => {
 
 // edit model by id
 const editModelById = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   try {
     
@@ -100,11 +89,6 @@ const editModelById = async (req, res) => {
 
 // delete model by id
 const deleteModelByID = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   try {
     const id = req.params.id;
