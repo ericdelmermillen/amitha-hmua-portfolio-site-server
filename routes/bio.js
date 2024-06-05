@@ -2,11 +2,13 @@ const bioController = require("../controllers/bio-controller.js");
 const bioRouter = require("express").Router();
 const { validationResult } = require('express-validator');
 const { bioDataIsValid } = require('../utils/validationSchemas.js');
+const { verifyToken } = require('../utils/utils.js');
 
 
 // GET getBio route
 bioRouter.route("/")
   .get(bioController.getBio);
+
 
 // PUT updateBio route
 bioRouter.route("/update")
@@ -16,6 +18,12 @@ bioRouter.route("/update")
     
     if(!errors.isEmpty()) {
       return res.status(400).json({errors: errorMsgs});
+    }
+
+    const token = req.headers.authorization; 
+
+    if(!verifyToken(token)) {
+      return res.status(401).send({message: "unauthorized"});
     }
     
     next();

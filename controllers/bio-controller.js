@@ -38,11 +38,6 @@ const getBio = async (req, res) => {
 
 // updateBio
 const updateBio = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({ message: "Unauthorized" });
-  }
 
   const { 
     bio_name, 

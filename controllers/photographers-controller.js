@@ -26,7 +26,7 @@ const addPhotographer = async (req, res) => {
   const token = req.headers.authorization; 
 
   if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"})
+    return res.status(401).send({message: "unauthorized"});
   }
 
   try {
@@ -43,7 +43,7 @@ const addPhotographer = async (req, res) => {
     if(photographerExists) {
       return res.status(409).json({
         success: false,
-        message: "A photographer with that name already exists",
+        message: "A photographer with that name already exists"
       });
     }
 
