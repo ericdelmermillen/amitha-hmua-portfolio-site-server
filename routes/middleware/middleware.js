@@ -1,14 +1,3 @@
-const {
-  paramsIsNumber,
-  emailAndPasswordAreValid, 
-  bioDataIsValid,
-  validContactFormData,
-  photographerDataValid,
-  modelDataValid,
-  tagDataValid,
-  shootDataValid,
-  shootsOrderDataValid
-} = require("../../utils/validationSchemas.js");
 const { verifyToken } = require('../../utils/utils.js');
 const { validationResult } = require('express-validator');
 

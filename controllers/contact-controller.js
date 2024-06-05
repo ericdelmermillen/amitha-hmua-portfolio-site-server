@@ -1,8 +1,8 @@
 const nodemailer = require('nodemailer');
 
 // contact form
-// needs to set up for the correct email: make new email
 const handleContactForm = async (req, res) => {
+  console.log("from contact controller")
   const { 
     firstName, 
     lastName, 

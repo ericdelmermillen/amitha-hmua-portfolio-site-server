@@ -59,6 +59,8 @@ const validContactFormData = [
     .isLength({ min: 10, max: 500 })
     .withMessage('Message must be between 10-500 characters long.'),
   body('email')
+    .notEmpty()
+    .withMessage("Contact email required")
     .isEmail()
     .withMessage('Invalid email format'),
   body('subject')
