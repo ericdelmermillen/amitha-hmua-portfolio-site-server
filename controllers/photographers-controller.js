@@ -23,11 +23,6 @@ const getAllPhotographers = async (req, res) => {
 
 // photographers/add route
 const addPhotographer = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   try {
     const { 

@@ -2,6 +2,7 @@ const photographersController = require('../controllers/photographers-controller
 const photographersRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, photographerDataValid } = require('../utils/validationSchemas.js');
+const { verifyToken } = require('../utils/utils.js');
 
 
 // get photographers route
@@ -18,6 +19,12 @@ photographersRouter.route('/add')
 
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
+    }
+    
+    const token = req.headers.authorization; 
+    
+    if(!verifyToken(token)) {
+      return res.status(401).send({message: "unauthorized"});
     }
 
     next();

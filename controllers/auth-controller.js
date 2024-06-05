@@ -2,10 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const knex = require("knex")(require("../knexfile.js"));
 const { generateUploadURL } = require('../s3.js');
-const { getToken, 
-  verifyToken, 
-  generateRefreshToken 
-} = require('../utils/utils.js');
+const { getToken, generateRefreshToken } = require('../utils/utils.js');
 
 
 // createUser function
@@ -148,6 +145,6 @@ module.exports = {
   createUser,
   userLogin,
   refreshToken,
-  logout,
-  getSignedURL
+  getSignedURL,
+  logout
 };
