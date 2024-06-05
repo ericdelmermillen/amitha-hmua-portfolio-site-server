@@ -1,6 +1,5 @@
 const bioController = require("../controllers/bio-controller.js");
 const bioRouter = require("express").Router();
-// const { validationResult } = require('express-validator');
 const { bioDataIsValid } = require('../utils/validationSchemas.js');
 const { validateToken, validateRequest } = require("./middleware/middleware.js");
 

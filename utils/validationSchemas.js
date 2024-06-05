@@ -12,8 +12,8 @@ const emailAndPasswordAreValid = [
     .isEmail()
     .withMessage('Invalid email format'),
   body('password')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters long')
+    .isLength({ min: 8, max: 32})
+    .withMessage('Password must be at between 8-32 characters long')
     .isString()
     .withMessage('Password must be a string')
 ];

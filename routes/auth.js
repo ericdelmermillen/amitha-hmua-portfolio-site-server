@@ -1,37 +1,17 @@
 const authController = require('../controllers/auth-controller.js');
 const authRouter = require('express').Router();
-const { validationResult } = require('express-validator');
 const { emailAndPasswordAreValid } = require('../utils/validationSchemas.js');
-const { verifyToken } = require('../utils/utils.js');
+const { validateToken, validateRequest } = require("./middleware/middleware.js");
 
 
 // auth create user
-authRouter.route('/createuser')
-  .post(emailAndPasswordAreValid, (req, res, next) => {
-    const errors = validationResult(req);
-    const errorMsgs = errors.array().map(error => error.msg);
-      
-    if(!errors.isEmpty()) {
-      return res.status(400).json({ errors: errorMsgs });
-    }
-
-    next();
-  }, authController.createUser);
+authRouter.route("/createuser")
+  .post(validateRequest(emailAndPasswordAreValid), authController.createUser);
 
 
 // auth login
 authRouter.route('/login')
-  .post(emailAndPasswordAreValid, (req, res, next) => {
-    const errors = validationResult(req);
-
-    const errorMsgs = errors.array().map(error => error.msg);
-    
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errorMsgs });
-    }
-  
-  next();
-}, authController.userLogin);
+  .post(validateRequest(emailAndPasswordAreValid), authController.userLogin);
 
 
 // auth refresh token
@@ -41,18 +21,9 @@ authRouter.route('/refresh')
 
 // get signed AWS URL
 authRouter.route('/getsignedURL')
-  .get((req, res, next) => {
+  .get(validateToken, authController.getSignedURL);
   
-    const token = req.headers.authorization; 
-    
-    if(!verifyToken(token)) {
-      return res.status(401).send({message: "unauthorized"});
-    }
-    
-    next();
-}, authController.getSignedURL);
-  
-  
+
 // auth logout
 authRouter.route('/logout')
   .post(authController.logout);
