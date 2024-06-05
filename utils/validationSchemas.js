@@ -1,5 +1,4 @@
 const { body, param } = require('express-validator');
-// const { isValidURL } = require('./utils.js');
 
 const paramsIsNumber = [
   param('id')
@@ -128,7 +127,6 @@ const shootDataValid = [
   body('photo_urls')
     .isArray({ min: 1 })
     .withMessage('At least one photo URL is required')
-    // .custom(urls => urls.every(url => typeof url === 'string').withMessage('Each photo URL must be a string'))
 ];
 
 const shootsOrderDataValid = [

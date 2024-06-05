@@ -1,7 +1,7 @@
 const authController = require('../controllers/auth-controller.js');
 const authRouter = require('express').Router();
 const { emailAndPasswordAreValid } = require('../utils/validationSchemas.js');
-const { validateToken, validateRequest } = require("./middleware/middleware.js");
+const { validateToken, validateRequest } = require("../middleware/middleware.js");
 
 
 // auth create user

@@ -1,8 +1,7 @@
 const tagsController = require('../controllers/tags-controller');
 const tagsRouter = require('express').Router();
-const { validationResult } = require('express-validator');
 const { paramsIsNumber, tagDataValid } = require('../utils/validationSchemas.js');
-const { validateToken, validateRequest } = require("./middleware/middleware.js");
+const { validateToken, validateRequest } = require("../middleware/middleware.js");
 
 
 // get models route

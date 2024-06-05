@@ -1,4 +1,4 @@
-const { verifyToken } = require('../../utils/utils.js');
+const { verifyToken } = require('../utils/utils.js');
 const { validationResult } = require('express-validator');
 
 

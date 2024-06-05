@@ -1,7 +1,7 @@
 const contactController = require('../controllers/contact-controller.js');
 const contactRouter = require('express').Router();
 const { validContactFormData } = require('../utils/validationSchemas.js');
-const { validateRequest } = require("./middleware/middleware.js");
+const { validateRequest } = require("../middleware/middleware.js");
 
 
 // contact route

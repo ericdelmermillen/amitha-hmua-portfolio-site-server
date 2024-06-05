@@ -1,8 +1,7 @@
 const modelsController = require('../controllers/models-controller.js');
 const modelsRouter = require('express').Router();
 const { paramsIsNumber, modelDataValid } = require('../utils/validationSchemas.js');
-const { validateToken } = require("./middleware/middleware.js");
-const { validateRequest } = require("./middleware/middleware.js");
+const { validateToken, validateRequest } = require("../middleware/middleware.js");
 
 
 // get models route
