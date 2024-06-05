@@ -1,5 +1,4 @@
 const knex = require("knex")(require("../knexfile.js"));
-const { verifyToken } = require('../utils/utils.js');
 
 
 // get all photographers for addEdit shoot page photographer selector 
@@ -95,11 +94,6 @@ const editPhotographerById = async (req, res) => {
 
 // delete photographer by id
 const deletePhotographerByID = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   try {
     const id = req.params.id;

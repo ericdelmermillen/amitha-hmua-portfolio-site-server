@@ -62,6 +62,14 @@ photographersRouter.route('/delete/:id')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
+
+    const token = req.headers.authorization; 
+
+    if(!verifyToken(token)) {
+      console.log("rejected in route")
+      return res.status(401).send({message: "unauthorized"});
+    }
+    
     next();
   }, photographersController.deletePhotographerByID);
 
