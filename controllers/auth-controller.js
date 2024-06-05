@@ -111,13 +111,7 @@ const refreshToken = async (req, res) => {
 
 // get signed AWS S3 URL
 const getSignedURL = async (req, res) => {
-  const token = req.headers.authorization; 
   const dirname = req.query;
-
-  if(!verifyToken(token)) {
-    console.log("not authorized")
-    return res.status(401).send({ message: "Unauthorized" });
-  }
 
   const url = await generateUploadURL(dirname);
   return res.send({url});

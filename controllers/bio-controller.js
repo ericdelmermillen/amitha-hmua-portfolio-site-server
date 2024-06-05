@@ -1,5 +1,4 @@
 const knex = require("knex")(require("../knexfile.js"));
-const { verifyToken } = require('../utils/utils.js');
 const { deleteFiles } = require("../s3.js");
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;

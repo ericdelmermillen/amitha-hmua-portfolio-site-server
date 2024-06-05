@@ -2,6 +2,7 @@ const authController = require('../controllers/auth-controller.js');
 const authRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { emailAndPasswordAreValid } = require('../utils/validationSchemas.js');
+const { verifyToken } = require('../utils/utils.js');
 
 
 // auth create user
@@ -13,7 +14,7 @@ authRouter.route('/createuser')
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
     }
-    
+
     next();
   }, authController.createUser);
 
@@ -41,7 +42,14 @@ authRouter.route('/refresh')
 // get signed AWS URL
 authRouter.route('/getsignedURL')
   .get((req, res, next) => {
-  next();
+  
+    const token = req.headers.authorization; 
+    
+    if(!verifyToken(token)) {
+      return res.status(401).send({message: "unauthorized"});
+    }
+    
+    next();
 }, authController.getSignedURL);
   
   
