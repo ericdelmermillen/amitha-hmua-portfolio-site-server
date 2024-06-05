@@ -2,6 +2,7 @@ const shootsController = require('../controllers/shoots-controller.js');
 const shootsRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, shootDataValid, shootsOrderDataValid } = require('../utils/validationSchemas.js');
+const { validateToken } = require("./middleware/middleware.js");
 
 
 // GET shoots 
@@ -26,7 +27,7 @@ shootsRouter.route('/shoot/:id')
 
 // POST /shoots/add
 shootsRouter.route('/add')
-  .post(shootDataValid, (req, res, next) => {
+  .post(validateToken, shootDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
@@ -42,7 +43,7 @@ shootsRouter.route('/add')
 
   // PUT /shoots/edit/:id
 shootsRouter.route('/edit/:id')
-  .put((req, res, next) => {
+  .put(validateToken, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
@@ -56,7 +57,7 @@ shootsRouter.route('/edit/:id')
 
 // delete shoot
 shootsRouter.route('/delete/:id')
-  .delete(paramsIsNumber, (req, res, next) => {
+  .delete(validateToken, paramsIsNumber, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
@@ -70,7 +71,7 @@ shootsRouter.route('/delete/:id')
 
 // edit shoots order
 shootsRouter.route('/updateorder')
-  .patch(shootsOrderDataValid, (req, res, next) => {
+  .patch(validateToken, shootsOrderDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);

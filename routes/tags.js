@@ -2,6 +2,7 @@ const tagsController = require('../controllers/tags-controller');
 const tagsRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, tagDataValid } = require('../utils/validationSchemas.js');
+const { validateToken } = require("./middleware/middleware.js");
 
 
 // get models route
@@ -11,7 +12,7 @@ tagsRouter.route('/all')
 
 // // add model route  
 tagsRouter.route('/add')
-  .post(tagDataValid, (req, res, next) => {
+  .post(validateToken, tagDataValid, (req, res, next) => {
     const errors = validationResult(req);
     const errorMsgs = errors.array().map(error => error.msg);
 
@@ -25,7 +26,7 @@ tagsRouter.route('/add')
   
 // edit tag by id route  
 tagsRouter.route('/edit/:id')
-  .put(paramsIsNumber, tagDataValid, (req, res, next) => {
+  .put(validateToken, paramsIsNumber, tagDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
@@ -40,7 +41,7 @@ tagsRouter.route('/edit/:id')
   
 // // delete model route
 tagsRouter.route('/delete/:id')
-  .delete(paramsIsNumber, (req, res, next) => {
+  .delete(validateToken, paramsIsNumber, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);

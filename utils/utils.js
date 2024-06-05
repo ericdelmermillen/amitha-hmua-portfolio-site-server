@@ -37,11 +37,11 @@ const dateFormatOptions = () => (
   { year: 'numeric', month: '2-digit', day: '2-digit' }
 );
 
-// regex to test for valid urls for URL validation
-const isValidURL = (url) => {
-  const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-  return urlRegex.test(url);
-};
+// // regex to test for valid urls for URL validation
+// const isValidURL = (url) => {
+//   const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+//   return urlRegex.test(url);
+// };
 
 
 
@@ -50,5 +50,5 @@ module.exports = {
   verifyToken,
   generateRefreshToken,
   dateFormatOptions,
-  isValidURL
+  // isValidURL
 };

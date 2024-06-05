@@ -1,3 +1,14 @@
+const {
+  paramsIsNumber,
+  emailAndPasswordAreValid, 
+  bioDataIsValid,
+  validContactFormData,
+  photographerDataValid,
+  modelDataValid,
+  tagDataValid,
+  shootDataValid,
+  shootsOrderDataValid
+} = require("../../utils/validationSchemas.js");
 const { verifyToken } = require('../../utils/utils.js');
 
 const validateToken = (req, res, next) => {
@@ -10,6 +21,8 @@ const validateToken = (req, res, next) => {
 
   next();
 };
+
+console.log(paramsIsNumber)
 
 module.exports = {
   validateToken

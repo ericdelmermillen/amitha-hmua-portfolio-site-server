@@ -2,7 +2,6 @@ const photographersController = require('../controllers/photographers-controller
 const photographersRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, photographerDataValid } = require('../utils/validationSchemas.js');
-const { verifyToken } = require('../utils/utils.js');
 const { validateToken } = require("./middleware/middleware.js");
 
 

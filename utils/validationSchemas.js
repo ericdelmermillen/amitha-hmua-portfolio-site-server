@@ -1,5 +1,5 @@
 const { body, param } = require('express-validator');
-const { isValidURL } = require('./utils.js');
+// const { isValidURL } = require('./utils.js');
 
 const paramsIsNumber = [
   param('id')

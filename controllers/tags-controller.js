@@ -1,5 +1,4 @@
 const knex = require("knex")(require("../knexfile.js"));
-const { verifyToken } = require('../utils/utils.js');
 
 // get all tags for add shoot/edit tags selector
 const getAllTags = async (req, res) => {
@@ -24,11 +23,6 @@ const getAllTags = async (req, res) => {
 
 // // tags/add route
 const addTag = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "Unauthorized"});
-  }
 
   try {
     const { tag_name } = req.body;
@@ -65,11 +59,6 @@ const addTag = async (req, res) => {
 
 // edit tag by id
 const editTagById = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   try {
     
@@ -101,11 +90,6 @@ const editTagById = async (req, res) => {
 
 // // delete tag by id
 const deleteTagByID = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   try {
     const id = req.params.id;

@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const knex = require("knex")(require("../knexfile.js"));
-const { verifyToken, dateFormatOptions } = require('../utils/utils.js');
+const { dateFormatOptions } = require('../utils/utils.js');
 const { deleteFiles } = require("../s3.js");
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
@@ -167,11 +167,6 @@ const getShootByID = async (req, res) => {
 
 // add shoot 
 const addShoot = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({ message: "Unauthorized" });
-  }
 
   let {
     shoot_date,
@@ -268,11 +263,6 @@ const addShoot = async (req, res) => {
 
 // edit shoot
 const editShootByID = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({ message: "Unauthorized" });
-  }
 
   const { id } = req.params;
 
@@ -400,11 +390,6 @@ const editShootByID = async (req, res) => {
 
 // delete shoot
 const deleteShootByID = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({ message: "unauthorized" });
-  }
 
   try {
     const { id } = req.params;
@@ -477,11 +462,6 @@ const deleteShootByID = async (req, res) => {
 
 // route for updating shoots order: update the display order of all the shoots
 const updateShootOrder = async (req, res) => {
-  const token = req.headers.authorization; 
-
-  if(!verifyToken(token)) {
-    return res.status(401).send({message: "unauthorized"});
-  }
 
   const newShootsOrder = req.body.new_shoot_order;
 
