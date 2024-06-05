@@ -3,6 +3,7 @@ const photographersRouter = require('express').Router();
 const { validationResult } = require('express-validator');
 const { paramsIsNumber, photographerDataValid } = require('../utils/validationSchemas.js');
 const { verifyToken } = require('../utils/utils.js');
+const { validateToken } = require("./middleware/middleware.js");
 
 
 // get photographers route
@@ -13,18 +14,12 @@ photographersRouter.route('/all')
 
 // add photographer route
 photographersRouter.route('/add')
-  .post(photographerDataValid, (req, res, next) => {
+  .post(validateToken, photographerDataValid, (req, res, next) => {
     const errors = validationResult(req);
       const errorMsgs = errors.array().map(error => error.msg);
 
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
-    }
-    
-    const token = req.headers.authorization; 
-    
-    if(!verifyToken(token)) {
-      return res.status(401).send({message: "unauthorized"});
     }
 
     next();
@@ -33,19 +28,13 @@ photographersRouter.route('/add')
 
 // edit photographer by id route  
 photographersRouter.route('/edit/:id')
-  .put(paramsIsNumber, photographerDataValid, (req, res, next) => {
+  .put(validateToken, paramsIsNumber, photographerDataValid, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
 
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
-    }
-    
-    const token = req.headers.authorization; 
-
-    if(!verifyToken(token)) {
-      return res.status(401).send({message: "unauthorized"});
     }
     
     next();
@@ -54,19 +43,13 @@ photographersRouter.route('/edit/:id')
 
 // delete photographer route
 photographersRouter.route('/delete/:id')
-  .delete(paramsIsNumber, (req, res, next) => {
+  .delete(validateToken, paramsIsNumber, (req, res, next) => {
     const errors = validationResult(req);
 
     const errorMsgs = errors.array().map(error => error.msg);
 
     if(!errors.isEmpty()) {
       return res.status(400).json({ errors: errorMsgs });
-    }
-
-    const token = req.headers.authorization; 
-
-    if(!verifyToken(token)) {
-      return res.status(401).send({message: "unauthorized"});
     }
     
     next();
