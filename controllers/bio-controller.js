@@ -1,4 +1,9 @@
-const knex = require("knex")(require("../knexfile.js"));
+// --- setting up for migrations: commented out line works with original knexfile.js set up: new lines work with config setup
+// const knex = require("knex")(require("../knexfile.js"));
+const knexConfig = require('../knexfile.js');
+const knex = require('knex')(knexConfig[process.env.NODE_ENV || 'development']);
+// ---
+
 const { deleteFiles } = require("../s3.js");
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
@@ -19,14 +24,16 @@ const getBio = async (req, res) => {
       const bioImgURL = bioData.bio_img_url 
         ? `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bioData.bio_img_url}`
         : ""
-      
+        
       return res.json({
-        bioName, 
-        bioText,
-        bioImgURL});
+        bioName: bioName, 
+        bioText: bioText,
+        bioImgURL: bioImgURL,
+        bioImageNotSet: bioImgURL === `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/` || !bioImgURL.length
+      });
     } else {
       console.log("No bio data found in database");
-      return res.status(404).json({message: "Bio data not found"});
+      return res.status(404).json({message: "Bio data not found or not set"});
     }
 
   } catch(error) {

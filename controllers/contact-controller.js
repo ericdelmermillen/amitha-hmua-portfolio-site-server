@@ -39,7 +39,7 @@ const handleContactForm = async (req, res) => {
   };
   
   try {
-    // response sending before request to transporter due to very long wait for confirmation
+    // response send before request to transporter due to very long wait for confirmation
     res.status(201).json({
       message: "Thanks! Your message to Amitha has been sent!"})
 
