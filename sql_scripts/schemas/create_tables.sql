@@ -35,7 +35,6 @@ VALUES
   );
 
 
-
 CREATE TABLE photographers (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   photographer_name VARCHAR(255) NOT NULL

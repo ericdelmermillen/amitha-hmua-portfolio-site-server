@@ -43,97 +43,6 @@ const getBio = async (req, res) => {
 }
 
 // updateBio
-// const updateBio = async (req, res) => {
-
-//   const { 
-//     bio_name, 
-//     bio_img_url, 
-//     bio_text, 
-//     updated_Photo
-//   } = req.body;
-  
-//   try {
-
-//     const existingBioData = await knex('bio').first();
-
-//     if(!existingBioData) {
-//       const insertedBio = await knex('bio').insert({
-//         bio_name,
-//         bio_text,
-//         bio_img_url
-//       });
-
-//       return res.json({
-//         message: "Bio inserted successfully",
-//         bioName: bio_name,
-//         bioText: bio_text,
-//         bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bio_img_url}`
-//       });
-//     }
-
-//     // Get existing bio data
-//     // const bioData = await knex('bio').first(); 
-//     const prevBioImgURL = bioData.bio_img_url;
-
-//     // Update bio data
-//     const updatedBio = await knex('bio')
-//       .where('id', 1)
-//       .update({
-//         bio_name,
-//         bio_text,
-//         bio_img_url
-//       });
-
-//     if(updatedBio) {
-//       // Fetch the updated bio data
-//       const updatedBioData = await knex('bio').first(); 
-      
-//       const {      
-//         bio_name: updatedBioName,
-//         bio_text: updatedBioText,
-//         bio_img_url: updatedBioImgURL
-//       } = updatedBioData;
-
-//       if(updated_Photo) {
-//         // Delete old AWS objects on successful update
-//         try {
-//           await deleteFiles([`${AWS_BIO_DIRNAME}/${prevBioImgURL}`]);
-//         } catch (deleteError) {
-//           console.error('Error deleting files from AWS:', deleteError);
-//         }
-//       }
-      
-//       return res.json({
-//         message: "Bio updated successfully",
-//         bioName: updatedBioName,
-//         bioText: updatedBioText,
-//         bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${updatedBioImgURL}`
-//       });
-//     }
-
-//   } catch (error) {
-//     console.error('Error updating Bio page:', error);
-
-//     // If updating bio fails, delete the AWS object added by the client
-//     try {
-//       console.log("Update failed: deleting new photo from AWS");
-//       const deleteResponse = await deleteFiles([`bio/${bio_img_url}`]);
-
-//       if(!deleteResponse) {
-//         throw new Error("Error deleting files from AWS");
-//       }
-
-//     } catch(deleteError) {
-//       // Handle errors in AWS object deletion
-//       console.error("Error deleting file from AWS:", deleteError);
-//       return res.status(500).send("Error deleting files from AWS");
-//     }
-    
-//     return res.status(500).send("Error updating Bio page");
-//   }
-// };
-
-// updateBio
 const updateBio = async (req, res) => {
 
   const { 
@@ -223,7 +132,6 @@ const updateBio = async (req, res) => {
     return res.status(500).send("Error updating Bio page");
   }
 };
-
 
 
 module.exports = {
