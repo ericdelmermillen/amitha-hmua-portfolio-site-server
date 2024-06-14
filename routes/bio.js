@@ -11,7 +11,9 @@ bioRouter.route("/")
 
 // PUT updateBio route
 bioRouter.route("/update")
-  .put(validateToken, validateRequest(bioDataIsValid), bioController.updateBio);
+  .put(validateToken, 
+    // validateRequest(bioDataIsValid), 
+    bioController.updateBio);
 
 
   module.exports = bioRouter;
