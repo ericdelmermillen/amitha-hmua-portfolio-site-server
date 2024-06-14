@@ -1,18 +1,19 @@
 /**
- * @param {import("knex").Knex} knex
- * @returns {Promise<void>}
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
  */
-exports.up = (knex) => {
-  return knex.schema.createTable('photographers', (table) => {
+exports.up = function(knex) {
+  return knex.schema.createTable('users', (table) => {
     table.increments('id').primary();
-    table.string('photographer_name', 255).notNullable();
+    table.string('email', 255);
+    table.string('password', 255);
   });
 };
 
 /**
- * @param {import("knex").Knex} knex
- * @returns {Promise<void>}
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
  */
 exports.down = (knex) => {
-  return knex.schema.dropTableIfExists('photographers');
+  return knex.schema.dropTable('users');
 };
