@@ -116,6 +116,7 @@ const getShootByID = async (req, res) => {
         knex.raw('GROUP_CONCAT(DISTINCT tags.id) AS tag_ids'), 
         knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
+        knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids')
       )
@@ -128,6 +129,8 @@ const getShootByID = async (req, res) => {
       .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id')
       .where('shoots.id', id)
       .groupBy('shoots.id', 'shoots.shoot_date');
+
+      console.log(shoot)
     
     const shootData = {};
     shootData.shoot_id = shoot[0].shoot_id;
@@ -243,10 +246,12 @@ const addShoot = async (req, res) => {
       }
 
       // Insert photo URLs
-      for(const photoUrl of photo_urls) {
+      for(const [idx, photoUrl] of photo_urls.entries()) {
         // await trx('photos').insert({
+          console.log(idx)
         await trx('photos').insert({
           shoot_id: shootId,
+          display_order: idx + 1,
           photo_url: photoUrl
         });
       }
@@ -380,9 +385,10 @@ const editShootByID = async (req, res) => {
       }
 
       // Insert photo URLs
-      for(const photoUrl of photo_urls) {
+      for(const [idx, photoUrl] of photo_urls.entries()) {
         await trx('photos').insert({
           shoot_id: id,
+          display_order: idx + 1, 
           photo_url: photoUrl
         });
       }
