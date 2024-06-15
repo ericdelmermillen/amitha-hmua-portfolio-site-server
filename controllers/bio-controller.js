@@ -32,7 +32,6 @@ const getBio = async (req, res) => {
         bioImageNotSet: bioImgURL === `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/` || !bioImgURL.length
       });
     } else {
-      console.log("No bio data found in database");
       return res.status(404).json({message: "Bio data not found or not set"});
     }
 

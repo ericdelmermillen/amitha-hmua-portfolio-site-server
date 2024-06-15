@@ -129,8 +129,6 @@ const getShootByID = async (req, res) => {
       .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id')
       .where('shoots.id', id)
       .groupBy('shoots.id', 'shoots.shoot_date');
-
-      console.log(shoot)
     
     const shootData = {};
     shootData.shoot_id = shoot[0].shoot_id;
@@ -247,8 +245,6 @@ const addShoot = async (req, res) => {
 
       // Insert photo URLs
       for(const [idx, photoUrl] of photo_urls.entries()) {
-        // await trx('photos').insert({
-          console.log(idx)
         await trx('photos').insert({
           shoot_id: shootId,
           display_order: idx + 1,
