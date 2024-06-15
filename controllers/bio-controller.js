@@ -1,8 +1,4 @@
-// --- setting up for migrations: commented out line works with original knexfile.js set up: new lines work with config setup
 const knex = require("knex")(require("../knexfile.js"));
-// const knexConfig = require('../knexfile.js');
-// const knex = require('knex')(knexConfig[process.env.NODE_ENV || 'development']);
-// ---
 
 const { deleteFiles } = require("../s3.js");
 
