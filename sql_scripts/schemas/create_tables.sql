@@ -121,20 +121,6 @@ CREATE TABLE photos (
   FOREIGN KEY (shoot_id) REFERENCES shoots(id) ON DELETE CASCADE
 );
 
-DELIMITER //
-
-CREATE TRIGGER set_display_order_default_photos
-BEFORE INSERT ON photos
-FOR EACH ROW
-BEGIN
-    DECLARE total_rows INT;
-    SELECT COUNT(*) INTO total_rows FROM photos WHERE shoot_id = NEW.shoot_id;
-    SET NEW.display_order = total_rows + 1;
-END;
-//
-
-DELIMITER ;
-
 
 INSERT INTO photos 
 	(shoot_id, photo_url)
