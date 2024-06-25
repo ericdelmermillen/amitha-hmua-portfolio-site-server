@@ -112,6 +112,7 @@ const getSignedURL = async (req, res) => {
   const dirname = req.query;
 
   const url = await generateUploadURL(dirname);
+  
   return res.send({url});
 }
 

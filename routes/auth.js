@@ -5,8 +5,8 @@ const { validateToken, validateRequest } = require("../middleware/middleware.js"
 
 
 // auth create user
-authRouter.route("/createuser")
-  .post(validateRequest(emailAndPasswordAreValid), authController.createUser);
+// authRouter.route("/createuser")
+//   .post(validateRequest(emailAndPasswordAreValid), authController.createUser);
 
 
 // auth login
