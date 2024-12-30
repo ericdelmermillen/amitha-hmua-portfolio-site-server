@@ -27,8 +27,7 @@ const createUser = async (req, res) => {
     
     const [ userId ] = await knex('users').insert(newUser);
 
-    res.json({
-      success: true,
+    return res.status(201).json({
       message: "User created successfully",
       userID: userId
     });
@@ -66,13 +65,11 @@ const userLogin = async (req, res) => {
     // build the user
     const user = {};
     user.id = matchedUser.id;
-    user.role = matchedUser.role;
 
     const token = getToken(user);
     const refreshToken = generateRefreshToken(user.id); 
 
     return res.json({
-      success: true,
       message: "Login successful",
       user: user,
       token: token,
@@ -109,7 +106,7 @@ const refreshToken = async (req, res) => {
 
 // get signed AWS S3 URL
 const getSignedURL = async (req, res) => {
-  const dirname = req.query;
+  const { dirname } = req.query;
 
   const url = await generateUploadURL(dirname);
   
@@ -138,7 +135,7 @@ const logout = async (req, res) => {
     
   } catch(error) {
     console.log(error)
-    return res.status(500).json({ error: "An error occurred while logging in" });
+    return res.status(500).json({ error: "An error occurred while logging out" });
   }
 };
 

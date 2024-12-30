@@ -23,7 +23,7 @@ const s3Client = new S3Client({
 // Generate upload URL function using SDK v3
 const generateUploadURL = async function (dirname) {
 
-  const awsDirname = dirname.dirname;
+  const awsDirname = dirname;
 
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
