@@ -1,5 +1,10 @@
 import express from 'express';
-import { getAllModels, addModel, editModelById, deleteModelByID } from '../controllers/models-controller.mjs';
+import { 
+  getAllModels, 
+  addModel, 
+  editModelById, 
+  deleteModelByID 
+} from '../controllers/models-controller.mjs';
 import { paramsIsNumber, modelDataValid } from '../utils/validationSchemas.mjs';
 import { validateToken, validateRequest } from '../middleware/middleware.mjs';
 
