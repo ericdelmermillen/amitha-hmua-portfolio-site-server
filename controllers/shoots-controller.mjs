@@ -1,7 +1,12 @@
-const knex = require("knex")(require("../knexfile.js"));
+import knexModule from "knex";
+import knexfile from "../knexfile.js";
 
-const { dateFormatOptions } = require('../utils/utils.js');
-const { deleteFiles } = require("../s3.js");
+const NODE_ENVIRONMENT = process.env.NODE_ENVIRONMENT || 'development';
+
+const knex = knexModule(knexfile[NODE_ENVIRONMENT]);
+
+import { dateFormatOptions } from '../utils/utils.mjs';
+import { deleteFiles } from "../s3.mjs";
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
 const AWS_SHOOTS_DIRNAME = process.env.AWS_SHOOTS_DIRNAME;
@@ -107,7 +112,6 @@ const getShootByID = async (req, res) => {
         knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
         knex.raw('GROUP_CONCAT(DISTINCT tags.id) AS tag_ids'), 
         knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags'),
-        knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
         knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids')
@@ -485,7 +489,7 @@ const updateShootOrder = async (req, res) => {
 };
 
 
-module.exports = {
+export {
   getShootSummaries,
   getShootByID,
   addShoot,

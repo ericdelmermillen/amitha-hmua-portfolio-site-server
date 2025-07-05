@@ -1,9 +1,15 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const knex = require("knex")(require("../knexfile.js"));
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import knexModule from 'knex';
 
-const { generateUploadURL } = require('../s3.js');
-const { getToken, generateRefreshToken } = require('../utils/utils.js');
+
+import knexConfig from '../knexfile.js';
+import { generateUploadURL } from '../s3.mjs';
+import { getToken, generateRefreshToken } from '../utils/utils.mjs';
+
+// Select environment config (e.g., 'development')
+const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
+const knex = knexModule(knexConfig[NODE_ENVIRONMENT]);
 
 
 // createUser function
@@ -140,7 +146,7 @@ const logout = async (req, res) => {
 };
 
 
-module.exports = {
+export {
   createUser,
   userLogin,
   refreshToken,

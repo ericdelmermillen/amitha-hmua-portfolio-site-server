@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken');
+import jwt from 'jsonwebtoken';
 
 // generate jwt
 const getToken = (user) => {
@@ -38,7 +38,7 @@ const dateFormatOptions = () => (
 );
 
 
-module.exports = {
+export {
   getToken,
   verifyToken,
   generateRefreshToken,

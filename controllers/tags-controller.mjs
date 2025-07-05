@@ -1,7 +1,13 @@
-const knex = require("knex")(require("../knexfile.js"));
+import knexModule from 'knex';
+import knexConfig from '../knexfile.js';
+
+const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
+const knex = knexModule(knexConfig[NODE_ENVIRONMENT]);
 
 // get all tags for add shoot/edit tags selector
 const getAllTags = async (req, res) => {
+  
+  console.log("from get all tags")
 
   try {
     const tagsData = await knex('tags');
@@ -154,7 +160,7 @@ const deleteTagByID = async (req, res) => {
 };
 
 
-module.exports = {
+export {
   getAllTags,
   addTag,
   editTagById,

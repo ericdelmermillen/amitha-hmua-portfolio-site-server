@@ -1,15 +1,16 @@
-const dotenv = require('dotenv');
+import dotenv from 'dotenv';
 dotenv.config();
 
-const { v4: uuid } = require('uuid');
 
-const { 
+import { v4 as uuid } from 'uuid';
+
+import { 
   S3Client, 
   PutObjectCommand,
   DeleteObjectCommand 
-} = require('@aws-sdk/client-s3');
+} from '@aws-sdk/client-s3';
 
-const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // Initialize S3 client with SDK v3
 const s3Client = new S3Client({
@@ -58,7 +59,7 @@ const deleteFiles = async (fileNames) => {
 };
 
 
-module.exports = {
+export {
   generateUploadURL,
   deleteFiles
 };

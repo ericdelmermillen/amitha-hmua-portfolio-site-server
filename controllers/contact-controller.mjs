@@ -1,8 +1,11 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
-// contact form
+const EMAIL = process.env.EMAIL;
+const PASSWORD = process.env.PASSWORD;
+
 const handleContactForm = async (req, res) => {
-  console.log("from contact controller")
+  console.log("from contact controller");
+
   const { 
     firstName, 
     lastName, 
@@ -11,15 +14,15 @@ const handleContactForm = async (req, res) => {
     message 
   } = req.body;
 
-  let config = {
+  const config = {
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL,
-      pass: process.env.PASSWORD,
+      user: EMAIL,
+      pass: PASSWORD
     }
-  }
+  };
 
-  let transporter = nodemailer.createTransport(config);
+  const transporter = nodemailer.createTransport(config);
 
   const submittedMessage = `
     <p>New Contact form submission:</p>
@@ -30,7 +33,7 @@ const handleContactForm = async (req, res) => {
     <p>${message}</p>
   `;
 
-  let emailMessage = {
+  const emailMessage = {
     from: email,
     to: "amithamillensuwanta@gmail.com",
     subject: `Contact Form Submission: ${subject}`,
@@ -39,9 +42,10 @@ const handleContactForm = async (req, res) => {
   };
   
   try {
-    // response send before request to transporter due to very long wait for confirmation
+    // respond before awaiting sendMail due to delay
     res.status(201).json({
-      message: "Thanks! Your message to Amitha has been sent!"})
+      message: "Thanks! Your message to Amitha has been sent!"
+    });
 
     return await transporter.sendMail(emailMessage);
 
@@ -51,7 +55,6 @@ const handleContactForm = async (req, res) => {
   }
 };
 
-
-module.exports = {
+export {
   handleContactForm
-};
+}

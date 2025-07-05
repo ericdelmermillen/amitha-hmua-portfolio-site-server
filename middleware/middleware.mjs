@@ -1,5 +1,5 @@
-const { verifyToken } = require('../utils/utils.js');
-const { validationResult } = require('express-validator');
+import { verifyToken } from '../utils/utils.mjs';
+import { validationResult } from 'express-validator';
 
 
 const validateToken = (req, res, next) => {
@@ -28,7 +28,7 @@ const validateRequest = (validations) => {
   };
 };
 
-module.exports = {
+export {
   validateToken,
   validateRequest
 }

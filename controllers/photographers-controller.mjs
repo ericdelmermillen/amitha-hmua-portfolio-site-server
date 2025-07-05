@@ -1,4 +1,8 @@
-const knex = require("knex")(require("../knexfile.js"));
+import knexModule from 'knex';
+import knexConfig from '../knexfile.js';
+
+const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
+const knex = knexModule(knexConfig[NODE_ENVIRONMENT]);
 
 
 // get all photographers for addEdit shoot page photographer selector 
@@ -158,7 +162,7 @@ const deletePhotographerByID = async (req, res) => {
 };
 
 
-module.exports = {
+export {
   getAllPhotographers,
   addPhotographer,
   editPhotographerById,

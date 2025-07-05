@@ -1,4 +1,9 @@
-const knex = require("knex")(require("../knexfile.js"));
+import knexModule from 'knex';
+import knexConfig from '../knexfile.js';
+
+const NODE_ENVIRONMENT = process.env.NODE_ENV
+
+const knex = knexModule(knexConfig[NODE_ENVIRONMENT || 'development'])
 
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
@@ -154,7 +159,7 @@ const deleteModelByID = async (req, res) => {
 };
 
 
-module.exports = {
+export {
   getAllModels,
   addModel,
   editModelById,

@@ -1,4 +1,4 @@
-const { body, param } = require('express-validator');
+import { body, param } from 'express-validator';
 
 const paramsIsNumber = [
   param('id')
@@ -140,7 +140,7 @@ const shootsOrderDataValid = [
 ];
 
 
-module.exports = {
+export {
   paramsIsNumber,
   emailAndPasswordAreValid, 
   bioDataIsValid,
