@@ -6,8 +6,6 @@ const knex = knexModule(knexConfig[NODE_ENVIRONMENT]);
 
 // get all tags for add shoot/edit tags selector
 const getAllTags = async (req, res) => {
-  
-  console.log("from get all tags")
 
   try {
     const tagsData = await knex('tags');

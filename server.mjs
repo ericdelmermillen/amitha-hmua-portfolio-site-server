@@ -5,9 +5,6 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 
-// import { deleteFiles } from './s3.mjs';
-
-// Import routes
 import authRouter from './routes/auth.mjs';
 import bioRouter from './routes/bio.mjs';
 import contactRouter from './routes/contact.mjs';
@@ -49,25 +46,6 @@ app.use('/api/shoots', shootsRouter);
 // Tags: get all, get by ID, add, edit, delete
 app.use('/api/tags', tagsRouter);
 
-/* ------------------ OPTIONAL TEST ROUTE ------------------ */
-
-// Gets names of AWS S3 bucket objects from req.body (no DB lookup)
-// Uncomment to test delete functionality
-// app.delete('/api/images/delete/:id', async (req, res) => {
-//   const id = +req.params.id;
-//   const { objNames } = req.body;
-
-//   try {
-//     const deleteResponse = await deleteFiles(objNames);
-//     console.log(deleteResponse); // Optional: log the response for debugging
-//     res.send('Deleted');
-//   } catch (error) {
-//     console.error('Error deleting file:', error);
-//     res.status(500).send('Error deleting files');
-//   }
-// });
-
-/* ------------------------ START SERVER ------------------------ */
 
 const PORT = process.env.PORT || 8080;
 
