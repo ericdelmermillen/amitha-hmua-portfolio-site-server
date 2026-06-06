@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  // createUser,
+  createUser,
   userLogin,
   refreshToken,
   getSignedURL,
@@ -13,8 +13,8 @@ const authRouter = express.Router();
 
 
 // auth create user
-// authRouter.route("/createuser")
-//   .post(validateRequest(emailAndPasswordAreValid), createUser);
+authRouter.route("/createuser")
+  .post(validateRequest(emailAndPasswordAreValid), createUser);
 
 
 // auth login

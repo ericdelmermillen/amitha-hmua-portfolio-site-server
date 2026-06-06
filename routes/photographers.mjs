@@ -10,8 +10,6 @@ import { validateToken, validateRequest } from '../middleware/middleware.mjs';
 
 const photographersRouter = express.Router();
 
-// ***may refactor to make / the ropute for get app and add: will need to update the client
-
 // get photographers route
 // for getting all photographers to show in the add photographers select for adding a shoot
 photographersRouter.route('/all')
