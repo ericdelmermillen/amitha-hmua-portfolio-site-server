@@ -75,6 +75,7 @@ const editPhotographerById = async (req, res) => {
     const { id } = req.params;
     const { photographer_name } = req.body;
 
+    // 1. Check photographer exists
     const [existing] = await pool.query(
       `SELECT id FROM photographers WHERE id = ? LIMIT 1`,
       [id]
@@ -86,11 +87,26 @@ const editPhotographerById = async (req, res) => {
       });
     };
 
+    // 2. Prevent duplicate names (excluding current record)
+    const [duplicate] = await pool.query(
+      `SELECT id FROM photographers WHERE photographer_name = ? AND id != ? LIMIT 1`,
+      [photographer_name, id]
+    );
+
+    if (duplicate.length) {
+      return res.status(409).json({
+        success: false,
+        message: `Photographer name "${photographer_name}" already exists`
+      });
+    };
+
+    // 3. Update
     await pool.query(
       `UPDATE photographers SET photographer_name = ? WHERE id = ?`,
       [photographer_name, id]
     );
 
+    // 4. Return updated record
     const [updated] = await pool.query(
       `SELECT id, photographer_name FROM photographers WHERE id = ? LIMIT 1`,
       [id]

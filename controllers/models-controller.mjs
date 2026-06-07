@@ -1,7 +1,5 @@
 import pool from '../dbClient.mjs';
 
-const NODE_ENVIRONMENT = process.env.NODE_ENV;
-
 
 // get all models for create shoot modal model selector
 const getAllModels = async (req, res) => {
@@ -73,11 +71,49 @@ const addModel = async (req, res) => {
 
 
 // edit model by id
+// const editModelById = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const { model_name } = req.body;
+
+//     const [existing] = await pool.query(
+//       `SELECT id FROM models WHERE id = ? LIMIT 1`,
+//       [id]
+//     );
+
+//     if (!existing.length) {
+//       return res.status(404).json({
+//         message: `Model with ID ${id} does not exist`
+//       });
+//     };
+
+//     await pool.query(
+//       `UPDATE models SET model_name = ? WHERE id = ?`,
+//       [model_name, id]
+//     );
+
+//     const [updatedRows] = await pool.query(
+//       `SELECT id, model_name FROM models WHERE id = ? LIMIT 1`,
+//       [id]
+//     );
+
+//     return res.status(200).json({
+//       message: `Model with ID ${id} updated successfully`,
+//       updatedModel: updatedRows[0]
+//     });
+
+//   } catch (error) {
+//     console.error("Error updating model:", error);
+//     return res.status(500).json({ error: "Internal server error" });
+//   };
+// };
+
 const editModelById = async (req, res) => {
   try {
     const { id } = req.params;
     const { model_name } = req.body;
 
+    // 1. Check model exists
     const [existing] = await pool.query(
       `SELECT id FROM models WHERE id = ? LIMIT 1`,
       [id]
@@ -87,13 +123,28 @@ const editModelById = async (req, res) => {
       return res.status(404).json({
         message: `Model with ID ${id} does not exist`
       });
-    };
+    }
 
+    // 2. Prevent duplicate names (excluding current record)
+    const [duplicate] = await pool.query(
+      `SELECT id FROM models WHERE model_name = ? AND id != ? LIMIT 1`,
+      [model_name, id]
+    );
+
+    if (duplicate.length) {
+      return res.status(409).json({
+        success: false,
+        message: `Model name "${model_name}" already exists`
+      });
+    }
+
+    // 3. Update
     await pool.query(
       `UPDATE models SET model_name = ? WHERE id = ?`,
       [model_name, id]
     );
 
+    // 4. Return updated row
     const [updatedRows] = await pool.query(
       `SELECT id, model_name FROM models WHERE id = ? LIMIT 1`,
       [id]
@@ -107,9 +158,8 @@ const editModelById = async (req, res) => {
   } catch (error) {
     console.error("Error updating model:", error);
     return res.status(500).json({ error: "Internal server error" });
-  };
+  }
 };
-
 
 // delete model by id
 const deleteModelByID = async (req, res) => {
