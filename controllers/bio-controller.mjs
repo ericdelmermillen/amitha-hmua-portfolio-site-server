@@ -3,7 +3,6 @@ import { deleteFiles } from '../s3.mjs';
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
 const AWS_BIO_DIRNAME = process.env.AWS_BIO_DIRNAME;
-const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
 
 
 // getBio to show bio page
