@@ -1,39 +1,41 @@
-import knexModule from 'knex';
-import knexConfig from '../knexfile.js';
+import pool from '../dbClient.mjs';
 import { deleteFiles } from '../s3.mjs';
 
 const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
 const AWS_BIO_DIRNAME = process.env.AWS_BIO_DIRNAME;
-
 const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
-const knex = knexModule(knexConfig[NODE_ENVIRONMENT]);
+
 
 // getBio to show bio page
 const getBio = async (req, res) => {
   try {
-    const bioData = await knex('bio').first();
+    const [rows] = await pool.query(`SELECT * FROM bio LIMIT 1`);
+    const bioData = rows[0];
 
-    if (bioData) {
-      const { bio_name: bioName, bio_text: bioText } = bioData;
-
-      const bioImgURL = bioData.bio_img_url
-        ? `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bioData.bio_img_url}`
-        : "";
-
-      return res.json({
-        bioName,
-        bioText,
-        bioImgURL,
-        bioImageNotSet: bioImgURL === `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/` || !bioImgURL.length
+    if (!bioData) {
+      return res.status(404).json({
+        message: "Bio data not found or not set"
       });
-    } else {
-      return res.status(404).json({ message: "Bio data not found or not set" });
-    }
+    };
+
+    const bioImgURL = bioData.bio_img_url
+      ? `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bioData.bio_img_url}`
+      : "";
+
+    return res.json({
+      bioName: bioData.bio_name,
+      bioText: bioData.bio_text,
+      bioImgURL,
+      bioImageNotSet:
+        bioImgURL === `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/` || !bioImgURL.length
+    });
 
   } catch (error) {
     console.error("Error fetching bio data:", error);
-    return res.status(500).json({ message: "An error occurred while fetching the Bio Page data" });
-  }
+    return res.status(500).json({
+      message: "An error occurred while fetching the Bio Page data"
+    });
+  };
 };
 
 // updateBio
@@ -45,15 +47,28 @@ const updateBio = async (req, res) => {
     updated_Photo
   } = req.body;
 
-  try {
-    const existingBioData = await knex('bio').first();
+  let connection;
 
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // 1. Check existing row
+    const [existingRows] = await connection.query(
+      `SELECT * FROM bio LIMIT 1`
+    );
+
+    const existingBioData = existingRows[0];
+
+    // 2. INSERT if none exists
     if (!existingBioData) {
-      const insertedBio = await knex('bio').insert({
-        bio_name,
-        bio_text,
-        bio_img_url
-      });
+      await connection.query(
+        `INSERT INTO bio (bio_name, bio_text, bio_img_url)
+         VALUES (?, ?, ?)`,
+        [bio_name, bio_text, bio_img_url]
+      );
+
+      await connection.commit();
 
       return res.json({
         message: "Bio inserted successfully",
@@ -61,61 +76,62 @@ const updateBio = async (req, res) => {
         bioText: bio_text,
         bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bio_img_url}`
       });
-    }
+    };
 
     const prevBioImgURL = existingBioData.bio_img_url;
 
-    const updatedBio = await knex('bio')
-      .where('id', 1)
-      .update({
-        bio_name,
-        bio_text,
-        bio_img_url
-      });
+    // 3. UPDATE bio
+    await connection.query(
+      `UPDATE bio
+       SET bio_name = ?, bio_text = ?, bio_img_url = ?
+       WHERE id = ?`,
+      [bio_name, bio_text, bio_img_url, existingBioData.id]
+    );
 
-    if (updatedBio) {
-      const updatedBioData = await knex('bio').first();
+    await connection.commit();
 
-      const {
-        bio_name: updatedBioName,
-        bio_text: updatedBioText,
-        bio_img_url: updatedBioImgURL
-      } = updatedBioData;
+    // 4. AWS cleanup (only after DB success)
+    if (updated_Photo && prevBioImgURL) {
+      try {
+        await deleteFiles([`${AWS_BIO_DIRNAME}/${prevBioImgURL}`]);
+      } catch (deleteError) {
+        console.error("Error deleting files from AWS:", deleteError);
+      };
+    };
 
-      if (updated_Photo) {
-        try {
-          await deleteFiles([`${AWS_BIO_DIRNAME}/${prevBioImgURL}`]);
-        } catch (deleteError) {
-          console.error('Error deleting files from AWS:', deleteError);
-        }
-      }
+    const [updatedRows] = await pool.query(`SELECT * FROM bio LIMIT 1`);
+    const updatedBioData = updatedRows[0];
 
-      return res.json({
-        message: "Bio updated successfully",
-        bioName: updatedBioName,
-        bioText: updatedBioText,
-        bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${updatedBioImgURL}`
-      });
-    }
+    return res.json({
+      message: "Bio updated successfully",
+      bioName: updatedBioData.bio_name,
+      bioText: updatedBioData.bio_text,
+      bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${updatedBioData.bio_img_url}`
+    });
 
   } catch (error) {
-    console.error('Error updating Bio page:', error);
+    if (connection) {
+      await connection.rollback();
+    };
 
+    console.error("Error updating Bio page:", error);
+
+    // best-effort cleanup for failed upload
     try {
-      console.log("Update failed: deleting new photo from AWS");
-      const deleteResponse = await deleteFiles([`${AWS_BIO_DIRNAME}/${bio_img_url}`]);
-
-      if (!deleteResponse) {
-        throw new Error("Error deleting files from AWS");
-      }
-
+      if (bio_img_url) {
+        await deleteFiles([`${AWS_BIO_DIRNAME}/${bio_img_url}`]);
+      };
+      
     } catch (deleteError) {
       console.error("Error deleting file from AWS:", deleteError);
       return res.status(500).send("Error deleting files from AWS");
-    }
+    };
 
     return res.status(500).send("Error updating Bio page");
-  }
+
+  } finally {
+    if (connection) connection.release();
+  };
 };
 
 export {

@@ -1,47 +1,54 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import knexModule from 'knex';
-
-
-import knexConfig from '../knexfile.js';
+import pool from '../dbClient.mjs';
 import { generateUploadURL } from '../s3.mjs';
 import { getToken, generateRefreshToken } from '../utils/utils.mjs';
 
-// Select environment config (e.g., 'development')
 const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
-const knex = knexModule(knexConfig[NODE_ENVIRONMENT]);
+const JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL = process.env.JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL;
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+
+// console.log(`JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL: ${JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL}`)
+// console.log(`JWT_TOKEN_EXPIRATION_INTERVAL: ${process.env.JWT_TOKEN_EXPIRATION_INTERVAL}`)
 
 
 // createUser function
 const createUser = async (req, res) => {
   const { email, password } = req.body;
-  
+
   try {
-    const userExists = await knex('users').where({ email: email }).first();
-    
-    if(userExists) {
+    // check existing user
+    const [existingRows] = await pool.query(
+      `SELECT id FROM users WHERE email = ? LIMIT 1`,
+      [email]
+    );
+
+    if (existingRows.length) {
       return res.status(409).json({
         success: false,
         message: "User with that email already exists",
       });
-    }
-
-    const newUser = {
-      email: email,
-      password: await bcrypt.hash(password, 10), 
     };
-    
-    const [ userId ] = await knex('users').insert(newUser);
+
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // insert user
+    const [ result ] = await pool.query(
+      `INSERT INTO users (email, password) VALUES (?, ?)`,
+      [email, hashedPassword]
+    );
 
     return res.status(201).json({
       message: "User created successfully",
-      userID: userId
+      userID: result.insertId
     });
 
-  } catch(error) {
+  } catch (error) {
     console.log(`Error creating user: ${error}`);
-    return res.status(500).json({ error: "Failed to create user"});
-  }
+    return res.status(500).json({ error: "Failed to create user" });
+  };
 };
 
 
@@ -50,65 +57,80 @@ const userLogin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const matchedUser = await knex('users').where({ email }).first();
+    const [rows] = await pool.query(
+      `SELECT id, password FROM users WHERE email = ? LIMIT 1`,
+      [email]
+    );
 
-    if(!matchedUser) {
+    const matchedUser = rows[0];
+
+    if (!matchedUser) {
       return res.status(404).json({
         success: false,
         message: "User with that email not found",
       });
-    }
+    };
 
-    const passwordMatch = await bcrypt.compare(password, matchedUser.password);        
+    const passwordMatch = await bcrypt.compare(
+      password,
+      matchedUser.password
+    );
 
-    if(!passwordMatch) {
+    if (!passwordMatch) {
       return res.status(401).json({
         success: false,
         message: "Not authorized",
       });
-    }
+    };
 
-    // build the user
-    const user = {};
-    user.id = matchedUser.id;
+    const user = { id: matchedUser.id };
 
     const token = getToken(user);
-    const refreshToken = generateRefreshToken(user.id); 
+    const refreshToken = generateRefreshToken(user.id);
 
     return res.json({
       message: "Login successful",
-      user: user,
-      token: token,
-      refreshToken: refreshToken
+      user,
+      token,
+      refreshToken
     });
-    
-  } catch(error) {
+
+  } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ error: "An error occurred while logging in" });
-  }
+    return res.status(500).json({
+      error: "An error occurred while logging in"
+    });
+  };
 };
+
 
 // token refresh function
 const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
 
-  // Verify refresh token
+  console.log("refreshing");
+  console.log(`JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL: ${JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL}`);
+
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
 
-    // Generate new access token with short expiration time
-    const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    const accessToken = jwt.sign(
+      { id: decoded.id },
+      JWT_SECRET,
+      { expiresIn: JWT_TOKEN_EXPIRATION_INTERVAL }
+    );
 
-    res.json({
+    return res.json({
       success: true,
       message: "Token refreshed successfully",
-      accessToken: accessToken
+      accessToken
     });
+
   } catch (error) {
-    console.error('Error refreshing token:', error);
-    return res.status(401).json({ error: 'Invalid refresh token' });
+    console.error("Error refreshing token:", error);
+    return res.status(401).json({ error: "Invalid refresh token" });
   }
-}
+};
 
 // get signed AWS S3 URL
 const getSignedURL = async (req, res) => {
@@ -117,34 +139,44 @@ const getSignedURL = async (req, res) => {
   const url = await generateUploadURL(dirname);
   
   return res.send({url});
-}
+};
 
 
 // userLogout function
 const logout = async (req, res) => {
   const { user_id } = req.body;
 
-  if(!user_id) {
-    return res.status(400).send({message: "Invalid or missing User ID"})
-  } else if(isNaN(+user_id)) {
-    return res.status(400).send({message: "User ID must be a number"})
-  }
+  if (!user_id) {
+    return res.status(400).send({ message: "Invalid or missing User ID" });
+  } else if (isNaN(+user_id)) {
+    return res.status(400).send({ message: "User ID must be a number" });
+  };
 
   try {
-    const matchedUser = await knex('users').where('id', user_id).first();
+    const [rows] = await pool.query(
+      `SELECT id FROM users WHERE id = ? LIMIT 1`,
+      [user_id]
+    );
 
-    if(!matchedUser) {
-      return res.status(404).json({ message: `User with id of ${user_id} not found`});
-    } else {
-      return res.status(200).json({ message: 'Successfully Logged Out' });
-    }
-    
-  } catch(error) {
-    console.log(error)
-    return res.status(500).json({ error: "An error occurred while logging out" });
-  }
+    const matchedUser = rows[0];
+
+    if (!matchedUser) {
+      return res.status(404).json({
+        message: `User with id of ${user_id} not found`
+      });
+    };
+
+    return res.status(200).json({
+      message: "Successfully Logged Out"
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      error: "An error occurred while logging out"
+    });
+  };
 };
-
 
 export {
   createUser,
