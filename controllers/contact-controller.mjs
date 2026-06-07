@@ -4,7 +4,6 @@ const EMAIL = process.env.EMAIL;
 const PASSWORD = process.env.PASSWORD;
 
 const handleContactForm = async (req, res) => {
-  console.log("from contact controller");
 
   const { 
     firstName, 
@@ -52,9 +51,9 @@ const handleContactForm = async (req, res) => {
   } catch(error) {
     console.error('Error sending email:', error);
     return res.status(500).json({ error: "Failed to send email." });
-  }
+  };
 };
 
 export {
   handleContactForm
-}
+};

@@ -11,6 +11,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 // console.log(`JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL: ${JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL}`)
 // console.log(`JWT_TOKEN_EXPIRATION_INTERVAL: ${process.env.JWT_TOKEN_EXPIRATION_INTERVAL}`)
+// *** issue where client not being logged out when both token and refresh token are expired
 
 
 // createUser function
