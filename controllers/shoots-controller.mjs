@@ -1,88 +1,99 @@
-import knexModule from "knex";
-import knexfile from "../knexfile.js";
-
-const NODE_ENVIRONMENT = process.env.NODE_ENVIRONMENT || 'development';
-
-const knex = knexModule(knexfile[NODE_ENVIRONMENT]);
-
+import pool from "../dbClient.mjs";
 import { dateFormatOptions } from '../utils/utils.mjs';
 import { deleteFiles } from "../s3.mjs";
 
-const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
-const AWS_SHOOTS_DIRNAME = process.env.AWS_SHOOTS_DIRNAME;
+const BUCKET_PATH = process.env.BUCKET_PATH;
+const SHOOTS_DIRNAME = process.env.SHOOTS_DIRNAME;
 
 
 // get shoots with pagination
 const getShootSummaries = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
-    
-    // Get tag_id from query params
     const tag_id = req.query.tag_id;
 
-    // Calling for page X therefore offset by X - 1
-    const offset = (page - 1) * limit;
+    const pageInt = parseInt(page, 10);
+    const limitInt = parseInt(limit, 10);
+    const offset = (pageInt - 1) * limitInt;
 
-    // Build the query to select shoots
-    const shootsQuery = knex('shoots')
-      .select(
-        'shoots.id as shoot_id',
-        'shoots.shoot_date',
-        'shoots.display_order',
-        knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
-        knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags'),
-        knex.raw('SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC), ",", 1) AS photo_url')
-      )
-      .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
-      .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
-      .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
-      .leftJoin('models', 'shoot_models.model_id', 'models.id')
-      .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
-      .leftJoin('shoot_tags', 'shoots.id', 'shoot_tags.shoot_id')
-      .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id') 
-      .groupBy('shoots.id', 'shoots.shoot_date')
-      .orderBy('shoots.display_order')
-      .limit(limit)
-      .offset(offset);
+    // Base query parts
+    let query = `
+      SELECT 
+        shoots.id AS shoot_id,
+        shoots.shoot_date,
+        shoots.display_order,
+        GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers,
+        GROUP_CONCAT(DISTINCT models.model_name) AS models,
+        GROUP_CONCAT(DISTINCT tags.tag_name) AS tags,
+        SUBSTRING_INDEX(
+          GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC),
+          ',', 1
+        ) AS photo_url
+      FROM shoots
+      LEFT JOIN shoot_photographers 
+        ON shoots.id = shoot_photographers.shoot_id
+      LEFT JOIN photographers 
+        ON shoot_photographers.photographer_id = photographers.id
+      LEFT JOIN shoot_models 
+        ON shoots.id = shoot_models.shoot_id
+      LEFT JOIN models 
+        ON shoot_models.model_id = models.id
+      LEFT JOIN photos 
+        ON shoots.id = photos.shoot_id
+      LEFT JOIN shoot_tags 
+        ON shoots.id = shoot_tags.shoot_id
+      LEFT JOIN tags 
+        ON shoot_tags.tag_id = tags.id
+    `;
 
-    // Apply tag_id filter if provided
-    if(tag_id !== undefined) {
-      shootsQuery.whereExists(function() {
-        this.select(knex.raw(1))
-          .from('shoot_tags')
-          .whereRaw('shoot_tags.shoot_id = shoots.id')
-          .where('shoot_tags.tag_id', tag_id);
-      });
+    const params = [];
+
+    // Optional tag filter
+    if (tag_id !== undefined) {
+      query += `
+        WHERE EXISTS (
+          SELECT 1 
+          FROM shoot_tags 
+          WHERE shoot_tags.shoot_id = shoots.id
+          AND shoot_tags.tag_id = ?
+        )
+      `;
+      params.push(tag_id);
     }
 
-    // Execute the query
-    const shoots = await shootsQuery;
+    query += `
+      GROUP BY shoots.id, shoots.shoot_date, shoots.display_order
+      ORDER BY shoots.display_order
+      LIMIT ? OFFSET ?
+    `;
 
-    // Format the shoot data
-    const shootSummaries = shoots.map(shoot => ({
+    params.push(limitInt, offset);
+
+    // Execute query
+    const [rows] = await pool.query(query, params);
+
+    const shootSummaries = rows.map((shoot) => ({
       shoot_id: shoot.shoot_id,
       display_order: shoot.display_order,
-      shoot_date: new Date(shoot.shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0],
-      tags: shoot.tags.split(','),
-      photographers: shoot.photographers.split(','),
-      models: shoot.models.split(','),
-      // for testing: photos stored as urls vs photos stored as S3 object names
-      thumbnail_url: shoot.photo_url.includes("http") 
+      shoot_date: new Date(shoot.shoot_date)
+        .toISOString()
+        .split("T")[0],
+      tags: shoot.tags ? shoot.tags.split(",") : [],
+      photographers: shoot.photographers ? shoot.photographers.split(",") : [],
+      models: shoot.models ? shoot.models.split(",") : [],
+      thumbnail_url: shoot.photo_url?.includes("http")
         ? shoot.photo_url
-        : `${AWS_BUCKET_PATH}${AWS_SHOOTS_DIRNAME}/${shoot.photo_url}`
+        : `${process.env.BUCKET_PATH}${process.env.SHOOTS_DIRNAME}/${shoot.photo_url}`
     }));
 
-    const isFinalPage = shoots.length === 0;
-    const responseData = {
+    return res.json({
       shootSummaries,
-      isFinalPage
-    };
+      isFinalPage: rows.length === 0
+    });
 
-    return res.json(responseData);
   } catch (error) {
-    console.error('Error fetching shoot summaries:', error);
-    return res.status(500).send('Error fetching shoot summaries');
+    console.error("Error fetching shoot summaries:", error);
+    return res.status(500).send("Error fetching shoot summaries");
   }
 };
 
@@ -92,85 +103,131 @@ const getShootByID = async (req, res) => {
   try {
     const id = req.params.id;
 
-    const shootExists = await knex('shoots').where({ id }).first();
+    // 1. Check existence
+    const [existsRows] = await pool.query(
+      `SELECT id FROM shoots WHERE id = ? LIMIT 1`,
+      [id]
+    );
 
-    if(!shootExists) {
-      return res.status(404).json({ error: 'Shoot not found' });
-    }
+    if (!existsRows.length) {
+      return res.status(404).json({ error: "Shoot not found" });
+    };
 
-    // will this be an issue when posting the db to aws? ---
-    await knex.raw('SET SESSION group_concat_max_len = 2560');
-    // --
+    // 2. Increase GROUP_CONCAT limit (session-level)
+    await pool.query(`SET SESSION group_concat_max_len = 2560`);
 
-    const shoot = await knex('shoots')
-      .select(
-        'shoots.id as shoot_id',
-        'shoots.shoot_date',
-        knex.raw('GROUP_CONCAT(DISTINCT photographers.id) AS photographer_ids'),
-        knex.raw('GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers'),
-        knex.raw('GROUP_CONCAT(DISTINCT models.id) AS model_ids'), 
-        knex.raw('GROUP_CONCAT(DISTINCT models.model_name) AS models'),
-        knex.raw('GROUP_CONCAT(DISTINCT tags.id) AS tag_ids'), 
-        knex.raw('GROUP_CONCAT(DISTINCT tags.tag_name) AS tags'),
-        knex.raw('GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders'),
-        knex.raw('GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls'),
-        knex.raw('GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids')
-      )
-      .leftJoin('shoot_photographers', 'shoots.id', 'shoot_photographers.shoot_id')
-      .leftJoin('photographers', 'shoot_photographers.photographer_id', 'photographers.id')
-      .leftJoin('shoot_models', 'shoots.id', 'shoot_models.shoot_id')
-      .leftJoin('models', 'shoot_models.model_id', 'models.id')
-      .leftJoin('photos', 'shoots.id', 'photos.shoot_id')
-      .leftJoin('shoot_tags', 'shoots.id', 'shoot_tags.shoot_id')
-      .leftJoin('tags', 'shoot_tags.tag_id', 'tags.id')
-      .where('shoots.id', id)
-      .groupBy('shoots.id', 'shoots.shoot_date');
-    
-    const shootData = {};
-    shootData.shoot_id = shoot[0].shoot_id;
-    shootData.shoot_date = new Date(shoot[0].shoot_date).toISOString('en-US', dateFormatOptions).split('T')[0];
-    shootData.tag_ids = shoot[0].tag_ids.split(',');
-    shootData.tags = shoot[0].tags.split(',');
-    shootData.photographer_ids = shoot[0].photographer_ids.split(',');
-    shootData.photographers = shoot[0].photographers.split(',');
-    shootData.model_ids = shoot[0].model_ids.split(',');
-    shootData.models = shoot[0].models.split(',');
+    // 3. Main query
+    const [rows] = await pool.query(
+      `
+      SELECT 
+        shoots.id AS shoot_id,
+        shoots.shoot_date,
 
-    // Create an array of distinct photo objects with id, photo_url, and display_order properties
-    const displayOrders = shoot[0].display_orders.split(',');
-    const photoUrls = shoot[0].photo_urls.split(',');
-    const photoIds = shoot[0].photo_ids.split(','); 
+        GROUP_CONCAT(DISTINCT photographers.id) AS photographer_ids,
+        GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers,
+
+        GROUP_CONCAT(DISTINCT models.id) AS model_ids,
+        GROUP_CONCAT(DISTINCT models.model_name) AS models,
+
+        GROUP_CONCAT(DISTINCT tags.id) AS tag_ids,
+        GROUP_CONCAT(DISTINCT tags.tag_name) AS tags,
+
+        GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders,
+        GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls,
+        GROUP_CONCAT(DISTINCT photos.id ORDER BY photos.display_order ASC) AS photo_ids
+
+      FROM shoots
+      LEFT JOIN shoot_photographers 
+        ON shoots.id = shoot_photographers.shoot_id
+      LEFT JOIN photographers 
+        ON shoot_photographers.photographer_id = photographers.id
+      LEFT JOIN shoot_models 
+        ON shoots.id = shoot_models.shoot_id
+      LEFT JOIN models 
+        ON shoot_models.model_id = models.id
+      LEFT JOIN photos 
+        ON shoots.id = photos.shoot_id
+      LEFT JOIN shoot_tags 
+        ON shoots.id = shoot_tags.shoot_id
+      LEFT JOIN tags 
+        ON shoot_tags.tag_id = tags.id
+
+      WHERE shoots.id = ?
+      GROUP BY shoots.id, shoots.shoot_date
+      `,
+      [id]
+    );
+
+    const shoot = rows[0];
+
+    // 4. Shape response
+    const shootData = {
+      shoot_id: shoot.shoot_id,
+      shoot_date: new Date(shoot.shoot_date)
+        .toISOString()
+        .split("T")[0],
+
+      tag_ids: shoot.tag_ids ? shoot.tag_ids.split(",") : [],
+      tags: shoot.tags ? shoot.tags.split(",") : [],
+
+      photographer_ids: shoot.photographer_ids
+        ? shoot.photographer_ids.split(",")
+        : [],
+      photographers: shoot.photographers
+        ? shoot.photographers.split(",")
+        : [],
+
+      model_ids: shoot.model_ids ? shoot.model_ids.split(",") : [],
+      models: shoot.models ? shoot.models.split(",") : [],
+    };
+
+    // 5. Build photo array with deduplication
+    const displayOrders = shoot.display_orders
+      ? shoot.display_orders.split(",")
+      : [];
+
+    const photoUrls = shoot.photo_urls
+      ? shoot.photo_urls.split(",")
+      : [];
+
+    const photoIds = shoot.photo_ids
+      ? shoot.photo_ids.split(",")
+      : [];
+
     const photo_urls = [];
-    const seenIds = new Set(); // Keep track of seen photo ids to ensure uniqueness
+    const seenIds = new Set();
+
     displayOrders.forEach((order, idx) => {
-      const id = parseInt(photoIds[idx]);
-      if(!seenIds.has(id)) {
+      const photoId = parseInt(photoIds[idx], 10);
+
+      if (!seenIds.has(photoId)) {
+        const rawUrl = photoUrls[idx];
+
         photo_urls.push({
-          id,
-          display_order: parseInt(order),
-          // for testing: photos stored as urls vs photos stored as S3 object names
-          photo_url: photoUrls[idx].includes("http")
-            ? photoUrls[idx]
-            : `${AWS_BUCKET_PATH}${AWS_SHOOTS_DIRNAME}/${photoUrls[idx]}`
+          id: photoId,
+          display_order: parseInt(order, 10),
+          photo_url: rawUrl?.includes("http")
+            ? rawUrl
+            : `${process.env.BUCKET_PATH}${process.env.SHOOTS_DIRNAME}/${rawUrl}`,
         });
-        seenIds.add(id);
+
+        seenIds.add(photoId);
       }
     });
 
-    shootData.tag_ids = shoot[0].tag_ids.split(',');
-    shootData.tags = shoot[0].tags.split(',');
     shootData.photo_urls = photo_urls;
 
     return res.json(shootData);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
+    console.error("getShootByID error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  };
 };
 
 
 // add shoot 
 const addShoot = async (req, res) => {
+  let connection;
 
   let {
     shoot_date,
@@ -181,313 +238,411 @@ const addShoot = async (req, res) => {
     dirname
   } = req.body;
 
-    // Check for required fields
-  if(!photo_urls || !photo_urls.length) {
-    return res.status(400).json({ message: 'Photos not added' });
+  if (!photo_urls || !photo_urls.length) {
+    return res.status(400).json({ message: "Photos not added" });
   }
 
-  shoot_date = new Date(req.body.shoot_date).toISOString().slice(0, 10);
-  
+  shoot_date = new Date(shoot_date).toISOString().slice(0, 10);
+
   try {
-    // Start transaction
-    await knex.transaction(async (trx) => {
-      // Increment the display_order for existing shoots
-      await trx('shoots').update('display_order', trx.raw('display_order + 1'));
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
 
-      // Insert the new shoot
-      const [ shootId ] = await trx('shoots').insert({
-        shoot_date,
-        display_order: 1
-      });
+    // 1. Shift display order
+    await connection.query(
+      `UPDATE shoots SET display_order = display_order + 1`
+    );
 
-      // Link tags to the shoot
-      for(const tagId of tag_ids) {
-        const [ existingTag ] = await trx('tags').where('id', tagId);
-        if(!existingTag) {
-          throw new Error(`Tag with ID ${tagId} not found`);
-        }
-        // Link model to shoot
-        await trx('shoot_tags').insert({
-          shoot_id: shootId,
-          tag_id: tagId
-        });
+    // 2. Insert shoot
+    const [shootResult] = await connection.query(
+      `INSERT INTO shoots (shoot_date, display_order) VALUES (?, ?)`,
+      [shoot_date, 1]
+    );
+
+    const shootId = shootResult.insertId;
+
+    // 3. Link tags
+    for (const tagId of tag_ids) {
+      const [tagRows] = await connection.query(
+        `SELECT id FROM tags WHERE id = ? LIMIT 1`,
+        [tagId]
+      );
+
+      if (!tagRows.length) {
+        throw new Error(`Tag with ID ${tagId} not found`);
       }
 
-      // Link photographers to the shoot
-      for(const photographerId of photographer_ids) {
-        const [ existingPhotographer ] = await trx('photographers').where('id', photographerId);
-        if(!existingPhotographer) {
-          throw new Error(`Photographer with ID ${photographerId} not found`);
-        }
-        // Link photographer to shoot
-        await trx('shoot_photographers').insert({
-          shoot_id: shootId,
-          photographer_id: photographerId
-        });
+      await connection.query(
+        `INSERT INTO shoot_tags (shoot_id, tag_id) VALUES (?, ?)`,
+        [shootId, tagId]
+      );
+    }
+
+    // 4. Link photographers
+    for (const photographerId of photographer_ids) {
+      const [rows] = await connection.query(
+        `SELECT id FROM photographers WHERE id = ? LIMIT 1`,
+        [photographerId]
+      );
+
+      if (!rows.length) {
+        throw new Error(`Photographer with ID ${photographerId} not found`);
       }
 
-      // Link models to the shoot
-      for(const modelId of model_ids) {
-        const [ existingModel ] = await trx('models').where('id', modelId);
-        if(!existingModel) {
-          throw new Error(`Model with ID ${modelId} not found`);
-        }
-        // Link model to shoot
-        await trx('shoot_models').insert({
-          shoot_id: shootId,
-          model_id: modelId
-        });
+      await connection.query(
+        `INSERT INTO shoot_photographers (shoot_id, photographer_id) VALUES (?, ?)`,
+        [shootId, photographerId]
+      );
+    }
+
+    // 5. Link models
+    for (const modelId of model_ids) {
+      const [rows] = await connection.query(
+        `SELECT id FROM models WHERE id = ? LIMIT 1`,
+        [modelId]
+      );
+
+      if (!rows.length) {
+        throw new Error(`Model with ID ${modelId} not found`);
       }
 
-      // Insert photo URLs
-      for(const [idx, photoUrl] of photo_urls.entries()) {
-        await trx('photos').insert({
-          shoot_id: shootId,
-          display_order: idx + 1,
-          photo_url: photoUrl
-        });
-      }
+      await connection.query(
+        `INSERT INTO shoot_models (shoot_id, model_id) VALUES (?, ?)`,
+        [shootId, modelId]
+      );
+    }
+
+    // 6. Insert photos
+    for (const [idx, photoUrl] of photo_urls.entries()) {
+      await connection.query(
+        `INSERT INTO photos (shoot_id, display_order, photo_url)
+         VALUES (?, ?, ?)`,
+        [shootId, idx + 1, photoUrl]
+      );
+    }
+
+    await connection.commit();
+
+    return res.status(201).json({
+      message: "Shoot added successfully"
     });
 
-    return res.status(201).json({ message: 'Shoot added successfully' });
   } catch (error) {
-    
-    // delete aws objs on fail
+    if (connection) {
+      await connection.rollback();
+    }
+
+    // AWS cleanup (unchanged logic)
     try {
-      const objKeys = photo_urls.map(url => `${AWS_SHOOTS_DIRNAME}/${url}`);
+      const objKeys = photo_urls.map(
+        (url) => `${process.env.SHOOTS_DIRNAME}/${url}`
+      );
       await deleteFiles(objKeys);
     } catch (deleteError) {
-      console.error('Error deleting files from AWS:', deleteError);
+      console.error("Error deleting files from AWS:", deleteError);
     }
-    
+
     console.error(error);
-    return res.status(500).json({ message: error.message || 'Internal server error' });
+
+    return res.status(500).json({
+      message: error.message || "Internal server error"
+    });
+
+  } finally {
+    if (connection) connection.release();
   }
 };
 
+
 // edit shoot
 const editShootByID = async (req, res) => {
-
   const { id } = req.params;
 
-  // Check if the shoot exists
-  const existingShoot = await knex('shoots').where('id', id).first();
+  let connection;
 
-  if(!existingShoot) {
-    return res.status(404).json({ message: 'Shoot not found' });
-  }
-
-  let {
-    shoot_date,
-    tag_ids,
-    photographer_ids,
-    model_ids,
-    photo_urls
-  } = req.body;
-  
-  // Check for required fields
-  if(!photo_urls || !photo_urls.length) {
-    return res.status(400).json({ message: 'Photos not added' });
-  }
-
-  shoot_date = new Date(req.body.shoot_date).toISOString().slice(0, 10);
-  
   try {
-    // Start transaction
-    await knex.transaction(async (trx) => {
-    
-      // get the photo obj keys
-      const photoObjKeys = await trx('photos')
-        .select('photo_url')
-        .where('shoot_id', id);
-      
-      // Update shoot details
-      await trx('shoots')
-        .where('id', id)
-        .update({
-          shoot_date
-        });
+    // 1. Check existence
+    const [existing] = await pool.query(
+      `SELECT id FROM shoots WHERE id = ? LIMIT 1`,
+      [id]
+    );
 
-      // Delete existing associations
-      await trx('shoot_photographers').where('shoot_id', id).del();
-      await trx('shoot_models').where('shoot_id', id).del();
-      await trx('shoot_tags').where('shoot_id', id).del();
-      await trx('photos').where('shoot_id', id).del();
+    if (!existing.length) {
+      return res.status(404).json({ message: "Shoot not found" });
+    }
 
-      // Prepare AWS object keys for deletion
-      const objKeys = [];
+    let {
+      shoot_date,
+      tag_ids,
+      photographer_ids,
+      model_ids,
+      photo_urls
+    } = req.body;
 
-      for(const obj of photoObjKeys) {
-        // get rid of dummy urls
-        if(!obj.photo_url.includes("http") && !photo_urls.includes(obj.photo_url)) {
-          objKeys.push(`${AWS_SHOOTS_DIRNAME}/${obj.photo_url}`);
-        }
+    if (!photo_urls || !photo_urls.length) {
+      return res.status(400).json({ message: "Photos not added" });
+    }
+
+    shoot_date = new Date(shoot_date).toISOString().slice(0, 10);
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    // 2. Get existing photos for cleanup logic
+    const [photoRows] = await connection.query(
+      `SELECT photo_url FROM photos WHERE shoot_id = ?`,
+      [id]
+    );
+
+    // 3. Update shoot
+    await connection.query(
+      `UPDATE shoots SET shoot_date = ? WHERE id = ?`,
+      [shoot_date, id]
+    );
+
+    // 4. Delete relations
+    await connection.query(`DELETE FROM shoot_photographers WHERE shoot_id = ?`, [id]);
+    await connection.query(`DELETE FROM shoot_models WHERE shoot_id = ?`, [id]);
+    await connection.query(`DELETE FROM shoot_tags WHERE shoot_id = ?`, [id]);
+    await connection.query(`DELETE FROM photos WHERE shoot_id = ?`, [id]);
+
+    // 5. AWS cleanup list (same logic as before)
+    const objKeys = [];
+
+    for (const obj of photoRows) {
+      if (
+        !obj.photo_url.includes("http") &&
+        !photo_urls.includes(obj.photo_url)
+      ) {
+        objKeys.push(`${process.env.SHOOTS_DIRNAME}/${obj.photo_url}`);
       }
-      
-      try {
-        // Deleting AWS objects after successful deletion of shoot data
-        const deleteResponse = await deleteFiles(objKeys);
-        // Check if deletion was successful
-        if(!deleteResponse) {
-          throw new Error("Error deleting files from AWS");
-        }
-      } catch(error) {
-        // Handle errors in AWS object deletion
-        console.error("Error deleting file from AWS:", error);
-        return res.status(500).send("Error deleting files from AWS");
-      }
+    }
 
-      // Link photographers to the shoot
-      for(const photographerId of photographer_ids) {
-        const [ existingPhotographer ] = await trx('photographers').where('id', photographerId);
-        if(!existingPhotographer) {
-          throw new Error(`Photographer with ID ${photographerId} not found`);
-        }
-        // Link photographer to shoot
-        await trx('shoot_photographers').insert({
-          shoot_id: id,
-          photographer_id: photographerId
-        });
+    // IMPORTANT: AWS deletion happens OUTSIDE SQL transaction safety boundary
+    // (good practice: don’t hold DB transaction open during network calls)
+    try {
+      const deleteResponse = await deleteFiles(objKeys);
+      if (!deleteResponse) {
+        throw new Error("Error deleting files from AWS");
       }
-      
-      // Link models to the shoot
-      for(const modelId of model_ids) {
-        const [ existingModel ] = await trx('models').where('id', modelId);
-        if(!existingModel) {
-          throw new Error(`Model with ID ${modelId} not found`);
-        }
-        // Link model to shoot
-        await trx('shoot_models').insert({
-          shoot_id: id,
-          model_id: modelId
-        });
-      }
+    } catch (error) {
+      console.error("Error deleting file from AWS:", error);
+      throw error; // force rollback
+    }
 
-      // Link tags to the shoot
-      for(const tagId of tag_ids) {
-        const [ existingTag ] = await trx('tags').where('id', tagId);
-        if(!existingTag) {
-          throw new Error(`Tag with ID ${tagId} not found`);
-        }
-        // Link tag to shoot
-        await trx('shoot_tags').insert({
-          shoot_id: id,
-          tag_id: tagId
-        });
+    // 6. Reinsert relations
+
+    for (const photographerId of photographer_ids) {
+      const [rows] = await connection.query(
+        `SELECT id FROM photographers WHERE id = ? LIMIT 1`,
+        [photographerId]
+      );
+      if (!rows.length) {
+        throw new Error(`Photographer with ID ${photographerId} not found`);
       }
 
-      // Insert photo URLs
-      for(const [idx, photoUrl] of photo_urls.entries()) {
-        await trx('photos').insert({
-          shoot_id: id,
-          display_order: idx + 1, 
-          photo_url: photoUrl
-        });
+      await connection.query(
+        `INSERT INTO shoot_photographers (shoot_id, photographer_id) VALUES (?, ?)`,
+        [id, photographerId]
+      );
+    }
+
+    for (const modelId of model_ids) {
+      const [rows] = await connection.query(
+        `SELECT id FROM models WHERE id = ? LIMIT 1`,
+        [modelId]
+      );
+      if (!rows.length) {
+        throw new Error(`Model with ID ${modelId} not found`);
       }
+
+      await connection.query(
+        `INSERT INTO shoot_models (shoot_id, model_id) VALUES (?, ?)`,
+        [id, modelId]
+      );
+    }
+
+    for (const tagId of tag_ids) {
+      const [rows] = await connection.query(
+        `SELECT id FROM tags WHERE id = ? LIMIT 1`,
+        [tagId]
+      );
+      if (!rows.length) {
+        throw new Error(`Tag with ID ${tagId} not found`);
+      }
+
+      await connection.query(
+        `INSERT INTO shoot_tags (shoot_id, tag_id) VALUES (?, ?)`,
+        [id, tagId]
+      );
+    }
+
+    for (const [idx, photoUrl] of photo_urls.entries()) {
+      await connection.query(
+        `INSERT INTO photos (shoot_id, display_order, photo_url)
+         VALUES (?, ?, ?)`,
+        [id, idx + 1, photoUrl]
+      );
+    }
+
+    await connection.commit();
+
+    return res.status(200).json({
+      message: "Shoot updated successfully"
     });
-    
-    return res.status(200).json({ message: 'Shoot updated successfully' });
+
   } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+
     console.error(error);
-    return res.status(500).json({ message: error.message || 'Internal server error' });
+
+    return res.status(500).json({
+      message: error.message || "Internal server error"
+    });
+
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 // delete shoot
 const deleteShootByID = async (req, res) => {
+  const { id } = req.params;
+
+  let connection;
+  let photoObjKeys = [];
 
   try {
-    const { id } = req.params;
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
 
-    let photoObjKeys;
+    // 1. Get photo URLs
+    const [photoRows] = await connection.query(
+      `SELECT photo_url FROM photos WHERE shoot_id = ?`,
+      [id]
+    );
 
-    // Start a transaction
-    await knex.transaction(async (trx) => {
-      // get the photo obj keys
-      photoObjKeys = await trx('photos')
-        .select('photo_url')
-        .where('shoot_id', id);
-      
-      // Delete photos
-      await trx('photos').where('shoot_id', id).del();
+    photoObjKeys = photoRows;
 
-      // Delete shoot_models
-      await trx('shoot_models').where('shoot_id', id).del();
+    // 2. Delete child tables first
+    await connection.query(
+      `DELETE FROM photos WHERE shoot_id = ?`,
+      [id]
+    );
 
-      // Delete shoot_photographers
-      await trx('shoot_photographers').where('shoot_id', id).del();
+    await connection.query(
+      `DELETE FROM shoot_models WHERE shoot_id = ?`,
+      [id]
+    );
 
-      // Delete shoot_tags
-      await trx('shoot_tags').where('shoot_id', id).del();
+    await connection.query(
+      `DELETE FROM shoot_photographers WHERE shoot_id = ?`,
+      [id]
+    );
 
-      // Delete the shoot itself
-      const deleted = await trx('shoots').where('id', id).del();
+    await connection.query(
+      `DELETE FROM shoot_tags WHERE shoot_id = ?`,
+      [id]
+    );
 
-      if(!deleted) {
-        throw new Error(`Shoot number ${id} not deleted`);
-      }
+    // 3. Delete shoot itself
+    const [result] = await connection.query(
+      `DELETE FROM shoots WHERE id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      throw new Error(`Shoot number ${id} not deleted`);
+    }
+
+    await connection.commit();
+
+  } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Failed to delete shoot"
     });
 
-    // Prepare AWS object keys for deletion
+  } finally {
+    if (connection) connection.release();
+  }
+
+  // 4. AWS cleanup AFTER DB success
+  try {
     const objKeys = [];
 
-    for(const obj of photoObjKeys) {
-      // get rid of dummy urls
-      if(!obj.photo_url.includes("http")) {
-        // objKeys.push(`images/${obj.photo_url}`);
-        objKeys.push(`${AWS_SHOOTS_DIRNAME}/${obj.photo_url}`);
+    for (const obj of photoObjKeys) {
+      if (!obj.photo_url.includes("http")) {
+        objKeys.push(
+          `${process.env.SHOOTS_DIRNAME}/${obj.photo_url}`
+        );
       }
     }
 
-    // aws obj deleting ---
-    try {
-      // Deleting AWS objects after successful deletion of shoot data
-      const deleteResponse = await deleteFiles(objKeys);
-      // Check if deletion was successful
-      if(deleteResponse) {
-        return res.json({
-          success: true,
-          message: `Shoot number ${id} and associated files deleted successfully`
-        });
-      } else {
-        throw new Error("Error deleting files from AWS");
-      }
-    } catch(error) {
-      // Handle errors in AWS object deletion
-      console.error("Error deleting file from AWS:", error);
-      return res.status(500).send("Error deleting files from AWS");
+    const deleteResponse = await deleteFiles(objKeys);
+
+    if (!deleteResponse) {
+      throw new Error("Error deleting files from AWS");
     }
-  } catch(error) {
-    // Handle errors in shoot data deletion
-    console.error(error);
-    return res.status(500).json({ error: "Failed to delete shoot" });
+
+    return res.json({
+      success: true,
+      message: `Shoot number ${id} and associated files deleted successfully`
+    });
+
+  } catch (error) {
+    console.error("Error deleting file from AWS:", error);
+    return res.status(500).send("Error deleting files from AWS");
   }
 };
-
 
 // route for updating shoots order: update the display order of all the shoots
 const updateShootOrder = async (req, res) => {
-
   const newShootsOrder = req.body.new_shoot_order;
 
+  let connection;
+
   try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+
     await Promise.all(
-      newShootsOrder.map(async (update) => {
-        const { shoot_id, display_order } = update;
-        // Update the shoot record in the database with the new display_order
-        await knex('shoots')
-          .where({ id: shoot_id })
-          .update({ display_order });
+      newShootsOrder.map(async ({ shoot_id, display_order }) => {
+        await connection.query(
+          `UPDATE shoots SET display_order = ? WHERE id = ?`,
+          [display_order, shoot_id]
+        );
       })
     );
 
-    return res.status(200).json({ message: 'Shoots display order updated successfully' });
+    await connection.commit();
+
+    return res.status(200).json({
+      message: "Shoots display order updated successfully"
+    });
+
   } catch (error) {
-    console.error('Error updating shoot display order:', error);
-    return res.status(500).json({ message: 'Error updating shoot display order' });
+    if (connection) {
+      await connection.rollback();
+    }
+
+    console.error("Error updating shoot display order:", error);
+
+    return res.status(500).json({
+      message: "Error updating shoot display order"
+    });
+
+  } finally {
+    if (connection) connection.release();
   }
 };
-
 
 export {
   getShootSummaries,

@@ -1,164 +1,198 @@
-import knexModule from 'knex';
-import knexConfig from '../knexfile.js';
-
-const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
-const knex = knexModule(knexConfig[NODE_ENVIRONMENT]);
+import pool from '../dbClient.mjs';
 
 
 // get all photographers for addEdit shoot page photographer selector 
 const getAllPhotographers = async (req, res) => {
-
   try {
-    const photographersData = await knex('photographers');
-
-    const photographers = photographersData.map(({ id, photographer_name }) => ({ id, photographer_name }));
+    const [rows] = await pool.query(
+      `SELECT id, photographer_name FROM photographers`
+    );
 
     return res.json({
       success: true,
       message: "Photographers fetched successfully",
-      photographers: photographers
+      photographers: rows
     });
 
-  } catch(error) {
-    return res.status(500).json({error: "Failed to fetch photographers"});
-  }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to fetch photographers" });
+  };
 };
+
 
 // photographers/add route
 const addPhotographer = async (req, res) => {
-
   try {
-    const { 
-      photographer_name
-    } = req.body;
+    const { photographer_name } = req.body;
 
-    const newPhotographer = {
-      photographer_name: photographer_name
+    if (!photographer_name) {
+      return res.status(400).json({
+        success: false,
+        message: "photographer_name is required"
+      });
     };
 
-    const photographerExists = await knex('photographers').where({ photographer_name }).first();
-    
-    if(photographerExists) {
+    // check exists
+    const [existing] = await pool.query(
+      `SELECT id FROM photographers WHERE photographer_name = ? LIMIT 1`,
+      [photographer_name]
+    );
+
+    if (existing.length) {
       return res.status(409).json({
         success: false,
         message: "A photographer with that name already exists"
       });
-    }
+    };
 
-    await knex('photographers').insert(newPhotographer);
+    // insert
+    await pool.query(
+      `INSERT INTO photographers (photographer_name) VALUES (?)`,
+      [photographer_name]
+    );
 
-    const photographersData = await knex('photographers');
-
-    const photographers = photographersData.map(({ id, photographer_name }) => ({ id, photographer_name }));
+    const [rows] = await pool.query(
+      `SELECT id, photographer_name FROM photographers`
+    );
 
     return res.json({
       success: true,
       message: "Photographer added successfully",
-      photographers: photographers
+      photographers: rows
     });
-    
-  } catch(error) {
-    return res.status(500).json({error: "Failed to add photographer"});
-  }
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to add photographer" });
+  };
 };
 
 
 // edit photographer by id
 const editPhotographerById = async (req, res) => {
-
   try {
     const { id } = req.params;
     const { photographer_name } = req.body;
 
-    // Check if the photographer with the specified ID exists
-    const existingPhotographer = await knex('photographers').where({ id }).first();
-    if(!existingPhotographer) {
-      return res.status(404).json({ message: `Photographer with ID ${id} does not exist` });
-    }
+    // 1. Check photographer exists
+    const [existing] = await pool.query(
+      `SELECT id FROM photographers WHERE id = ? LIMIT 1`,
+      [id]
+    );
 
-    // Update the photographer in the database
-    await knex('photographers')
-      .where({ id })
-      .update({
-        photographer_name
+    if (!existing.length) {
+      return res.status(404).json({
+        message: `Photographer with ID ${id} does not exist`
       });
+    };
 
-    const photographerExists = await knex('photographers').where({ id }).first();
+    // 2. Prevent duplicate names (excluding current record)
+    const [duplicate] = await pool.query(
+      `SELECT id FROM photographers WHERE photographer_name = ? AND id != ? LIMIT 1`,
+      [photographer_name, id]
+    );
 
-    return res.status(200).json({ 
-      message: `Photographer with ID ${id} updated successfully`, 
-      photographer: photographerExists });
+    if (duplicate.length) {
+      return res.status(409).json({
+        success: false,
+        message: `Photographer name "${photographer_name}" already exists`
+      });
+    };
+
+    // 3. Update
+    await pool.query(
+      `UPDATE photographers SET photographer_name = ? WHERE id = ?`,
+      [photographer_name, id]
+    );
+
+    // 4. Return updated record
+    const [updated] = await pool.query(
+      `SELECT id, photographer_name FROM photographers WHERE id = ? LIMIT 1`,
+      [id]
+    );
+
+    return res.status(200).json({
+      message: `Photographer with ID ${id} updated successfully`,
+      photographer: updated[0]
+    });
 
   } catch (error) {
-    console.error('Error updating photographer:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
+    console.error("Error updating photographer:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  };
 };
 
 
 // delete photographer by id
 const deletePhotographerByID = async (req, res) => {
-
   try {
     const id = req.params.id;
 
-    const photographerExistsInShootPhotographers = await knex('shoot_photographers').where({ photographer_id: id });
+    // check usage in shoots
+    const [links] = await pool.query(
+      `SELECT shoot_id FROM shoot_photographers WHERE photographer_id = ?`,
+      [id]
+    );
 
-    if(photographerExistsInShootPhotographers.length) {
+    if (links.length) {
+      const shootIds = links.map(r => r.shoot_id);
 
-      const shootIds = photographerExistsInShootPhotographers.map(shoot => shoot.shoot_id);
+      const [shootRows] = await pool.query(
+        `SELECT id FROM shoots WHERE id IN (?)`,
+        [shootIds]
+      );
 
-      try {
-        const photographerShootsData = await Promise.all(shootIds.map(async (shootId) => {
-          const shoot = await knex('shoots').where({ id: shootId }).first();
-          return shoot;
-        }));
+      const photographerShoots = shootRows.map(s => ({
+        shoot_id: s.id
+      }));
 
-        const photographerShoots = photographerShootsData.map(shoot => ({
-          shoot_id: shoot.id
-        }));
-
-        return res.status(409).json({
-          success: false,
-          message: 'Photographer can not be deleted because they appear in existing shoot(s)',
-          photographerShoots: photographerShoots
-        });
-      } catch(error) {
-        console.error(error);
-        return res.status(500).json({ error: "Failed to retrieve shoots" });
-      }
-    }
-
-  const photographerExists = await knex('photographers').where({ id }).first();
-    
-    if(!photographerExists) {
       return res.status(409).json({
+        success: false,
+        message: "Photographer can not be deleted because they appear in existing shoot(s)",
+        photographerShoots
+      });
+    };
+
+    // check exists
+    const [existing] = await pool.query(
+      `SELECT id FROM photographers WHERE id = ? LIMIT 1`,
+      [id]
+    );
+
+    if (!existing.length) {
+      return res.status(404).json({
         success: false,
         message: `Photographer number ${id} does not exist`
       });
-    }
+    };
 
-    const deleted = await knex('photographers').where({ id }).del();
+    const [result] = await pool.query(
+      `DELETE FROM photographers WHERE id = ?`,
+      [id]
+    );
 
-    if(!deleted) {
+    if (result.affectedRows === 0) {
       return res.status(500).json({
         success: false,
         message: `Photographer number ${id} not deleted`
       });
-    }
+    };
 
-    const photographersData = await knex('photographers');
+    const [rows] = await pool.query(
+      `SELECT id, photographer_name FROM photographers`
+    );
 
     return res.json({
       success: true,
-      message: `Photographer number ${id} deleted successfully`,
-      photographers: photographersData
+      message: `Photographer deleted successfully`,
+      photographers: rows
     });
-    
-  } catch(error) {
-    console.log(error);
-    return res.status(500).json({error: "Failed to delete photographer"});
-  }
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Failed to delete photographer" });
+  };
 };
 
 

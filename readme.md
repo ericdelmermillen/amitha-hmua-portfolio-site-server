@@ -1,20 +1,17 @@
 # Title: Amitha Millen-Suwanta Makeup Artist Portfolio Server
 
-
 # Description:
 
 This project is the server for a full-stack web application developed for Amitha Millen-Suwanta, a makeup artist based in Toronto, Ontario, Canada. The application showcases her portfolio and includes a custom CMS for managing and uploading content seamlessly.
 
-
 # Features:
 
 • Portfolio Showcase: Display Amitha's work with an attractive and responsive design.
-• Content Management System (CMS): Manage images and text, including posting, editing, 
-  and reordering content.
+• Content Management System (CMS): Manage images and text, including posting, editing,
+and reordering content.
 • User Authentication: Secure login and registration with JWT authentication.
 • File Uploads: Upload and manage images via AWS S3.
 • SEO Optimized: Open Graph meta tags for better social media sharing.
-
 
 # Technologies Used:
 
@@ -37,7 +34,6 @@ AWS Amplify: For hosting the React client.
 JWT: For secure authentication.
 Nodemailer: For sending emails.
 
-
 # Installation:
 
 Prerequisites:
@@ -59,39 +55,45 @@ bash
 npm install
 Create a .env file in the root directory with the following environment variables:
 
-
 # Sample .env:
 
 dotenv
+
 # Port configuration for the server
+
 PORT=8000
 
 # JWT secrets for authentication
+
 JWT_SECRET=dummy_jwt_secret
 JWT_REFRESH_SECRET=dummy_jwt_refresh_secret
 
 # Database connection details
+
 DB_HOST=localhost
 DB_USER=dummy_user
 DB_PASSWORD=dummy_password
 DB_DATABASE=dummy_db
 
 # Email configuration for notifications or contact forms
+
 EMAIL=dummy_email@example.com
 PASSWORD=dummy_email_password
 
 # Client host configuration for CORS and other purposes
+
 CLIENT_HOST=http://localhost:5173
 
 # AWS S3 configuration for file storage
-AWS_REGION=dummy_region
-AWS_BUCKET_NAME=dummy_bucket_name
-AWS_ACCESS_KEY_ID=dummy_access_key_id
-AWS_SECRET_ACCESS_KEY=dummy_secret_access_key
-AWS_BUCKET_BASE_URL=https://dummy-bucket.s3.dummy-region.amazonaws.com/
-AWS_BUCKET_PATH=https://dummy-bucket.s3.dummy-region.amazonaws.com/
-AWS_SHOOTS_DIRNAME=dummy_shoots_dirname
-AWS_BIO_DIRNAME=dummy_bio_dirname
+
+REGION=dummy_region
+BUCKET_NAME=dummy_bucket_name
+ACCESS_KEY_ID=dummy_access_key_id
+SECRET_ACCESS_KEY=dummy_secret_access_key
+BUCKET_BASE_URL=https://dummy-bucket.s3.dummy-region.amazonaws.com/
+BUCKET_PATH=https://dummy-bucket.s3.dummy-region.amazonaws.com/
+SHOOTS_DIRNAME=dummy_shoots_dirname
+BIO_DIRNAME=dummy_bio_dirname
 
 Run database migrations:
 
