@@ -1,8 +1,8 @@
 import pool from '../dbClient.mjs';
 import { deleteFiles } from '../s3.mjs';
 
-const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
-const AWS_BIO_DIRNAME = process.env.AWS_BIO_DIRNAME;
+const BUCKET_PATH = process.env.BUCKET_PATH;
+const BIO_DIRNAME = process.env.BIO_DIRNAME;
 
 
 // getBio to show bio page
@@ -18,7 +18,7 @@ const getBio = async (req, res) => {
     };
 
     const bioImgURL = bioData.bio_img_url
-      ? `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bioData.bio_img_url}`
+      ? `${BUCKET_PATH}${BIO_DIRNAME}/${bioData.bio_img_url}`
       : "";
 
     return res.json({
@@ -26,7 +26,7 @@ const getBio = async (req, res) => {
       bioText: bioData.bio_text,
       bioImgURL,
       bioImageNotSet:
-        bioImgURL === `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/` || !bioImgURL.length
+        bioImgURL === `${BUCKET_PATH}${BIO_DIRNAME}/` || !bioImgURL.length
     });
 
   } catch (error) {
@@ -73,7 +73,7 @@ const updateBio = async (req, res) => {
         message: "Bio inserted successfully",
         bioName: bio_name,
         bioText: bio_text,
-        bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${bio_img_url}`
+        bioImgURL: `${BUCKET_PATH}${BIO_DIRNAME}/${bio_img_url}`
       });
     };
 
@@ -92,7 +92,7 @@ const updateBio = async (req, res) => {
     // 4. AWS cleanup (only after DB success)
     if (updated_Photo && prevBioImgURL) {
       try {
-        await deleteFiles([`${AWS_BIO_DIRNAME}/${prevBioImgURL}`]);
+        await deleteFiles([`${BIO_DIRNAME}/${prevBioImgURL}`]);
       } catch (deleteError) {
         console.error("Error deleting files from AWS:", deleteError);
       };
@@ -105,7 +105,7 @@ const updateBio = async (req, res) => {
       message: "Bio updated successfully",
       bioName: updatedBioData.bio_name,
       bioText: updatedBioData.bio_text,
-      bioImgURL: `${AWS_BUCKET_PATH}${AWS_BIO_DIRNAME}/${updatedBioData.bio_img_url}`
+      bioImgURL: `${BUCKET_PATH}${BIO_DIRNAME}/${updatedBioData.bio_img_url}`
     });
 
   } catch (error) {
@@ -118,7 +118,7 @@ const updateBio = async (req, res) => {
     // best-effort cleanup for failed upload
     try {
       if (bio_img_url) {
-        await deleteFiles([`${AWS_BIO_DIRNAME}/${bio_img_url}`]);
+        await deleteFiles([`${BIO_DIRNAME}/${bio_img_url}`]);
       };
       
     } catch (deleteError) {

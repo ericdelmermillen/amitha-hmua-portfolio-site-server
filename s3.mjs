@@ -15,10 +15,10 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 // Initialize S3 client with SDK v3
 const s3Client = new S3Client({
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: process.env.ACCESS_KEY_ID,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
   },
-  region: process.env.AWS_REGION
+  region: process.env.REGION
 });
 
 // Generate upload URL function using SDK v3
@@ -27,7 +27,7 @@ const generateUploadURL = async function (dirname) {
   const awsDirname = dirname;
 
   const command = new PutObjectCommand({
-    Bucket: process.env.AWS_BUCKET_NAME,
+    Bucket: process.env.BUCKET_NAME,
     // Key: `images/${uuid()}.jpeg`
     Key: `${awsDirname}/${uuid()}.jpeg`
   });
@@ -43,7 +43,7 @@ const deleteFiles = async (fileNames) => {
   try {
     const deletePromises = fileNames.map(async (fileName) => {
       const deleteParams = {
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: process.env.BUCKET_NAME,
         Key: fileName
       };
       const response = await s3Client.send(new DeleteObjectCommand(deleteParams));

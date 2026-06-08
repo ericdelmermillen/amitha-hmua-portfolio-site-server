@@ -2,8 +2,8 @@ import pool from "../dbClient.mjs";
 import { dateFormatOptions } from '../utils/utils.mjs';
 import { deleteFiles } from "../s3.mjs";
 
-const AWS_BUCKET_PATH = process.env.AWS_BUCKET_PATH;
-const AWS_SHOOTS_DIRNAME = process.env.AWS_SHOOTS_DIRNAME;
+const BUCKET_PATH = process.env.BUCKET_PATH;
+const SHOOTS_DIRNAME = process.env.SHOOTS_DIRNAME;
 
 
 // get shoots with pagination
@@ -83,7 +83,7 @@ const getShootSummaries = async (req, res) => {
       models: shoot.models ? shoot.models.split(",") : [],
       thumbnail_url: shoot.photo_url?.includes("http")
         ? shoot.photo_url
-        : `${process.env.AWS_BUCKET_PATH}${process.env.AWS_SHOOTS_DIRNAME}/${shoot.photo_url}`
+        : `${process.env.BUCKET_PATH}${process.env.SHOOTS_DIRNAME}/${shoot.photo_url}`
     }));
 
     return res.json({
@@ -208,7 +208,7 @@ const getShootByID = async (req, res) => {
           display_order: parseInt(order, 10),
           photo_url: rawUrl?.includes("http")
             ? rawUrl
-            : `${process.env.AWS_BUCKET_PATH}${process.env.AWS_SHOOTS_DIRNAME}/${rawUrl}`,
+            : `${process.env.BUCKET_PATH}${process.env.SHOOTS_DIRNAME}/${rawUrl}`,
         });
 
         seenIds.add(photoId);
@@ -335,7 +335,7 @@ const addShoot = async (req, res) => {
     // AWS cleanup (unchanged logic)
     try {
       const objKeys = photo_urls.map(
-        (url) => `${process.env.AWS_SHOOTS_DIRNAME}/${url}`
+        (url) => `${process.env.SHOOTS_DIRNAME}/${url}`
       );
       await deleteFiles(objKeys);
     } catch (deleteError) {
@@ -414,7 +414,7 @@ const editShootByID = async (req, res) => {
         !obj.photo_url.includes("http") &&
         !photo_urls.includes(obj.photo_url)
       ) {
-        objKeys.push(`${process.env.AWS_SHOOTS_DIRNAME}/${obj.photo_url}`);
+        objKeys.push(`${process.env.SHOOTS_DIRNAME}/${obj.photo_url}`);
       }
     }
 
@@ -581,7 +581,7 @@ const deleteShootByID = async (req, res) => {
     for (const obj of photoObjKeys) {
       if (!obj.photo_url.includes("http")) {
         objKeys.push(
-          `${process.env.AWS_SHOOTS_DIRNAME}/${obj.photo_url}`
+          `${process.env.SHOOTS_DIRNAME}/${obj.photo_url}`
         );
       }
     }

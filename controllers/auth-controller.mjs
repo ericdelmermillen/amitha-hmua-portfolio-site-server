@@ -5,14 +5,13 @@ import { generateUploadURL } from '../s3.mjs';
 import { getToken, generateRefreshToken } from '../utils/utils.mjs';
 
 const NODE_ENVIRONMENT = process.env.NODE_ENV || 'development';
+const JWT_TOKEN_EXPIRATION_INTERVAL = process.env.JWT_TOKEN_EXPIRATION_INTERVAL;
 const JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL = process.env.JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL;
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
-// console.log(`JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL: ${JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL}`)
-// console.log(`JWT_TOKEN_EXPIRATION_INTERVAL: ${process.env.JWT_TOKEN_EXPIRATION_INTERVAL}`)
-// *** issue where client not being logged out when both token and refresh token are expired
 
+// *** issue where client not being logged out when both token and refresh token are expired
 
 // createUser function
 const createUser = async (req, res) => {
@@ -109,8 +108,8 @@ const userLogin = async (req, res) => {
 const refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
 
-  console.log("refreshing");
-  console.log(`JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL: ${JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL}`);
+  // console.log("refreshing");
+  // console.log(`JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL: ${JWT_REFRESH_TOKEN_EXPIRATION_INTERVAL}`);
 
   try {
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
