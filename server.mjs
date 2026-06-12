@@ -25,6 +25,12 @@ app.use(cors(corsOptions));
 
 
 // Routes:
+
+// aws health check
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
+
 // Auth route for: createUser, login for admin, get AWS signed URL
 app.use('/api/auth', authRouter);
 
