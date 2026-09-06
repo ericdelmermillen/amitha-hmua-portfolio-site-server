@@ -4,8 +4,8 @@ import pool from '../dbClient.mjs';
 // get all tags for add shoot/edit tags selector
 const getAllTags = async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      `SELECT id, tag_name FROM tags`
+    const [ rows ] = await pool.query(
+      `SELECT id, name FROM tags`
     );
 
     return res.json({
@@ -35,7 +35,7 @@ const addTag = async (req, res) => {
 
     // check exists
     const [existing] = await pool.query(
-      `SELECT id FROM tags WHERE tag_name = ? LIMIT 1`,
+      `SELECT id FROM tags WHERE name = ? LIMIT 1`,
       [tag_name]
     );
 
@@ -47,12 +47,12 @@ const addTag = async (req, res) => {
     }
 
     await pool.query(
-      `INSERT INTO tags (tag_name) VALUES (?)`,
+      `INSERT INTO tags (name) VALUES (?)`,
       [tag_name]
     );
 
     const [rows] = await pool.query(
-      `SELECT id, tag_name FROM tags`
+      `SELECT id, name FROM tags`
     );
 
     return res.json({
@@ -88,7 +88,7 @@ const editTagById = async (req, res) => {
 
     // 2. Prevent duplicate tag names (excluding current tag)
     const [duplicate] = await pool.query(
-      `SELECT id FROM tags WHERE tag_name = ? AND id != ? LIMIT 1`,
+      `SELECT id FROM tags WHERE name = ? AND id != ? LIMIT 1`,
       [tag_name, id]
     );
 
@@ -101,13 +101,13 @@ const editTagById = async (req, res) => {
 
     // 3. Update
     await pool.query(
-      `UPDATE tags SET tag_name = ? WHERE id = ?`,
+      `UPDATE tags SET name = ? WHERE id = ?`,
       [tag_name, id]
     );
 
     // 4. Return updated record
     const [updated] = await pool.query(
-      `SELECT id, tag_name FROM tags WHERE id = ? LIMIT 1`,
+      `SELECT id, name FROM tags WHERE id = ? LIMIT 1`,
       [id]
     );
 
@@ -178,7 +178,7 @@ const deleteTagByID = async (req, res) => {
     }
 
     const [rows] = await pool.query(
-      `SELECT id, tag_name FROM tags`
+      `SELECT id, name FROM tags`
     );
 
     return res.json({
@@ -192,8 +192,6 @@ const deleteTagByID = async (req, res) => {
     return res.status(500).json({ error: "Failed to delete tag" });
   }
 };
-
-
 
 export {
   getAllTags,

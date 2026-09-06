@@ -1,9 +1,5 @@
 import pool from "../dbClient.mjs";
-import { dateFormatOptions } from '../utils/utils.mjs';
 import { deleteFiles } from "../s3.mjs";
-
-const BUCKET_PATH = process.env.BUCKET_PATH;
-const SHOOTS_DIRNAME = process.env.SHOOTS_DIRNAME;
 
 
 // get shoots with pagination
@@ -22,9 +18,9 @@ const getShootSummaries = async (req, res) => {
         shoots.id AS shoot_id,
         shoots.shoot_date,
         shoots.display_order,
-        GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers,
-        GROUP_CONCAT(DISTINCT models.model_name) AS models,
-        GROUP_CONCAT(DISTINCT tags.tag_name) AS tags,
+        GROUP_CONCAT(DISTINCT photographers.name) AS photographers,
+        GROUP_CONCAT(DISTINCT models.name) AS models,
+        GROUP_CONCAT(DISTINCT tags.name) AS tags,
         SUBSTRING_INDEX(
           GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC),
           ',', 1
@@ -70,7 +66,7 @@ const getShootSummaries = async (req, res) => {
     params.push(limitInt, offset);
 
     // Execute query
-    const [rows] = await pool.query(query, params);
+    const [ rows ] = await pool.query(query, params);
 
     const shootSummaries = rows.map((shoot) => ({
       shoot_id: shoot.shoot_id,
@@ -104,7 +100,7 @@ const getShootByID = async (req, res) => {
     const id = req.params.id;
 
     // 1. Check existence
-    const [existsRows] = await pool.query(
+    const [ existsRows ] = await pool.query(
       `SELECT id FROM shoots WHERE id = ? LIMIT 1`,
       [id]
     );
@@ -124,13 +120,13 @@ const getShootByID = async (req, res) => {
         shoots.shoot_date,
 
         GROUP_CONCAT(DISTINCT photographers.id) AS photographer_ids,
-        GROUP_CONCAT(DISTINCT photographers.photographer_name) AS photographers,
+        GROUP_CONCAT(DISTINCT photographers.name) AS photographers,
 
         GROUP_CONCAT(DISTINCT models.id) AS model_ids,
-        GROUP_CONCAT(DISTINCT models.model_name) AS models,
+        GROUP_CONCAT(DISTINCT models.name) AS models,
 
         GROUP_CONCAT(DISTINCT tags.id) AS tag_ids,
-        GROUP_CONCAT(DISTINCT tags.tag_name) AS tags,
+        GROUP_CONCAT(DISTINCT tags.name) AS tags,
 
         GROUP_CONCAT(DISTINCT photos.display_order ORDER BY photos.display_order ASC) AS display_orders,
         GROUP_CONCAT(DISTINCT photos.photo_url ORDER BY photos.display_order ASC) AS photo_urls,
@@ -234,8 +230,7 @@ const addShoot = async (req, res) => {
     tag_ids,
     photographer_ids,
     model_ids,
-    photo_urls,
-    dirname
+    photo_urls
   } = req.body;
 
   if (!photo_urls || !photo_urls.length) {
@@ -362,7 +357,7 @@ const editShootByID = async (req, res) => {
 
   try {
     // 1. Check existence
-    const [existing] = await pool.query(
+    const [ existing ] = await pool.query(
       `SELECT id FROM shoots WHERE id = ? LIMIT 1`,
       [id]
     );

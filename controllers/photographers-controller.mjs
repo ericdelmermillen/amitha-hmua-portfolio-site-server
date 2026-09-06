@@ -5,7 +5,7 @@ import pool from '../dbClient.mjs';
 const getAllPhotographers = async (req, res) => {
   try {
     const [rows] = await pool.query(
-      `SELECT id, photographer_name FROM photographers`
+      `SELECT id, name FROM photographers`
     );
 
     return res.json({
